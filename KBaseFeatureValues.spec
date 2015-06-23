@@ -1,3 +1,6 @@
+
+
+
 module KBaseFeatureValues {
 
     /* 
@@ -7,19 +10,20 @@ module KBaseFeatureValues {
     typedef string ws_genome_id;
 
     /* 
-        A workspace ID that references a ConditionSet data object.
+        A workspace ID that references a ConditionSet data object (Note: does not exist yet,
+        this is a placeholder).
         @id ws KBaseExperiments.ConditionSet
     */
     typedef string ws_conditionset_id;
 
     /*
-        row_ids - ids for rows.
-        col_ids - ids for columns.
+        row_ids - unique ids for rows.
+        col_ids - unique ids for columns.
         values - two dimensional array values[row][col], where first index 
             (row) goes vertically over outer list and (col) goes horizontally 
             along each each internal list.
-        @meta ws length(row_ids) as n_rows
-        @meta ws length(col_ids) as n_cols
+        @metadata ws length(row_ids) as n_rows
+        @metadata ws length(col_ids) as n_cols
     */
     typedef structure {
         list<string> row_ids;
@@ -54,13 +58,13 @@ module KBaseFeatureValues {
         data - contains values for (feature,condition) pairs, where 
             features correspond to columns and conditions are rows.
         @optional genome_ref feature_mapping conditionset_ref condition_mapping report
-        @meta ws type genome_ref
-        @meta ws length(data.row_ids) as feature_count
-        @meta ws length(data.col_ids) as condition_count
+        @metadata ws type genome_ref
+        @metadata ws length(data.row_ids) as feature_count
+        @metadata ws length(data.col_ids) as condition_count
     */
     typedef structure {
         string type;
-        float scale;
+        string scale;
         string row_normalization;
         string col_normalization;
         ws_genome_id genome_ref;
@@ -75,21 +79,30 @@ module KBaseFeatureValues {
         data - contains values for (feature,condition) pairs, where 
             features correspond to columns and conditions are rows.
         @optional genome_ref report
-        @meta ws type genome_ref
-        @meta ws length(data.row_labels) as feature_count
-        @meta ws length(data.col_labels) as condition_count
+        @metadata ws type genome_ref
+        @metadata ws length(data.row_labels) as feature_count
+        @metadata ws length(data.col_labels) as condition_count
 
     */
     typedef structure {
         string type;
+        string scale;
+        string row_normalization;
+        string col_normalization;
+
         ws_genome_id genome_ref;
+
+        mapping<string, string> feature_ko_mapping;
+        ws_conditionset_id conditionset_ref;
+        mapping<string, string> condition_mapping;
+
         FloatMatrix2D data;
         AnalysisReport report;
-    } FitnessMatrix;
+    } SingleKnockoutFitnessMatrix;
 
     /* 
-        A workspace ID that references a Genome data object.
-        @id ws KBaseFeatureValues.ExpressionMatrix KBaseFeatureValues.FitnessMatrix KBaseFeatureValues.BioMatrix2D
+        A workspace ID that references a Float2DMatrix wrapper data object.
+        @id ws KBaseFeatureValues.ExpressionMatrix KBaseFeatureValues.SingleKnockoutFitnessMatrix
     */
     typedef string ws_matrix_id;
 
@@ -99,19 +112,106 @@ module KBaseFeatureValues {
     typedef mapping<string, int> labeled_cluster;
 
     /*
-        One-dimensional cluster set.
-        type - which dimension these clusters were constructed for.
+        feature_clusters - list of labeled feature clusters
+        condition_clusters - (optional) list of labeled condition clusters
+        
+        feature_dendrogram - (optional) maybe output from hierchical clustering approaches
+        condition_dendogram - (optional) maybe output from hierchical clustering approaches
+
+        original_data - pointer to the original data used to make this cluster set
+        
         report - information collected during cluster construction.
+        @metadata ws original_data as source_data_ref
+        @metadata ws length(feature_clusters) as n_feature_clusters
+        @metadata ws length(condition_clusters) as n_condition_clusters
+        @optional condition_clusters 
+        @optional feature_dendrogram condition_dendrogram
         @optional original_data report
-	  @meta ws type
     */
     typedef structure {
-        string type;
-        list<labeled_cluster> clusters;
+        list<labeled_cluster> feature_clusters;
+        list<labeled_cluster> condition_clusters;
+        string feature_dendrogram;
+        string condition_dendrogram;
         ws_matrix_id original_data;
         AnalysisReport report;
     } ClusterSet;
 
+
+    /* 
+        A workspace ID that references a ClusterSet data object.
+        @id ws KBaseFeatureValues.ExpressionMatrix KBaseFeatureValues.SingleKnockoutFitnessMatrix
+    */
+    typedef string ws_clusterset_id;
+
+
+    /* note: this needs review from Marcin */
+    typedef structure {
+        int best_k;
+        mapping <int,float> estimate_cluster_sizes;
+    } EstimateKResult;
+
+    typedef structure {
+        ws_matrix_id input_matrix;
+        string out_workspace;
+        string out_estimate_result;
+    } EstimateKParams;
+
+    funcdef estimate_k(EstimateKParams params)
+        returns (string job_id) authentication required;
+
+
+
+    typedef structure {
+        int k;
+        ws_matrix_id input_data;
+        string out_workspace;
+        string out_clusterset_id;
+    } ClusterKMeansParams;
+
+    funcdef cluster_k_means(ClusterKMeansParams params)
+        returns (string job_id) authentication required;
+
+
+    typedef structure {
+        string distance_metric;
+        string linkage_criteria;
+        float feature_height_cutoff;
+        float condition_height_cutoff;
+        ws_matrix_id input_data;
+        string out_workspace;
+        string out_clusterset_id;
+    } ClusterHierarchicalParams;
+
+    funcdef cluster_hierarchical(ClusterHierarchicalParams params)
+        returns (string job_id) authentication required;
+
+
+    typedef structure {
+        float feature_height_cutoff;
+        float condition_height_cutoff;
+        ws_matrix_id input_data;
+        string out_workspace;
+        string out_clusterset_id;
+    } ClustersFromDendrogramParams;
+
+    funcdef clusters_from_dendrogram(ClustersFromDendrogramParams params)
+        returns (string job_id) authentication required;
+
+
+    typedef structure {
+        ws_clusterset_id input_clusterset;
+        string out_workspace;
+        string out_report_id;
+    } EvaluateClustersetQualityParams;
+
+    funcdef evaluate_clusterset_quality(EvaluateClustersetQualityParams params)
+        returns (string job_id) authentication required;
+
+
+
+    /*
+    Generic approach probably won't work 
     typedef structure {
         string method;
         ws_matrix_id input_data;
@@ -120,7 +220,7 @@ module KBaseFeatureValues {
     } ClusterFeaturesParams;
 
     funcdef cluster_features(ClusterFeaturesParams params) 
-        returns (string job_id) authentication required;
+        returns (string job_id) authentication required;*/
 
     /*
         method - optional field specifying special type of validation
