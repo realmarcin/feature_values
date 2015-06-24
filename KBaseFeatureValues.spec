@@ -84,10 +84,8 @@ module KBaseFeatureValues {
             features correspond to rows and conditions are columns
             (ie data.values[feature][condition])
 
-        @optional description row_normalization col_normalizaion
+        @optional description row_normalization col_normalization
         @optional genome_ref feature_mapping conditionset_ref condition_mapping report
-
-        @metadata ws type genome_ref
 
         @metadata ws type
         @metadata ws scale
@@ -133,7 +131,7 @@ module KBaseFeatureValues {
             features correspond to rows and conditions are columns
             (ie data.values[feature][condition])
 
-        @optional description row_normalization col_normalizaion
+        @optional description row_normalization col_normalization
         @optional genome_ref feature_ko_mapping conditionset_ref condition_mapping report
 
         @metadata ws type
@@ -141,8 +139,8 @@ module KBaseFeatureValues {
         @metadata ws row_normalization
         @metadata ws col_normalization
         @metadata ws genome_ref as Genome
-        @metadata ws length(data.row_labels) as feature_count
-        @metadata ws length(data.col_labels) as condition_count
+        @metadata ws length(data.row_ids) as feature_count
+        @metadata ws length(data.col_ids) as condition_count
 
     */
     typedef structure {
