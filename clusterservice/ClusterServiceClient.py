@@ -18,7 +18,6 @@ import random as _random
 import base64 as _base64
 from ConfigParser import ConfigParser as _ConfigParser
 import os as _os
-import time
 
 _CT = 'content-type'
 _AJ = 'application/json'
@@ -108,8 +107,7 @@ class ClusterService(object):
 
     def __init__(self, url=None, timeout=30 * 60, user_id=None,
                  password=None, token=None, ignore_authrc=False,
-                 trust_all_ssl_certificates=False,
-                 async_job_check_time_ms=5000):
+                 trust_all_ssl_certificates=False):
         if url is None:
             raise ValueError('A url is required')
         scheme, _, _, _, _, _ = _urlparse.urlparse(url)
@@ -119,7 +117,6 @@ class ClusterService(object):
         self.timeout = int(timeout)
         self._headers = dict()
         self.trust_all_ssl_certificates = trust_all_ssl_certificates
-        self.async_job_check_time = async_job_check_time_ms / 1000.0
         # token overrides user_id and password
         if token is not None:
             self._headers['AUTHORIZATION'] = token
@@ -172,22 +169,11 @@ class ClusterService(object):
         if 'result' not in resp:
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
-
-    def cluster_float_rows_scikit_kmeans_async(self, params, json_rpc_context = None):
+ 
+    def cluster_float_rows_scikit_kmeans(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method cluster_float_rows_scikit_kmeans: argument json_rpc_context is not type dict as required.')
-        return self._call('ClusterService.cluster_float_rows_scikit_kmeans_async',
-                          [params], json_rpc_context)[0]
-
-    def cluster_float_rows_scikit_kmeans_check(self, job_id):
-        resp = self._call('ClusterService.cluster_float_rows_scikit_kmeans_check', [job_id])
+        resp = self._call('ClusterService.cluster_float_rows_scikit_kmeans',
+                          [params], json_rpc_context)
         return resp[0]
-
-    def cluster_float_rows_scikit_kmeans(self, params, json_rpc_context = None):
-        job_id = self.cluster_float_rows_scikit_kmeans_async(params, json_rpc_context)
-        while True:
-            time.sleep(self.async_job_check_time)
-            job_state = self.cluster_float_rows_scikit_kmeans_check(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
  

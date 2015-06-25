@@ -32,8 +32,8 @@ class ClusterService:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN cluster_float_rows_scikit_kmeans
-        matrix = params.values
-        k_means = cl.KMeans(init='k-means++', n_clusters=3, n_init=10)
+        matrix = params.input_data.values
+        k_means = cl.KMeans(init='k-means++', n_clusters=params.k, n_init=10)
         k_means.fit(matrix)
         k_means_labels = k_means.labels_
         returnVal = {'cluster_labels': k_means_labels}

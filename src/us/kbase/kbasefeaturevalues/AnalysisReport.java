@@ -15,7 +15,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: AnalysisReport</p>
  * <pre>
- * This object is created during upload of matrices.
+ * A basic report object used for a variety of cases to mark informational
+ * messages, warnings, and errors related to processing or quality control
+ * checks of raw data.
  * </pre>
  * 
  */

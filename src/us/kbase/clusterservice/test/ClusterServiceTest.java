@@ -10,20 +10,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.kbase.auth.AuthService;
-import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterFloatRowsScikitKmeansParams;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
+import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 public class ClusterServiceTest {
     private File rootTempDir = null;
-    private AuthToken token = null;
 
     @Test
     public void smallTest() throws Exception {
         File workDir = generateTempDir(rootTempDir, "cluster_", "");
         workDir.mkdirs();
-        ClusterServiceLocalClient cl = new ClusterServiceLocalClient(workDir, token);
+        ClusterServiceLocalClient cl = new ClusterServiceLocalClient(workDir);
         cl.setBinDir(new File("bin"));
         List<List<Double>> values = new ArrayList<List<Double>>();
         values.add(Arrays.asList(1.0, 2.0, 3.0));
@@ -34,14 +32,14 @@ public class ClusterServiceTest {
         values.add(Arrays.asList(-1.2, -2.2, -3.2));
         values.add(Arrays.asList(-1.1, -2.1, -3.1));
         List<Long> clusterLabels = cl.clusterFloatRowsScikitKmeans(
-                new ClusterFloatRowsScikitKmeansParams().withValues(values)).getClusterLabels();
+                new ClusterFloatRowsScikitKmeansParams().withInputData(new FloatMatrix2D().withValues(values)).withK(3L)).getClusterLabels();
         System.out.println(clusterLabels);
     }
     
     @Before
     public void prepare() throws Exception {
         rootTempDir = new File(getProp("test.temp-dir"));
-        token = AuthService.login(getProp("test.user"), getProp("test.password")).getToken();
+        //token = AuthService.login(getProp("test.user"), getProp("test.password")).getToken();
         cleanup();
     }
 

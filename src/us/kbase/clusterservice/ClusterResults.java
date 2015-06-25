@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import us.kbase.kbasefeaturevalues.AnalysisReport;
 
 
 /**
@@ -23,65 +24,56 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "messages",
-    "warnings",
-    "errors",
+    "report",
     "cluster_labels"
 })
 public class ClusterResults {
 
-    @JsonProperty("messages")
-    private List<String> messages;
-    @JsonProperty("warnings")
-    private List<String> warnings;
-    @JsonProperty("errors")
-    private List<String> errors;
+    /**
+     * <p>Original spec-file type: AnalysisReport</p>
+     * <pre>
+     * A basic report object used for a variety of cases to mark informational
+     * messages, warnings, and errors related to processing or quality control
+     * checks of raw data.
+     * </pre>
+     * 
+     */
+    @JsonProperty("report")
+    private AnalysisReport report;
     @JsonProperty("cluster_labels")
     private List<Long> clusterLabels;
-    private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("messages")
-    public List<String> getMessages() {
-        return messages;
+    /**
+     * <p>Original spec-file type: AnalysisReport</p>
+     * <pre>
+     * A basic report object used for a variety of cases to mark informational
+     * messages, warnings, and errors related to processing or quality control
+     * checks of raw data.
+     * </pre>
+     * 
+     */
+    @JsonProperty("report")
+    public AnalysisReport getReport() {
+        return report;
     }
 
-    @JsonProperty("messages")
-    public void setMessages(List<String> messages) {
-        this.messages = messages;
+    /**
+     * <p>Original spec-file type: AnalysisReport</p>
+     * <pre>
+     * A basic report object used for a variety of cases to mark informational
+     * messages, warnings, and errors related to processing or quality control
+     * checks of raw data.
+     * </pre>
+     * 
+     */
+    @JsonProperty("report")
+    public void setReport(AnalysisReport report) {
+        this.report = report;
     }
 
-    public ClusterResults withMessages(List<String> messages) {
-        this.messages = messages;
-        return this;
-    }
-
-    @JsonProperty("warnings")
-    public List<String> getWarnings() {
-        return warnings;
-    }
-
-    @JsonProperty("warnings")
-    public void setWarnings(List<String> warnings) {
-        this.warnings = warnings;
-    }
-
-    public ClusterResults withWarnings(List<String> warnings) {
-        this.warnings = warnings;
-        return this;
-    }
-
-    @JsonProperty("errors")
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    @JsonProperty("errors")
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
-    }
-
-    public ClusterResults withErrors(List<String> errors) {
-        this.errors = errors;
+    public ClusterResults withReport(AnalysisReport report) {
+        this.report = report;
         return this;
     }
 
@@ -101,18 +93,18 @@ public class ClusterResults {
     }
 
     @JsonAnyGetter
-    public Map<java.lang.String, Object> getAdditionalProperties() {
+    public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
     @JsonAnySetter
-    public void setAdditionalProperties(java.lang.String name, Object value) {
+    public void setAdditionalProperties(String name, Object value) {
         this.additionalProperties.put(name, value);
     }
 
     @Override
-    public java.lang.String toString() {
-        return ((((((((((("ClusterResults"+" [messages=")+ messages)+", warnings=")+ warnings)+", errors=")+ errors)+", clusterLabels=")+ clusterLabels)+", additionalProperties=")+ additionalProperties)+"]");
+    public String toString() {
+        return ((((((("ClusterResults"+" [report=")+ report)+", clusterLabels=")+ clusterLabels)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

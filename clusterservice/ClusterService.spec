@@ -1,3 +1,5 @@
+#include<../KBaseFeatureValues.spec>
+
 module ClusterService {
 
     /*
@@ -6,7 +8,8 @@ module ClusterService {
             along each each internal list.
     */
     typedef structure {
-        list<list<float>> values;
+        int k;
+        KBaseFeatureValues.FloatMatrix2D input_data;
     } ClusterFloatRowsScikitKmeansParams;
 
     /*
@@ -14,14 +17,11 @@ module ClusterService {
             array.
     */
     typedef structure {
-        list<string> messages;
-        list<string> warnings;
-        list<string> errors;
+        KBaseFeatureValues.AnalysisReport report;
         list<int> cluster_labels;
     } ClusterResults;
 
-    async funcdef cluster_float_rows_scikit_kmeans(
-        ClusterFloatRowsScikitKmeansParams params) returns (ClusterResults)
-        authentication required;
+    funcdef cluster_float_rows_scikit_kmeans(
+        ClusterFloatRowsScikitKmeansParams params) returns (ClusterResults);
 
 };

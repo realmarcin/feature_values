@@ -11,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,12 +39,19 @@ public class ClusterServiceLocalClient {
     private ObjectMapper mapper;
     private File binDir = null;
     
-    public ClusterServiceLocalClient(File workDir, AuthToken token) {
+    public ClusterServiceLocalClient(File workDir) {
         this.workDir = workDir;
-        this.token = token;
         this.mapper = new ObjectMapper().registerModule(new JacksonTupleModule());
     }
 
+    public AuthToken getToken() {
+        return token;
+    }
+    
+    public void setToken(AuthToken token) {
+        this.token = token;
+    }
+    
     /**
      * Get directory containing shell-script running service side function.
      * If this directory is not set (it's null by default) then PATH variable
@@ -106,7 +112,7 @@ public class ClusterServiceLocalClient {
         OutputStream os = new FileOutputStream(inputFile);
         writeRequestData(method, arg, os, id);
         os.close();
-        String tokenString = token.toString();
+        String tokenString = authRequired ? token.toString() : null;
         File outputFile = new File(workDir, "output.json");
         // Run CLI function
         String serviceName = method.substring(0, method.indexOf('.'));
@@ -115,8 +121,13 @@ public class ClusterServiceLocalClient {
         StringBuilder errSb = new StringBuilder();
         int exitCode = -1;
         try {
-            exitCode = exec(workDir, outSb, errSb, cmd, inputFile.getAbsolutePath(), outputFile.getAbsolutePath(), 
-                    tokenString);
+            if (authRequired) {
+                exitCode = exec(workDir, outSb, errSb, cmd, inputFile.getAbsolutePath(), 
+                        outputFile.getAbsolutePath(), tokenString);
+            } else {
+                exitCode = exec(workDir, outSb, errSb, cmd, inputFile.getAbsolutePath(), 
+                        outputFile.getAbsolutePath());
+            }
         } catch (Exception ex) {
             throw new JsonClientException("Error running service CLI for method '" + method + "': " + 
                     ex.getMessage(), ex);
