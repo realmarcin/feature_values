@@ -35,7 +35,7 @@ class ClusterService:
         matrix = params['input_data']['values']
         k_means = cl.KMeans(init='k-means++', n_clusters=params['k'], n_init=10)
         k_means.fit(matrix)
-        k_means_labels = k_means.labels_
+        k_means_labels = k_means.labels_.tolist()
         returnVal = {'cluster_labels': k_means_labels}
         #END cluster_float_rows_scikit_kmeans
 
