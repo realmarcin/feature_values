@@ -132,9 +132,14 @@ public class ClusterServiceLocalClient {
             throw new JsonClientException("Error running service CLI for method '" + method + "': " + 
                     ex.getMessage(), ex);
         }
-        if (exitCode != 0) {
-            throw new JsonClientException("Error running service CLI for method '" + method + "' " + 
-                    "with exit code " + exitCode + "\nOutput:\n" + outSb + "\nErrors:\n" + errSb);
+        if (exitCode != 0 && !outputFile.exists()) {
+            String msg = "Error running service CLI for method '" + method + "' " + 
+                    "with exit code " + exitCode;
+            if (outSb.length() > 0)
+                msg += "\nOutput:\n" + outSb;
+            if (errSb.length() > 0)
+                msg += "\nErrors:\n" + errSb;
+            throw new JsonClientException(msg);
         }
         // Parse response into json
         if (!outputFile.exists())

@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import us.kbase.clusterservice.ClusterFloatRowsScikitKmeansParams;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
+import us.kbase.common.service.ServerException;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 public class ClusterServiceTest {
@@ -31,9 +32,14 @@ public class ClusterServiceTest {
         values.add(Arrays.asList(-1.0, -2.0, -3.0));
         values.add(Arrays.asList(-1.2, -2.2, -3.2));
         values.add(Arrays.asList(-1.1, -2.1, -3.1));
-        List<Long> clusterLabels = cl.clusterFloatRowsScikitKmeans(
-                new ClusterFloatRowsScikitKmeansParams().withInputData(new FloatMatrix2D().withValues(values)).withK(3L)).getClusterLabels();
-        System.out.println(clusterLabels);
+        try {
+            List<Long> clusterLabels = cl.clusterFloatRowsScikitKmeans(
+                    new ClusterFloatRowsScikitKmeansParams().withInputData(new FloatMatrix2D().withValues(values)).withK(3L)).getClusterLabels();
+            System.out.println(clusterLabels);
+        } catch (ServerException ex) {
+            System.out.println(ex.getData());
+            throw ex;
+        }
     }
     
     @Before
