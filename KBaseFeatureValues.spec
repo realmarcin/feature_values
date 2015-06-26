@@ -309,7 +309,7 @@ module KBaseFeatureValues {
         transform_type - type of matrix change (one of: add, multiply,
             normalize, fill in empty values, ?).
         transform_value - optional field defining volume of change if
-            it’s necessary for chosen transform_type.
+            it's necessary for chosen transform_type.
     */
     typedef structure {
         string transform_type;

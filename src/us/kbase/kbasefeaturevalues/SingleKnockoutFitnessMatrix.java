@@ -12,12 +12,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: ExpressionMatrix</p>
+ * <p>Original spec-file type: SingleKnockoutFitnessMatrix</p>
  * <pre>
- * A wrapper around a FloatMatrix2D designed for simple matricies of Expression
- * data.  Rows map to features, and columns map to conditions.  The data type 
- * includes some information about normalization factors and contains
- * mappings from row ids to features and col ids to conditions.
+ * A wrapper around a FloatMatrix2D designed for simple matricies of Fitness data
+ * for single gene/feature knockouts.  Generally fitness is measured as growth rate
+ * for the knockout strain relative to wildtype.  This data type only supports
+ * single feature knockouts.
  * description - short optional description of the dataset
  * type - ? level, ratio, log-ratio
  * scale - ? probably: raw, ln, log2, log10
@@ -28,13 +28,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *     features correspond to rows and conditions are columns
  *     (ie data.values[feature][condition])
  * @optional description row_normalization col_normalization
- * @optional genome_ref feature_mapping conditionset_ref condition_mapping report
+ * @optional genome_ref feature_ko_mapping conditionset_ref condition_mapping report
  * @metadata ws type
  * @metadata ws scale
  * @metadata ws row_normalization
  * @metadata ws col_normalization
  * @metadata ws genome_ref as Genome
- * @metadata ws conditionset_ref as ConditionSet
  * @metadata ws length(data.row_ids) as feature_count
  * @metadata ws length(data.col_ids) as condition_count
  * </pre>
@@ -49,13 +48,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "row_normalization",
     "col_normalization",
     "genome_ref",
-    "feature_mapping",
+    "feature_ko_mapping",
     "conditionset_ref",
     "condition_mapping",
     "data",
     "report"
 })
-public class ExpressionMatrix {
+public class SingleKnockoutFitnessMatrix {
 
     @JsonProperty("description")
     private java.lang.String description;
@@ -69,8 +68,8 @@ public class ExpressionMatrix {
     private java.lang.String colNormalization;
     @JsonProperty("genome_ref")
     private java.lang.String genomeRef;
-    @JsonProperty("feature_mapping")
-    private Map<String, String> featureMapping;
+    @JsonProperty("feature_ko_mapping")
+    private Map<String, String> featureKoMapping;
     @JsonProperty("conditionset_ref")
     private java.lang.String conditionsetRef;
     @JsonProperty("condition_mapping")
@@ -115,7 +114,7 @@ public class ExpressionMatrix {
         this.description = description;
     }
 
-    public ExpressionMatrix withDescription(java.lang.String description) {
+    public SingleKnockoutFitnessMatrix withDescription(java.lang.String description) {
         this.description = description;
         return this;
     }
@@ -130,7 +129,7 @@ public class ExpressionMatrix {
         this.type = type;
     }
 
-    public ExpressionMatrix withType(java.lang.String type) {
+    public SingleKnockoutFitnessMatrix withType(java.lang.String type) {
         this.type = type;
         return this;
     }
@@ -145,7 +144,7 @@ public class ExpressionMatrix {
         this.scale = scale;
     }
 
-    public ExpressionMatrix withScale(java.lang.String scale) {
+    public SingleKnockoutFitnessMatrix withScale(java.lang.String scale) {
         this.scale = scale;
         return this;
     }
@@ -160,7 +159,7 @@ public class ExpressionMatrix {
         this.rowNormalization = rowNormalization;
     }
 
-    public ExpressionMatrix withRowNormalization(java.lang.String rowNormalization) {
+    public SingleKnockoutFitnessMatrix withRowNormalization(java.lang.String rowNormalization) {
         this.rowNormalization = rowNormalization;
         return this;
     }
@@ -175,7 +174,7 @@ public class ExpressionMatrix {
         this.colNormalization = colNormalization;
     }
 
-    public ExpressionMatrix withColNormalization(java.lang.String colNormalization) {
+    public SingleKnockoutFitnessMatrix withColNormalization(java.lang.String colNormalization) {
         this.colNormalization = colNormalization;
         return this;
     }
@@ -190,23 +189,23 @@ public class ExpressionMatrix {
         this.genomeRef = genomeRef;
     }
 
-    public ExpressionMatrix withGenomeRef(java.lang.String genomeRef) {
+    public SingleKnockoutFitnessMatrix withGenomeRef(java.lang.String genomeRef) {
         this.genomeRef = genomeRef;
         return this;
     }
 
-    @JsonProperty("feature_mapping")
-    public Map<String, String> getFeatureMapping() {
-        return featureMapping;
+    @JsonProperty("feature_ko_mapping")
+    public Map<String, String> getFeatureKoMapping() {
+        return featureKoMapping;
     }
 
-    @JsonProperty("feature_mapping")
-    public void setFeatureMapping(Map<String, String> featureMapping) {
-        this.featureMapping = featureMapping;
+    @JsonProperty("feature_ko_mapping")
+    public void setFeatureKoMapping(Map<String, String> featureKoMapping) {
+        this.featureKoMapping = featureKoMapping;
     }
 
-    public ExpressionMatrix withFeatureMapping(Map<String, String> featureMapping) {
-        this.featureMapping = featureMapping;
+    public SingleKnockoutFitnessMatrix withFeatureKoMapping(Map<String, String> featureKoMapping) {
+        this.featureKoMapping = featureKoMapping;
         return this;
     }
 
@@ -220,7 +219,7 @@ public class ExpressionMatrix {
         this.conditionsetRef = conditionsetRef;
     }
 
-    public ExpressionMatrix withConditionsetRef(java.lang.String conditionsetRef) {
+    public SingleKnockoutFitnessMatrix withConditionsetRef(java.lang.String conditionsetRef) {
         this.conditionsetRef = conditionsetRef;
         return this;
     }
@@ -235,7 +234,7 @@ public class ExpressionMatrix {
         this.conditionMapping = conditionMapping;
     }
 
-    public ExpressionMatrix withConditionMapping(Map<String, String> conditionMapping) {
+    public SingleKnockoutFitnessMatrix withConditionMapping(Map<String, String> conditionMapping) {
         this.conditionMapping = conditionMapping;
         return this;
     }
@@ -280,7 +279,7 @@ public class ExpressionMatrix {
         this.data = data;
     }
 
-    public ExpressionMatrix withData(FloatMatrix2D data) {
+    public SingleKnockoutFitnessMatrix withData(FloatMatrix2D data) {
         this.data = data;
         return this;
     }
@@ -313,7 +312,7 @@ public class ExpressionMatrix {
         this.report = report;
     }
 
-    public ExpressionMatrix withReport(AnalysisReport report) {
+    public SingleKnockoutFitnessMatrix withReport(AnalysisReport report) {
         this.report = report;
         return this;
     }
@@ -330,7 +329,7 @@ public class ExpressionMatrix {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((((((("ExpressionMatrix"+" [description=")+ description)+", type=")+ type)+", scale=")+ scale)+", rowNormalization=")+ rowNormalization)+", colNormalization=")+ colNormalization)+", genomeRef=")+ genomeRef)+", featureMapping=")+ featureMapping)+", conditionsetRef=")+ conditionsetRef)+", conditionMapping=")+ conditionMapping)+", data=")+ data)+", report=")+ report)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((((("SingleKnockoutFitnessMatrix"+" [description=")+ description)+", type=")+ type)+", scale=")+ scale)+", rowNormalization=")+ rowNormalization)+", colNormalization=")+ colNormalization)+", genomeRef=")+ genomeRef)+", featureKoMapping=")+ featureKoMapping)+", conditionsetRef=")+ conditionsetRef)+", conditionMapping=")+ conditionMapping)+", data=")+ data)+", report=")+ report)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

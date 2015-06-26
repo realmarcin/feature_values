@@ -14,6 +14,15 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: KBaseFeatureValues</p>
  * <pre>
+ * The KBaseFeatureValues set of data types and service provides a mechanism for
+ * representing numeric values associated with genome features and conditions, together
+ * with some basic operations on this data.  Essentially, the data is stored as a simple
+ * 2D matrix of floating point numbers.  Currently, this is exposed as support for
+ * expression data and single gene knockout fitness data.  (Fitness data being growth
+ * rate relative to WT growth with the specified single gene knockout in a specified
+ * condition).
+ * The operations supported on this data is simple clustering of genes and clustering 
+ * related tools.
  * </pre>
  */
 public class KBaseFeatureValuesClient {
@@ -94,7 +103,7 @@ public class KBaseFeatureValuesClient {
         caller.setInsecureHttpConnectionAllowed(allowed);
     }
 
-    /** Deprecated. Use setIsInsecureHttpConnectionAllowed().
+    /** Deprecated. Use setInsecureHttpConnectionAllowed().
      * @deprecated
      */
     public void setAuthAllowedForHttp(boolean isAuthAllowedForHttp) {
@@ -137,19 +146,97 @@ public class KBaseFeatureValuesClient {
     }
 
     /**
-     * <p>Original spec-file function name: cluster_features</p>
+     * <p>Original spec-file function name: estimate_k</p>
      * <pre>
+     * Used as an analysis step before generating clusters using K-means clustering, this method
+     * provides an estimate of K by [...]
      * </pre>
-     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ClusterFeaturesParams ClusterFeaturesParams}
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKParams EstimateKParams}
      * @return   parameter "job_id" of String
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public String clusterFeatures(ClusterFeaturesParams params) throws IOException, JsonClientException {
+    public String estimateK(EstimateKParams params) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
-        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.cluster_features", args, retType, true, true);
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.estimate_k", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: cluster_k_means</p>
+     * <pre>
+     * Clusters features by K-means clustering.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ClusterKMeansParams ClusterKMeansParams}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String clusterKMeans(ClusterKMeansParams params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.cluster_k_means", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: cluster_hierarchical</p>
+     * <pre>
+     * Clusters features by hierarchical clustering.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ClusterHierarchicalParams ClusterHierarchicalParams}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String clusterHierarchical(ClusterHierarchicalParams params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.cluster_hierarchical", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: clusters_from_dendrogram</p>
+     * <pre>
+     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * method, this function creates new clusters by cutting the dendogram at
+     * a specific hieght or by some other approach.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ClustersFromDendrogramParams ClustersFromDendrogramParams}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String clustersFromDendrogram(ClustersFromDendrogramParams params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.clusters_from_dendrogram", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: evaluate_clusterset_quality</p>
+     * <pre>
+     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * method, this function creates new clusters by cutting the dendogram at
+     * a specific hieght or by some other approach.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.EvaluateClustersetQualityParams EvaluateClustersetQualityParams}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String evaluateClustersetQuality(EvaluateClustersetQualityParams params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.evaluate_clusterset_quality", args, retType, true, true);
         return res.get(0);
     }
 
@@ -158,15 +245,15 @@ public class KBaseFeatureValuesClient {
      * <pre>
      * </pre>
      * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ValidateMatrixParams ValidateMatrixParams}
-     * @return   instance of type {@link us.kbase.kbasefeaturevalues.AnalysisReport AnalysisReport}
+     * @return   parameter "job_id" of String
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public AnalysisReport validateMatrix(ValidateMatrixParams params) throws IOException, JsonClientException {
+    public String validateMatrix(ValidateMatrixParams params) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
-        TypeReference<List<AnalysisReport>> retType = new TypeReference<List<AnalysisReport>>() {};
-        List<AnalysisReport> res = caller.jsonrpcCall("KBaseFeatureValues.validate_matrix", args, retType, true, false);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.validate_matrix", args, retType, true, false);
         return res.get(0);
     }
 
@@ -175,13 +262,15 @@ public class KBaseFeatureValuesClient {
      * <pre>
      * </pre>
      * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.CorrectMatrixParams CorrectMatrixParams}
+     * @return   parameter "job_id" of String
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public void correctMatrix(CorrectMatrixParams params) throws IOException, JsonClientException {
+    public String correctMatrix(CorrectMatrixParams params) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
-        TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("KBaseFeatureValues.correct_matrix", args, retType, false, true);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.correct_matrix", args, retType, true, true);
+        return res.get(0);
     }
 }

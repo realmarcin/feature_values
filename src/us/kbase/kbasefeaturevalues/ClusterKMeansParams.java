@@ -12,42 +12,42 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: ClusterFeaturesParams</p>
+ * <p>Original spec-file type: ClusterKMeansParams</p>
  * 
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "method",
+    "k",
     "input_data",
     "out_workspace",
-    "out_cluster_id"
+    "out_clusterset_id"
 })
-public class ClusterFeaturesParams {
+public class ClusterKMeansParams {
 
-    @JsonProperty("method")
-    private String method;
+    @JsonProperty("k")
+    private Long k;
     @JsonProperty("input_data")
     private String inputData;
     @JsonProperty("out_workspace")
     private String outWorkspace;
-    @JsonProperty("out_cluster_id")
-    private String outClusterId;
+    @JsonProperty("out_clusterset_id")
+    private String outClustersetId;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("method")
-    public String getMethod() {
-        return method;
+    @JsonProperty("k")
+    public Long getK() {
+        return k;
     }
 
-    @JsonProperty("method")
-    public void setMethod(String method) {
-        this.method = method;
+    @JsonProperty("k")
+    public void setK(Long k) {
+        this.k = k;
     }
 
-    public ClusterFeaturesParams withMethod(String method) {
-        this.method = method;
+    public ClusterKMeansParams withK(Long k) {
+        this.k = k;
         return this;
     }
 
@@ -61,7 +61,7 @@ public class ClusterFeaturesParams {
         this.inputData = inputData;
     }
 
-    public ClusterFeaturesParams withInputData(String inputData) {
+    public ClusterKMeansParams withInputData(String inputData) {
         this.inputData = inputData;
         return this;
     }
@@ -76,23 +76,23 @@ public class ClusterFeaturesParams {
         this.outWorkspace = outWorkspace;
     }
 
-    public ClusterFeaturesParams withOutWorkspace(String outWorkspace) {
+    public ClusterKMeansParams withOutWorkspace(String outWorkspace) {
         this.outWorkspace = outWorkspace;
         return this;
     }
 
-    @JsonProperty("out_cluster_id")
-    public String getOutClusterId() {
-        return outClusterId;
+    @JsonProperty("out_clusterset_id")
+    public String getOutClustersetId() {
+        return outClustersetId;
     }
 
-    @JsonProperty("out_cluster_id")
-    public void setOutClusterId(String outClusterId) {
-        this.outClusterId = outClusterId;
+    @JsonProperty("out_clusterset_id")
+    public void setOutClustersetId(String outClustersetId) {
+        this.outClustersetId = outClustersetId;
     }
 
-    public ClusterFeaturesParams withOutClusterId(String outClusterId) {
-        this.outClusterId = outClusterId;
+    public ClusterKMeansParams withOutClustersetId(String outClustersetId) {
+        this.outClustersetId = outClustersetId;
         return this;
     }
 
@@ -108,7 +108,7 @@ public class ClusterFeaturesParams {
 
     @Override
     public String toString() {
-        return ((((((((((("ClusterFeaturesParams"+" [method=")+ method)+", inputData=")+ inputData)+", outWorkspace=")+ outWorkspace)+", outClusterId=")+ outClusterId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("ClusterKMeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
