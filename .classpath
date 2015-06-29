@@ -14,5 +14,9 @@
 	<classpathentry kind="lib" path="../jars/lib/jars/kbase/common/kbase-common-0.0.10.jar"/>
 	<classpathentry kind="lib" path="../jars/lib/jars/junit/junit-4.9.jar"/>
 	<classpathentry kind="lib" path="../jars/lib/jars/kbase/workspace/WorkspaceClient-0.2.0.jar"/>
+	<classpathentry kind="lib" path="/Users/rsutormin/Programs/eclipse/workspace/jars/lib/jars/apache_commons/http/httpclient-4.3.1.jar"/>
+	<classpathentry kind="lib" path="/Users/rsutormin/Programs/eclipse/workspace/jars/lib/jars/apache_commons/http/httpcore-4.3.jar"/>
+	<classpathentry kind="lib" path="/Users/rsutormin/Programs/eclipse/workspace/jars/lib/jars/apache_commons/http/httpmime-4.3.1.jar"/>
+	<classpathentry kind="lib" path="/Users/rsutormin/Programs/eclipse/workspace/jars/lib/jars/apache_commons/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="output" path="eclipse_classes"/>
 </classpath>

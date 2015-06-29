@@ -21,6 +21,10 @@
       <include name="kbase/common/kbase-common-0.0.10.jar"/>
       <include name="junit/junit-4.9.jar"/>
       <include name="kbase/workspace/WorkspaceClient-0.2.0.jar"/>
+      <include name="apache_commons/http/httpclient-4.3.1.jar"/>
+      <include name="apache_commons/http/httpcore-4.3.jar"/>
+      <include name="apache_commons/http/httpmime-4.3.1.jar"/>
+      <include name="apache_commons/commons-logging-1.1.1.jar"/>
     </fileset>
   </path>
 
@@ -62,6 +66,9 @@
       <sysproperty key="test.temp-dir" value="${test.temp-dir}"/>
       <sysproperty key="test.user" value="${test.user}"/>
       <sysproperty key="test.password" value="${test.password}"/>
+      <sysproperty key="test.ws.url" value="${test.ws.url}"/>
+      <sysproperty key="test.ujs.url" value="${test.ujs.url}"/>
+      <sysproperty key="test.shock.url" value="${test.shock.url}"/>
       <batchtest todir="${env.JENKINS_REPORT_DIR}">
         <fileset dir="${src}">
           <include name="**/test/**/**Test.java"/>

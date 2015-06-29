@@ -34,8 +34,10 @@ RUN apt-get update && apt-get install -y \
   libatlas3gf-base
 RUN pip install scikit-learn
 RUN pip install scipy
+RUN apt-get install -y mongodb
 WORKDIR /kb/dev_container/modules
 RUN mkdir feature_values
 COPY . /kb/dev_container/modules/feature_values/
 WORKDIR /kb/dev_container/modules/feature_values
+RUN bash ./deps/integration_tests.sh
 CMD make test

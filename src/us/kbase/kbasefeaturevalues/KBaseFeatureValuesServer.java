@@ -5,6 +5,16 @@ import us.kbase.common.service.JsonServerMethod;
 import us.kbase.common.service.JsonServerServlet;
 
 //BEGIN_HEADER
+import java.net.URL;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import us.kbase.common.service.UObject;
+import us.kbase.common.utils.AweUtils;
+import us.kbase.common.utils.TextUtils;
+import us.kbase.userandjobstate.InitProgress;
+import us.kbase.userandjobstate.UserAndJobStateClient;
 //END_HEADER
 
 /**
@@ -25,6 +35,61 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     private static final long serialVersionUID = 1L;
 
     //BEGIN_CLASS_HEADER
+    public static final String SERVICE_NAME = "KBaseFeatureValues";
+    public static final String CONFIG_PARAM_SCRATCH = "scratch";
+    public static final String CONFIG_PARAM_WS_URL = "ws.url";
+    public static final String CONFIG_PARAM_UJS_URL = "ujs.url";
+    public static final String CONFIG_PARAM_SHOCK_URL = "shock.url";
+    public static final String CONFIG_PARAM_AWE_URL = "awe.url";
+    public static final String CONFIG_PARAM_CLIENT_BIN_DIR = "client.bin.dir";
+    public static final String CONFIG_PARAM_CLIENT_WORK_DIR = "client.work.dir";
+    public static final String AWE_CLIENT_SCRIPT_NAME = "awe_" + SERVICE_NAME + "_run_job.sh";
+    
+    private UserAndJobStateClient getUjsClient(AuthToken auth) throws Exception {
+        String ujsUrl = config.get(CONFIG_PARAM_UJS_URL);
+        if (ujsUrl == null)
+            throw new IllegalStateException("Parameter '" + CONFIG_PARAM_UJS_URL +
+                    "' is not defined in configuration");
+        UserAndJobStateClient ret = new UserAndJobStateClient(new URL(ujsUrl), auth);
+        ret.setIsInsecureHttpConnectionAllowed(true);
+        return ret;
+    }
+    
+    private String getAweUrl() throws Exception {
+        String aweUrl = config.get(CONFIG_PARAM_AWE_URL);
+        if (aweUrl == null)
+            throw new IllegalStateException("Parameter '" + CONFIG_PARAM_AWE_URL +
+                    "' is not defined in configuration");
+        return aweUrl;
+    }
+    
+    private String runAweJob(AuthToken authPart, Object... params) throws Exception {
+        StackTraceElement[] st = new Exception().getStackTrace();
+        String methodName = null;
+        String className = getClass().getName();
+        for (int firstPos = 0; firstPos < st.length; firstPos++) {
+            if (st[firstPos].getMethodName().equals("runAweJob") || 
+                    !st[firstPos].getClassName().equals(className))
+                continue;
+            methodName = st[firstPos].getMethodName();
+            break;
+        }
+        Map<String, Object> args = new LinkedHashMap<String, Object>();
+        UserAndJobStateClient ujsClient = getUjsClient(authPart);
+        String jobId = ujsClient.createAndStartJob(authPart.toString(), "queued", 
+                "AWE job for " + SERVICE_NAME + "." + methodName, 
+                new InitProgress().withPtype("none"), null);
+        args.put("method", methodName);
+        args.put("params", Arrays.asList(params));
+        args.put("config", config);
+        args.put("jobid", jobId);
+        String argsHex = TextUtils.stringToHex(UObject.getMapper().writeValueAsString(args));
+        String aweJobId = AweUtils.runTask(getAweUrl(), SERVICE_NAME, methodName, argsHex, 
+                AWE_CLIENT_SCRIPT_NAME, authPart.toString());
+        //System.out.println("AWE job id: " + aweJobId);
+        return jobId;
+    }
+    
     //END_CLASS_HEADER
 
     public KBaseFeatureValuesServer() throws Exception {
@@ -46,6 +111,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String estimateK(EstimateKParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN estimate_k
+        returnVal = runAweJob(authPart, params);
         //END estimate_k
         return returnVal;
     }
@@ -62,6 +128,12 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String clusterKMeans(ClusterKMeansParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN cluster_k_means
+        try {
+            returnVal = runAweJob(authPart, params);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
         //END cluster_k_means
         return returnVal;
     }
@@ -78,6 +150,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String clusterHierarchical(ClusterHierarchicalParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN cluster_hierarchical
+        returnVal = runAweJob(authPart, params);
         //END cluster_hierarchical
         return returnVal;
     }
@@ -96,6 +169,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String clustersFromDendrogram(ClustersFromDendrogramParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN clusters_from_dendrogram
+        returnVal = runAweJob(authPart, params);
         //END clusters_from_dendrogram
         return returnVal;
     }
@@ -114,6 +188,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String evaluateClustersetQuality(EvaluateClustersetQualityParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN evaluate_clusterset_quality
+        returnVal = runAweJob(authPart, params);
         //END evaluate_clusterset_quality
         return returnVal;
     }
@@ -129,6 +204,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String validateMatrix(ValidateMatrixParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN validate_matrix
+        returnVal = runAweJob(authPart, params);
         //END validate_matrix
         return returnVal;
     }
@@ -144,6 +220,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public String correctMatrix(CorrectMatrixParams params, AuthToken authPart) throws Exception {
         String returnVal = null;
         //BEGIN correct_matrix
+        returnVal = runAweJob(authPart, params);
         //END correct_matrix
         return returnVal;
     }

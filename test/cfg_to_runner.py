@@ -14,7 +14,10 @@ CFG_SECTION = 'KBaseFeatureValuesTest'
 
 CONFIG_OPTS = ['test.temp-dir',
                'test.user',  
-               'test.password'
+               'test.password',
+               'test.ws.url',
+               'test.ujs.url',
+               'test.shock.url'
                ]
 
 
