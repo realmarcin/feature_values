@@ -6,6 +6,8 @@ SERVICE_NAME = KBaseFeatureValues
 ASYNC_JOB_SCRIPT_NAME = run_KBaseFeatureValues_async_job.sh
 SUB_SERVICE_NAME = ClusterService
 SUB_ASYNC_JOB_SCRIPT_FILE = run_ClusterService_async_job.sh
+SUB2_SERVICE_NAME = ClusterServiceR
+SUB2_ASYNC_JOB_SCRIPT_FILE = run_ClusterServiceR_async_job.sh
 ANT = ant
 TESTCFG ?= test.cfg
 
@@ -22,6 +24,10 @@ compile:
 	echo 'cd $(DIR)/clusterservice' >> $(LOCAL_BIN)/$(SUB_ASYNC_JOB_SCRIPT_FILE)
 	echo 'python ClusterServiceServer.py $$1 $$2 $$3' >> $(LOCAL_BIN)/$(SUB_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(LOCAL_BIN)/$(SUB_ASYNC_JOB_SCRIPT_FILE)
+	echo '#!/bin/bash' > $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	echo 'cd $(DIR)/clusterservice' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	echo 'Rscript ClusterServiceRImpl.r $$1 $$2' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	chmod a+x $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	$(ANT) compile
 
 deploy: deploy-client deploy-service deploy-scripts

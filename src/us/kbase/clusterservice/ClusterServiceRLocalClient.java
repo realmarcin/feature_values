@@ -15,26 +15,26 @@ import us.kbase.common.service.JsonLocalClientCaller;
  * <pre>
  * </pre>
  */
-public class ClusterServiceLocalClient extends JsonLocalClientCaller {
+public class ClusterServiceRLocalClient extends JsonLocalClientCaller {
     
-    public ClusterServiceLocalClient(File workDir) {
+    public ClusterServiceRLocalClient(File workDir) {
         super(workDir);
     }
 
     /**
-     * <p>Original spec-file function name: cluster_float_rows_scikit_kmeans</p>
+     * <p>Original spec-file function name: cluster_float_rows_r_kmeans</p>
      * <pre>
      * </pre>
-     * @param   params   instance of type {@link us.kbase.clusterservice.ClusterFloatRowsScikitKmeansParams ClusterFloatRowsScikitKmeansParams}
+     * @param   params   instance of type {@link us.kbase.clusterservice.ClusterFloatRowsRKmeansParams ClusterFloatRowsRKmeansParams}
      * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clusterFloatRowsScikitKmeans(ClusterFloatRowsScikitKmeansParams params) throws IOException, JsonClientException {
+    public ClusterResults clusterFloatRowsRKmeans(ClusterFloatRowsRKmeansParams params) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
-        List<ClusterResults> res = jsonrpcCall("ClusterService.cluster_float_rows_scikit_kmeans", args, retType, true, false);
+        List<ClusterResults> res = jsonrpcCall("ClusterServiceR.cluster_float_rows_r_kmeans", args, retType, true, false);
         return res.get(0);
     }
 }
