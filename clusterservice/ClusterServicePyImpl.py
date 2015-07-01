@@ -3,10 +3,10 @@ import sklearn.cluster as cl
 #END_HEADER
 
 
-class ClusterService:
+class ClusterServicePy:
     '''
     Module Name:
-    ClusterService
+    ClusterServicePy
 
     Module Description:
     
@@ -28,20 +28,20 @@ class ClusterService:
         #END_CONSTRUCTOR
         pass
 
-    def cluster_float_rows_scikit_kmeans(self, ctx, params):
+    def cluster_float_rows_kmeans(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
-        #BEGIN cluster_float_rows_scikit_kmeans
+        #BEGIN cluster_float_rows_kmeans
         matrix = params['input_data']['values']
         k_means = cl.KMeans(init='k-means++', n_clusters=params['k'], n_init=10)
         k_means.fit(matrix)
         k_means_labels = k_means.labels_.tolist()
         returnVal = {'cluster_labels': k_means_labels}
-        #END cluster_float_rows_scikit_kmeans
+        #END cluster_float_rows_kmeans
 
         # At some point might do deeper type checking...
         if not isinstance(returnVal, dict):
-            raise ValueError('Method cluster_float_rows_scikit_kmeans return value ' +
+            raise ValueError('Method cluster_float_rows_kmeans return value ' +
                              'returnVal is not type dict as required.')
         # return the results
         return [returnVal]

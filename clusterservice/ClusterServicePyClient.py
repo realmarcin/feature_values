@@ -103,7 +103,7 @@ class _JSONObjectEncoder(_json.JSONEncoder):
         return _json.JSONEncoder.default(self, obj)
 
 
-class ClusterService(object):
+class ClusterServicePy(object):
 
     def __init__(self, url=None, timeout=30 * 60, user_id=None,
                  password=None, token=None, ignore_authrc=False,
@@ -170,10 +170,10 @@ class ClusterService(object):
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
  
-    def cluster_float_rows_scikit_kmeans(self, params, json_rpc_context = None):
+    def cluster_float_rows_kmeans(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method cluster_float_rows_scikit_kmeans: argument json_rpc_context is not type dict as required.')
-        resp = self._call('ClusterService.cluster_float_rows_scikit_kmeans',
+            raise ValueError('Method cluster_float_rows_kmeans: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.cluster_float_rows_kmeans',
                           [params], json_rpc_context)
         return resp[0]
  

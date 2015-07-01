@@ -11,13 +11,13 @@ import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.JsonLocalClientCaller;
 
 /**
- * <p>Original spec-file module name: ClusterServiceR</p>
+ * <p>Original spec-file module name: ClusterServicePy</p>
  * <pre>
  * </pre>
  */
-public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements ClusterServiceLocalClient {
+public class ClusterServicePyLocalClient extends JsonLocalClientCaller implements ClusterServiceLocalClient {
     
-    public ClusterServiceRLocalClient(File workDir) {
+    public ClusterServicePyLocalClient(File workDir) {
         super(workDir);
     }
 
@@ -34,7 +34,7 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
-        List<ClusterResults> res = jsonrpcCall("ClusterServiceR.cluster_float_rows_kmeans", args, retType, true, false);
+        List<ClusterResults> res = jsonrpcCall("ClusterServicePy.cluster_float_rows_kmeans", args, retType, true, false);
         return res.get(0);
     }
 }

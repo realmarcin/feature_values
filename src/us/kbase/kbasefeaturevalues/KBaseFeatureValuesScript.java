@@ -2,6 +2,7 @@ package us.kbase.kbasefeaturevalues;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class KBaseFeatureValuesScript {
         List<Object> params = (List<Object>)argsMap.get("params");
         Map<String, String> config = (Map<String, String>)argsMap.get("config");
         System.out.println("Method name: " + methodName);
-        System.out.println("Job id: " + methodName);
+        System.out.println("Job id: " + jobId);
         System.out.println("Parameters: " + params);
         System.out.println("Configuration: " + config);
         Method method = null;
@@ -63,6 +64,11 @@ public class KBaseFeatureValuesScript {
             }
             ujsClient.completeJob(jobId, token, "done", null, res);
         } catch (Throwable ex) {
+            if (ex instanceof InvocationTargetException) {
+                InvocationTargetException ite = (InvocationTargetException)ex;
+                if (ite.getCause() != null)
+                    ex = ite.getCause();
+            }
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);

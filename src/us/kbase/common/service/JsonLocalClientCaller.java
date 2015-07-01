@@ -10,9 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import us.kbase.auth.AuthToken;
@@ -36,7 +34,7 @@ public class JsonLocalClientCaller {
     private File binDir = null;
     
     public JsonLocalClientCaller(File workDir) {
-        this.workDir = workDir;
+        this.workDir = workDir == null ? new File(".") : workDir;
         this.mapper = new ObjectMapper().registerModule(new JacksonTupleModule());
     }
 

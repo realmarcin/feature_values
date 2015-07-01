@@ -39,8 +39,8 @@ def get_config():
 
 config = get_config()
 
-from ClusterServiceImpl import ClusterService
-impl_ClusterService = ClusterService(config)
+from ClusterServicePyImpl import ClusterServicePy
+impl_ClusterServicePy = ClusterServicePy(config)
 
 
 class JSONObjectEncoder(json.JSONEncoder):
@@ -255,7 +255,7 @@ class Application(object):
                                    context['method'], context['call_id'])
 
     def __init__(self):
-        submod = get_service_name() or 'ClusterService'
+        submod = get_service_name() or 'ClusterServicePy'
         self.userlog = log.log(
             submod, ip_address=True, authuser=True, module=True, method=True,
             call_id=True, changecallback=self.logcallback,
@@ -265,8 +265,8 @@ class Application(object):
             call_id=True, logfile=self.userlog.get_log_file())
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
-        self.rpc_service.add(impl_ClusterService.cluster_float_rows_scikit_kmeans,
-                             name='ClusterService.cluster_float_rows_scikit_kmeans',
+        self.rpc_service.add(impl_ClusterServicePy.cluster_float_rows_kmeans,
+                             name='ClusterServicePy.cluster_float_rows_kmeans',
                              types=[dict])
 
     def __call__(self, environ, start_response):

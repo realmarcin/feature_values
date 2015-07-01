@@ -13,7 +13,7 @@ import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 
 /**
- * <p>Original spec-file type: ClusterFloatRowsRKmeansParams</p>
+ * <p>Original spec-file type: ClusterFloatRowsKmeansParams</p>
  * <pre>
  * values - two dimensional array values[row][col], where first index 
  *     (row) goes vertically over outer list and (col) goes horizontally 
@@ -27,7 +27,7 @@ import us.kbase.kbasefeaturevalues.FloatMatrix2D;
     "k",
     "input_data"
 })
-public class ClusterFloatRowsRKmeansParams {
+public class ClusterFloatRowsKmeansParams {
 
     @JsonProperty("k")
     private Long k;
@@ -60,7 +60,7 @@ public class ClusterFloatRowsRKmeansParams {
         this.k = k;
     }
 
-    public ClusterFloatRowsRKmeansParams withK(Long k) {
+    public ClusterFloatRowsKmeansParams withK(Long k) {
         this.k = k;
         return this;
     }
@@ -105,7 +105,7 @@ public class ClusterFloatRowsRKmeansParams {
         this.inputData = inputData;
     }
 
-    public ClusterFloatRowsRKmeansParams withInputData(FloatMatrix2D inputData) {
+    public ClusterFloatRowsKmeansParams withInputData(FloatMatrix2D inputData) {
         this.inputData = inputData;
         return this;
     }
@@ -122,7 +122,7 @@ public class ClusterFloatRowsRKmeansParams {
 
     @Override
     public String toString() {
-        return ((((((("ClusterFloatRowsRKmeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("ClusterFloatRowsKmeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

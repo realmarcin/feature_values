@@ -44,6 +44,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public static final String CONFIG_PARAM_CLIENT_BIN_DIR = "client.bin.dir";
     public static final String CONFIG_PARAM_CLIENT_WORK_DIR = "client.work.dir";
     public static final String AWE_CLIENT_SCRIPT_NAME = "awe_" + SERVICE_NAME + "_run_job.sh";
+    public static final String SERVICE_VERSION = "0.1";
     
     private UserAndJobStateClient getUjsClient(AuthToken auth) throws Exception {
         String ujsUrl = config.get(CONFIG_PARAM_UJS_URL);
@@ -84,7 +85,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         args.put("config", config);
         args.put("jobid", jobId);
         String argsHex = TextUtils.stringToHex(UObject.getMapper().writeValueAsString(args));
-        String aweJobId = AweUtils.runTask(getAweUrl(), SERVICE_NAME, methodName, argsHex, 
+        AweUtils.runTask(getAweUrl(), SERVICE_NAME, methodName, argsHex, 
                 AWE_CLIENT_SCRIPT_NAME, authPart.toString());
         //System.out.println("AWE job id: " + aweJobId);
         return jobId;

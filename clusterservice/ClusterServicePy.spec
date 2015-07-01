@@ -1,6 +1,6 @@
 #include<../KBaseFeatureValues.spec>
 
-module ClusterService {
+module ClusterServicePy {
 
     /*
         values - two dimensional array values[row][col], where first index 
@@ -10,7 +10,7 @@ module ClusterService {
     typedef structure {
         int k;
         KBaseFeatureValues.FloatMatrix2D input_data;
-    } ClusterFloatRowsScikitKmeansParams;
+    } ClusterFloatRowsKmeansParams;
 
     /*
         clusters - set of lists consisting of positions of rows from original
@@ -21,7 +21,7 @@ module ClusterService {
         list<int> cluster_labels;
     } ClusterResults;
 
-    funcdef cluster_float_rows_scikit_kmeans(
-        ClusterFloatRowsScikitKmeansParams params) returns (ClusterResults);
+    funcdef cluster_float_rows_kmeans(
+        ClusterFloatRowsKmeansParams params) returns (ClusterResults);
 
 };

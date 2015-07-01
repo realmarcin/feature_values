@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -31,11 +32,23 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.ServerException;
 import us.kbase.common.service.Tuple7;
+import us.kbase.common.service.UObject;
+import us.kbase.common.service.UnauthorizedException;
 import us.kbase.common.utils.ProcessHelper;
 import us.kbase.kbasefeaturevalues.ClusterKMeansParams;
+import us.kbase.kbasefeaturevalues.ClusterSet;
+import us.kbase.kbasefeaturevalues.ExpressionMatrix;
+import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
 import us.kbase.userandjobstate.UserAndJobStateClient;
+import us.kbase.workspace.CreateWorkspaceParams;
+import us.kbase.workspace.ObjectData;
+import us.kbase.workspace.ObjectIdentity;
+import us.kbase.workspace.ObjectSaveData;
+import us.kbase.workspace.SaveObjectsParams;
+import us.kbase.workspace.WorkspaceClient;
+import us.kbase.workspace.WorkspaceIdentity;
 
 public class AweIntegrationTest {
     private static AuthToken token = null;
@@ -47,6 +60,7 @@ public class AweIntegrationTest {
     private static File aweClientDir = null;
     private static File fvServiceDir = null;
     private static Server fvService = null;
+    private static String testWsName = null;
     
     private static int mongoInitWaitSeconds = 240;
     private static int aweServerInitWaitSeconds = 60;
@@ -78,6 +92,24 @@ public class AweIntegrationTest {
         token = getToken();
         client = new KBaseFeatureValuesClient(new URL("http://localhost:" + jobServicePort), token);
         client.setIsInsecureHttpConnectionAllowed(true);
+        String machineName = java.net.InetAddress.getLocalHost().getHostName();
+        machineName = machineName == null ? "nowhere" : machineName.toLowerCase().replaceAll("[^\\dA-Za-z_]|\\s", "_");
+        long suf = System.currentTimeMillis();
+        WorkspaceClient wscl = getWsClient();
+        Exception error = null;
+        for (int i = 0; i < 5; i++) {
+            testWsName = "test_feature_values_" + machineName + "_" + suf;
+            try {
+                wscl.createWorkspace(new CreateWorkspaceParams().withWorkspace(testWsName));
+                error = null;
+                break;
+            } catch (Exception ex) {
+                System.err.println(ex.getMessage());
+                error = ex;
+            }
+        }
+        if (error != null)
+            throw error;
     }
     
     @AfterClass
@@ -92,12 +124,54 @@ public class AweIntegrationTest {
         killPid(aweServerDir);
         //killPid(shockDir);
         killPid(mongoDir);
+        try {
+            if (testWsName != null) {
+                getWsClient().deleteWorkspace(new WorkspaceIdentity().withWorkspace(testWsName));
+                //System.out.println("Test workspace " + testWsName + " was deleted");
+            }
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 
     @Test
     public void testClusterKMeans() throws Exception {
-        String jobId = client.clusterKMeans(new ClusterKMeansParams().withInputData("superws/cluster1").withK(3L));
+        WorkspaceClient wscl = getWsClient();
+        String exprObjName = "expression1";
+        String clustObjName = "clusters1";
+        ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
+                .withData(getSampleMatrix());
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(exprObjName).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        String jobId = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
+                exprObjName).withK(3L).withOutWorkspace(testWsName).withOutClustersetId(clustObjName));
         waitForJob(jobId);
+        ObjectData res = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObjName))).get(0);
+        ClusterSet clSet = res.getData().asClassInstance(ClusterSet.class);
+        System.out.println(clSet.getFeatureClusters());
+    }
+
+    private static FloatMatrix2D getSampleMatrix() {
+        List<List<Double>> values = new ArrayList<List<Double>>();
+        values.add(Arrays.asList(1.0, 2.0, 3.0));
+        values.add(Arrays.asList(0.9, 1.9, 2.9));
+        values.add(Arrays.asList(1.4, 2.4, 3.4));
+        values.add(Arrays.asList(1.5, 2.5, 3.5));
+        values.add(Arrays.asList(-1.0, -2.0, -3.0));
+        values.add(Arrays.asList(-1.2, -2.2, -3.2));
+        values.add(Arrays.asList(-1.1, -2.1, -3.1));
+        return new FloatMatrix2D().withValues(values)
+                .withRowIds(Arrays.asList("g1", "g2", "g3", "g4", "g5", "g6", "g7"))
+                .withColIds(Arrays.asList("c1", "c2", "c3"));
+    }
+    
+    private static WorkspaceClient getWsClient() throws UnauthorizedException, IOException,
+            MalformedURLException {
+        WorkspaceClient wscl = new WorkspaceClient(new URL(getWsUrl()), token);
+        wscl.setAuthAllowedForHttp(true);
+        return wscl;
     }
 
     /*@Test
@@ -113,6 +187,10 @@ public class AweIntegrationTest {
         }
     }*/
 
+    private static String getWsUrl() {
+        return systemGetProperty("test." + KBaseFeatureValuesServer.CONFIG_PARAM_WS_URL);
+    }
+
     private static String getUjsUrl() {
         return systemGetProperty("test." + KBaseFeatureValuesServer.CONFIG_PARAM_UJS_URL);
     }
@@ -124,6 +202,7 @@ public class AweIntegrationTest {
         for (int i = 0; i < 30; i++) {
             Thread.sleep(1000);
             Tuple7<String, String, String, Long, String, Long, Long> data = jscl.getJobStatus(jobId);
+            //System.out.println("Job status: " + data);
             Long complete = data.getE6();
             Long wasError = data.getE7();
             if (complete == 1L) {
@@ -272,8 +351,6 @@ public class AweIntegrationTest {
     private static int startupAweServer(String aweServerExePath, File dir, int mongoPort) throws Exception {
         if (aweServerExePath == null) {
             aweServerExePath = "awe-server";
-        } else {
-            System.out.println(aweServerExePath + " exists: " + new File(aweServerExePath).exists());
         }
         if (!dir.exists())
             dir.mkdirs();
@@ -362,8 +439,6 @@ public class AweIntegrationTest {
             File fvServiceDir) throws Exception {
         if (aweClientExePath == null) {
             aweClientExePath = "awe-client";
-        } else {
-            System.out.println(aweClientExePath + " exists: " + new File(aweClientExePath).exists());
         }
         if (!dir.exists())
             dir.mkdirs();
@@ -480,8 +555,7 @@ public class AweIntegrationTest {
                         systemGetProperty("test." + KBaseFeatureValuesServer.CONFIG_PARAM_SHOCK_URL),
                 KBaseFeatureValuesServer.CONFIG_PARAM_AWE_URL + "=http://localhost:" + awePort + "/",
                 KBaseFeatureValuesServer.CONFIG_PARAM_CLIENT_BIN_DIR + "=" + binDir.getAbsolutePath(),
-                KBaseFeatureValuesServer.CONFIG_PARAM_WS_URL + "=" + 
-                        systemGetProperty("test." + KBaseFeatureValuesServer.CONFIG_PARAM_WS_URL)
+                KBaseFeatureValuesServer.CONFIG_PARAM_WS_URL + "=" + getWsUrl()
                 ), configFile);
         File jobServiceCLI = new File(dir, KBaseFeatureValuesServer.AWE_CLIENT_SCRIPT_NAME);
         writeFileLines(Arrays.asList(
