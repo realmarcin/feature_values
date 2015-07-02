@@ -91,6 +91,8 @@ public class JsonLocalClientCaller {
         os.close();
         String tokenString = authRequired ? token.toString() : null;
         File outputFile = new File(workDir, "output.json");
+        if (outputFile.exists())
+            outputFile.delete();
         // Run CLI function
         String serviceName = method.substring(0, method.indexOf('.'));
         String cmd = (binDir == null ? "" : (binDir.getAbsolutePath() + "/")) + "run_" + serviceName + "_async_job.sh";
@@ -109,7 +111,7 @@ public class JsonLocalClientCaller {
             throw new JsonClientException("Error running service CLI for method '" + method + "': " + 
                     ex.getMessage(), ex);
         }
-        if (exitCode != 0 && !(outputFile.exists() && outputFile.length() > 0)) {
+        if ((!outputFile.exists()) || outputFile.length() == 0) {
             String msg = "Error running service CLI for method '" + method + "' " + 
                     "with exit code " + exitCode;
             if (outSb.length() > 0)
@@ -119,8 +121,6 @@ public class JsonLocalClientCaller {
             throw new JsonClientException(msg);
         }
         // Parse response into json
-        if (!outputFile.exists())
-            throw new ServerException("Output file wasn't found", 0, "Unknown", null);
         JsonTokenStream jts = new JsonTokenStream(outputFile);
         Map<String, UObject> resp;
         try {
@@ -148,6 +148,14 @@ public class JsonLocalClientCaller {
         if (resp.containsKey("error")) {
             Map<String, String> retError = resp.get("error").asClassInstance(new TypeReference<Map<String, String>>(){});
             String data = retError.get("data") == null ? retError.get("error") : retError.get("data");
+            if (data == null || data.length() == 0) {
+                data = "Error running service CLI for method '" + method + "' " + 
+                        "with exit code " + exitCode;
+                if (outSb.length() > 0)
+                    data += "\nOutput:\n" + outSb;
+                if (errSb.length() > 0)
+                    data += "\nErrors:\n" + errSb;
+            }
             throw new ServerException(retError.get("message"),
                     new Integer(retError.get("code")), retError.get("name"),
                     data);

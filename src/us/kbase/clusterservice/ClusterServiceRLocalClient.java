@@ -9,6 +9,7 @@ import java.util.List;
 
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.JsonLocalClientCaller;
+import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 /**
  * <p>Original spec-file module name: ClusterServiceR</p>
@@ -35,6 +36,14 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
         args.add(params);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
         List<ClusterResults> res = jsonrpcCall("ClusterServiceR.cluster_float_rows_kmeans", args, retType, true, false);
+        return res.get(0);
+    }
+
+    public Long estimateK(FloatMatrix2D matrix) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(matrix);
+        TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
+        List<Long> res = jsonrpcCall("ClusterServiceR.estimate_k", args, retType, true, false);
         return res.get(0);
     }
 }

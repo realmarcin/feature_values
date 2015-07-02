@@ -9,7 +9,8 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.kbase.clusterservice.ClusterFloatRowsKmeansParams;
@@ -19,11 +20,12 @@ import us.kbase.common.service.ServerException;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 public class ClusterServiceTest {
-    private File rootTempDir = null;
+    private static File rootTempDir = null;
 
+    @Ignore
     @Test
     public void pyTest() throws Exception {
-        File workDir = generateTempDir(rootTempDir, "py_clusters_1_", "");
+        File workDir = generateTempDir(rootTempDir, "test_clusterservice_py1_", "");
         workDir.mkdirs();
         ClusterServicePyLocalClient cl = new ClusterServicePyLocalClient(workDir);
         cl.setBinDir(new File("bin"));
@@ -41,16 +43,19 @@ public class ClusterServiceTest {
 
     @Test
     public void rTest() throws Exception {
-        File workDir = generateTempDir(rootTempDir, "r_clusters_1_", "");
+        File workDir = generateTempDir(rootTempDir, "test_clusterservice_r1_", "");
         workDir.mkdirs();
         ClusterServiceRLocalClient cl = new ClusterServiceRLocalClient(workDir);
         cl.setBinDir(new File("bin"));
+        FloatMatrix2D matrix = getSampleMatrix();
         try {
             List<Long> clusterLabels = cl.clusterFloatRowsKmeans(
                     new ClusterFloatRowsKmeansParams().withInputData(
-                            getSampleMatrix()).withK(3L)).getClusterLabels();
+                            matrix).withK(3L)).getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
+            long k = cl.estimateK(matrix);
+            System.out.println("Estimated K: " + k);
         } catch (ServerException ex) {
             System.out.println(ex.getData());
             throw ex;
@@ -82,25 +87,36 @@ public class ClusterServiceTest {
                 .withRowIds(Arrays.asList("g1", "g2", "g3", "g4", "g5", "g6", "g7"))
                 .withColIds(Arrays.asList("c1", "c2", "c3"));
     }
-    
-    @Before
-    public void prepare() throws Exception {
+
+    @BeforeClass
+    public static void prepare() throws Exception {
         rootTempDir = new File(getProp("test.temp-dir"));
+        if (!rootTempDir.exists())
+            rootTempDir.mkdirs();
         //token = AuthService.login(getProp("test.user"), getProp("test.password")).getToken();
-        cleanup();
+        //cleanup();
+        System.out.println("test.temp-dir: " + rootTempDir);
+        for (File dir : rootTempDir.listFiles()) {
+            if (dir.isDirectory() && dir.getName().startsWith("test_clusterservice_"))
+                try {
+                    deleteRecursively(dir);
+                } catch (Exception e) {
+                    System.out.println("Can not delete directory [" + dir.getName() + "]: " + e.getMessage());
+                }
+        }
     }
 
-    public String getProp(String propName) {
+    private static String getProp(String propName) {
         String ret = System.getProperty(propName);
         if (ret == null)
             throw new IllegalStateException("Java system property " + propName + " is not defined");
         return ret;
     }
-    
+
     @After
     public void cleanup() throws Exception {
-        if (rootTempDir != null && rootTempDir.exists())
-            deleteRecursively(rootTempDir);
+        //if (rootTempDir != null && rootTempDir.exists())
+        //    deleteRecursively(rootTempDir);
     }
     
     private static File generateTempDir(File parentTempDir, String prefix, String suffix) {
