@@ -56,6 +56,7 @@ public class ClusterServiceTest {
             checkClusterLabels(clusterLabels);
             long k = cl.estimateK(matrix);
             System.out.println("Estimated K: " + k);
+            Assert.assertEquals(3, k);
         } catch (ServerException ex) {
             System.out.println(ex.getData());
             throw ex;
@@ -78,8 +79,8 @@ public class ClusterServiceTest {
         List<List<Double>> values = new ArrayList<List<Double>>();
         values.add(Arrays.asList(1.0, 2.0, 3.0));
         values.add(Arrays.asList(0.9, 1.9, 2.9));
-        values.add(Arrays.asList(1.4, 2.4, 3.4));
-        values.add(Arrays.asList(1.5, 2.5, 3.5));
+        values.add(Arrays.asList(2.4, 3.4, 4.4));
+        values.add(Arrays.asList(2.5, 3.5, 4.5));
         values.add(Arrays.asList(-1.0, -2.0, -3.0));
         values.add(Arrays.asList(-1.2, -2.2, -3.2));
         values.add(Arrays.asList(-1.1, -2.1, -3.1));

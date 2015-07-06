@@ -2,6 +2,7 @@
 library(jsonlite)
 library(clValid)
 library(amap)
+#library(sp)
 
 methods <- list()
 
@@ -21,12 +22,15 @@ methods[["ClusterServiceR.cluster_float_rows_kmeans"]] <- function(params) {
 }
 
 methods[["ClusterServiceR.estimate_k"]] <- function(matrix) {
-    values <- as.matrix(matrix[["values"]])
+    values <- matrix[["values"]]
+    row_names <- matrix[["row_ids"]]
+    row.names(values) <- row_names
+    values <- data.matrix(values)
     max_clust_num = min(c(50,nrow(values)-1))
-    print(max_clust_num)
-    valid <- clValid(values, nClust=c(2:max_clust_num),maxitems=nrow(values), clMethods<-c("kmeans"),validation=c("internal"))
-    print(valid)
-    valid
+    valid <- clValid(values, nClust=c(2:max_clust_num), maxitems=nrow(values), clMethods=c("kmeans"),validation=c("internal"))
+    ret <- measures(valid, "Silhouette")[1,,1]
+    best_pos <- which.max(ret)
+    unbox(as.numeric(names(ret)[best_pos]))
 }
 
 tryCatch({

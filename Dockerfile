@@ -40,4 +40,5 @@ RUN mkdir feature_values
 COPY . /kb/dev_container/modules/feature_values/
 WORKDIR /kb/dev_container/modules/feature_values
 RUN bash ./deps/integration_tests.sh
+RUN bash ./deps/r_lang.sh
 CMD make test
