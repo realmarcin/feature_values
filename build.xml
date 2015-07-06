@@ -3,7 +3,7 @@
   <property name="src"     location="src"/>
   <property name="classes" location="classes"/>
   <property name="dist"    location="dist"/>
-  <property name="lib"     location="${env.KB_TOP}/modules/jars/lib/jars/"/>
+  <property name="lib"     location="../jars/lib/jars/"/>
   <property name="module"  value="KBaseFeatureValues"/>
   <property name="jar.file" value="${module}.jar"/>
   <property name="cmd.file" value="awe_KBaseFeatureValues_run_job.sh"/>
