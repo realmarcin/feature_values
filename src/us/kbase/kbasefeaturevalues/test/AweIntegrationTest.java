@@ -88,7 +88,7 @@ public class AweIntegrationTest {
         int awePort = startupAweServer(new File(aweBinDir, "awe-server").getAbsolutePath(), aweServerDir, mongoPort);
         fvService = startupFVService(fvServiceDir, binDir, awePort);
         int jobServicePort = fvService.getConnectors()[0].getLocalPort();
-        startupAweClient(new File(aweBinDir, "awe-client").getAbsolutePath(), aweClientDir, awePort, fvServiceDir);
+        startupAweClient(new File(aweBinDir, "awe-client").getAbsolutePath(), aweClientDir, awePort, binDir);
         token = getToken();
         client = new KBaseFeatureValuesClient(new URL("http://localhost:" + jobServicePort), token);
         client.setIsInsecureHttpConnectionAllowed(true);
@@ -436,7 +436,7 @@ public class AweIntegrationTest {
 
     @SuppressWarnings("unchecked")
     private static int startupAweClient(String aweClientExePath, File dir, int aweServerPort, 
-            File fvServiceDir) throws Exception {
+            File binDir) throws Exception {
         if (aweClientExePath == null) {
             aweClientExePath = "awe-client";
         }
@@ -473,7 +473,7 @@ public class AweIntegrationTest {
         writeFileLines(Arrays.asList(
                 "#!/bin/bash",
                 "cd " + dir.getAbsolutePath(),
-                "export PATH=" + fvServiceDir.getAbsolutePath() + ":$PATH",
+                "export PATH=" + binDir.getAbsolutePath() + ":$PATH",
                 aweClientExePath + " --conf " + configFile.getAbsolutePath() + " >out.txt 2>err.txt & pid=$!",
                 "echo $pid > pid.txt"
                 ), scriptFile);
@@ -557,13 +557,13 @@ public class AweIntegrationTest {
                 KBaseFeatureValuesServer.CONFIG_PARAM_CLIENT_BIN_DIR + "=" + binDir.getAbsolutePath(),
                 KBaseFeatureValuesServer.CONFIG_PARAM_WS_URL + "=" + getWsUrl()
                 ), configFile);
-        File jobServiceCLI = new File(dir, KBaseFeatureValuesServer.AWE_CLIENT_SCRIPT_NAME);
+        /*File jobServiceCLI = new File(dir, KBaseFeatureValuesServer.AWE_CLIENT_SCRIPT_NAME);
         writeFileLines(Arrays.asList(
                 "#!/bin/bash",
                 "java -cp " + System.getProperty("java.class.path") + 
                     " us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1"
                 ), jobServiceCLI);
-        ProcessHelper.cmd("chmod", "a+x", jobServiceCLI.getAbsolutePath()).exec(dir);
+        ProcessHelper.cmd("chmod", "a+x", jobServiceCLI.getAbsolutePath()).exec(dir);*/
         System.setProperty("KB_DEPLOYMENT_CONFIG", configFile.getAbsolutePath());
         Server jettyServer = new Server(port);
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);

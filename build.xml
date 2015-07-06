@@ -6,9 +6,12 @@
   <property name="lib"     location="${env.KB_TOP}/modules/jars/lib/jars/"/>
   <property name="module"  value="KBaseFeatureValues"/>
   <property name="jar.file" value="${module}.jar"/>
+  <property name="cmd.file" value="awe_KBaseFeatureValues_run_job.sh"/>
+  <property name="jardir" location="../jars/lib/jars"/>
+  <property name="bindir" location="./bin"/>
 
   <path id="compile.classpath">
-    <fileset dir="${lib}">
+    <fileset dir="${jardir}">
       <include name="jackson/jackson-annotations-2.2.3.jar"/>
       <include name="jackson/jackson-core-2.2.3.jar"/>
       <include name="jackson/jackson-databind-2.2.3.jar"/>
@@ -44,6 +47,28 @@
       </manifest>
     </jar>
     <delete dir="${classes}"/>
+    <!-- Make shell file for AWE -->
+    <property name="jar.absolute.path" location="${dist}/${jar.file}"/>
+    <pathconvert targetos="unix" property="lib.classpath" refid="compile.classpath"/>
+    <echo file="${bindir}/${cmd.file}">#!/bin/sh
+export JAVA_HOME=${env.JAVA_HOME}
+export PATH=${env.JAVA_HOME}/bin:$PATH
+java -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
+    </echo>
+    <chmod file="${bindir}/${cmd.file}" perm="a+x"/>
+  </target>
+
+  <target name="deploy" depends="compile" description="deploy scripts and war">
+    <copy file="${dist}/${jar.file}" todir="${jardir}"/>
+    <!-- Make shell file for AWE -->
+    <property name="jar.absolute.path" location="${jardir}/${jar.file}"/>
+    <pathconvert targetos="unix" property="lib.classpath" refid="compile.classpath"/>
+    <echo file="${bindir}/${cmd.file}">#!/bin/sh
+export JAVA_HOME=${env.JAVA_HOME}
+export PATH=${env.JAVA_HOME}/bin:$PATH
+java -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
+    </echo>
+    <chmod file="${bindir}/${cmd.file}" perm="a+x"/>
   </target>
 
   <target name="preparejunitreportdir" if="env.JENKINS_REPORT_DIR">
