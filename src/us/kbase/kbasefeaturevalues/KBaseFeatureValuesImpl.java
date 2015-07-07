@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import us.kbase.auth.AuthToken;
-import us.kbase.clusterservice.ClusterFloatRowsKmeansParams;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
@@ -91,9 +90,7 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(params.getInputData()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        ClusterResults res = mathClient.clusterFloatRowsKmeans(
-                new ClusterFloatRowsKmeansParams().withInputData(matrix.getData())
-                .withK(params.getK()));
+        ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK());
         System.out.println("Cluster labels: " + res.getClusterLabels());
         List<Map<String, Long>> featureClusters = new ArrayList<Map<String, Long>>();
         Map<Long, Map<String, Long>> labelToCluster = new LinkedHashMap<Long, Map<String, Long>>();

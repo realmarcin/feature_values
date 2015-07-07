@@ -6,18 +6,11 @@ library(amap)
 
 methods <- list()
 
-methods[["ClusterServiceR.cluster_float_rows_kmeans"]] <- function(params) {
-    k <- params[["k"]]
-    #print(k)
-    input_data <- params[["input_data"]]
-    values <- input_data[["values"]]
-    #print(values)
-    row_ids <- input_data[["row_ids"]]
-    #print(row_ids)
-    col_ids <- input_data[["col_ids"]]
-    #print(col_ids)
+methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k) {
+    values <- matrix[["values"]]
+    #row_ids <- matrix[["row_ids"]]
+    #col_ids <- matrix[["col_ids"]]
     km <- kmeans(values, k, iter.max = 1000, nstart=1000,algorithm="Lloyd")
-    #print(km)
     list(cluster_labels=km[["cluster"]])
 }
 

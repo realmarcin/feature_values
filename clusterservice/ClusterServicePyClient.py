@@ -170,10 +170,31 @@ class ClusterServicePy(object):
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
  
-    def cluster_float_rows_kmeans(self, params, json_rpc_context = None):
+    def cluster_k_means(self, matrix, k, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method cluster_float_rows_kmeans: argument json_rpc_context is not type dict as required.')
-        resp = self._call('ClusterServicePy.cluster_float_rows_kmeans',
-                          [params], json_rpc_context)
+            raise ValueError('Method cluster_k_means: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.cluster_k_means',
+                          [matrix, k], json_rpc_context)
+        return resp[0]
+  
+    def estimate_k(self, matrix, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method estimate_k: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.estimate_k',
+                          [matrix], json_rpc_context)
+        return resp[0]
+  
+    def cluster_hierarchical(self, matrix, distance_metric, linkage_criteria, feature_height_cutoff, condition_height_cutoff, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method cluster_hierarchical: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.cluster_hierarchical',
+                          [matrix, distance_metric, linkage_criteria, feature_height_cutoff, condition_height_cutoff], json_rpc_context)
+        return resp[0]
+  
+    def clusters_from_dendrogram(self, feature_height_cutoff, condition_height_cutoff, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method clusters_from_dendrogram: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.clusters_from_dendrogram',
+                          [feature_height_cutoff, condition_height_cutoff], json_rpc_context)
         return resp[0]
  

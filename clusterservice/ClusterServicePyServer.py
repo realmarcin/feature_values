@@ -265,9 +265,18 @@ class Application(object):
             call_id=True, logfile=self.userlog.get_log_file())
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
-        self.rpc_service.add(impl_ClusterServicePy.cluster_float_rows_kmeans,
-                             name='ClusterServicePy.cluster_float_rows_kmeans',
+        self.rpc_service.add(impl_ClusterServicePy.cluster_k_means,
+                             name='ClusterServicePy.cluster_k_means',
+                             types=[dict, int])
+        self.rpc_service.add(impl_ClusterServicePy.estimate_k,
+                             name='ClusterServicePy.estimate_k',
                              types=[dict])
+        self.rpc_service.add(impl_ClusterServicePy.cluster_hierarchical,
+                             name='ClusterServicePy.cluster_hierarchical',
+                             types=[dict, basestring, basestring, float, float])
+        self.rpc_service.add(impl_ClusterServicePy.clusters_from_dendrogram,
+                             name='ClusterServicePy.clusters_from_dendrogram',
+                             types=[float, float])
 
     def __call__(self, environ, start_response):
         # Context object, equivalent to the perl impl CallContext

@@ -13,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.kbase.clusterservice.ClusterFloatRowsKmeansParams;
 import us.kbase.clusterservice.ClusterServicePyLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
 import us.kbase.common.service.ServerException;
@@ -30,9 +29,8 @@ public class ClusterServiceTest {
         ClusterServicePyLocalClient cl = new ClusterServicePyLocalClient(workDir);
         cl.setBinDir(new File("bin"));
         try {
-            List<Long> clusterLabels = cl.clusterFloatRowsKmeans(
-                    new ClusterFloatRowsKmeansParams().withInputData(
-                            getSampleMatrix()).withK(3L)).getClusterLabels();
+            List<Long> clusterLabels = cl.clusterKMeans(
+                    getSampleMatrix(), 3L).getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
         } catch (ServerException ex) {
@@ -49,9 +47,7 @@ public class ClusterServiceTest {
         cl.setBinDir(new File("bin"));
         FloatMatrix2D matrix = getSampleMatrix();
         try {
-            List<Long> clusterLabels = cl.clusterFloatRowsKmeans(
-                    new ClusterFloatRowsKmeansParams().withInputData(
-                            matrix).withK(3L)).getClusterLabels();
+            List<Long> clusterLabels = cl.clusterKMeans(matrix, 3L).getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
             long k = cl.estimateK(matrix);

@@ -28,20 +28,59 @@ class ClusterServicePy:
         #END_CONSTRUCTOR
         pass
 
-    def cluster_float_rows_kmeans(self, ctx, params):
+    def cluster_k_means(self, ctx, matrix, k):
         # ctx is the context object
         # return variables are: returnVal
-        #BEGIN cluster_float_rows_kmeans
-        matrix = params['input_data']['values']
-        k_means = cl.KMeans(init='k-means++', n_clusters=params['k'], n_init=10)
-        k_means.fit(matrix)
+        #BEGIN cluster_k_means
+        values = matrix['values']
+        k_means = cl.KMeans(init='k-means++', n_clusters=k, n_init=10)
+        k_means.fit(values)
         k_means_labels = k_means.labels_.tolist()
         returnVal = {'cluster_labels': k_means_labels}
-        #END cluster_float_rows_kmeans
+        #END cluster_k_means
 
         # At some point might do deeper type checking...
         if not isinstance(returnVal, dict):
-            raise ValueError('Method cluster_float_rows_kmeans return value ' +
+            raise ValueError('Method cluster_k_means return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
+    def estimate_k(self, ctx, matrix):
+        # ctx is the context object
+        # return variables are: cluster_number
+        #BEGIN estimate_k
+        #END estimate_k
+
+        # At some point might do deeper type checking...
+        if not isinstance(cluster_number, int):
+            raise ValueError('Method estimate_k return value ' +
+                             'cluster_number is not type int as required.')
+        # return the results
+        return [cluster_number]
+
+    def cluster_hierarchical(self, ctx, matrix, distance_metric, linkage_criteria, feature_height_cutoff, condition_height_cutoff):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN cluster_hierarchical
+        #END cluster_hierarchical
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method cluster_hierarchical return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
+    def clusters_from_dendrogram(self, ctx, feature_height_cutoff, condition_height_cutoff):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN clusters_from_dendrogram
+        #END clusters_from_dendrogram
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method clusters_from_dendrogram return value ' +
                              'returnVal is not type dict as required.')
         # return the results
         return [returnVal]
