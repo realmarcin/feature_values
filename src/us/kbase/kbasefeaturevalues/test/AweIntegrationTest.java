@@ -64,6 +64,7 @@ public class AweIntegrationTest {
     
     private static int mongoInitWaitSeconds = 240;
     private static int aweServerInitWaitSeconds = 60;
+    private static int fvJobWaitSeconds = 60;
 
     
     @BeforeClass
@@ -85,10 +86,10 @@ public class AweIntegrationTest {
         int mongoPort = startupMongo(System.getProperty("test.mongod.path"), mongoDir);
         //int shockPort = startupShock(System.getProperty("shock.path"), shockDir, mongoPort);
         File aweBinDir = new File("./test/deps/bin").getCanonicalFile();
-        int awePort = startupAweServer(new File(aweBinDir, "awe-server").getAbsolutePath(), aweServerDir, mongoPort);
+        int awePort = startupAweServer(findAweBinary(aweBinDir, "awe-server"), aweServerDir, mongoPort);
         fvService = startupFVService(fvServiceDir, binDir, awePort);
         int jobServicePort = fvService.getConnectors()[0].getLocalPort();
-        startupAweClient(new File(aweBinDir, "awe-client").getAbsolutePath(), aweClientDir, awePort, binDir);
+        startupAweClient(findAweBinary(aweBinDir, "awe-client"), aweClientDir, awePort, binDir);
         token = getToken();
         client = new KBaseFeatureValuesClient(new URL("http://localhost:" + jobServicePort), token);
         client.setIsInsecureHttpConnectionAllowed(true);
@@ -110,6 +111,12 @@ public class AweIntegrationTest {
         }
         if (error != null)
             throw error;
+    }
+    
+    private static String findAweBinary(File dir, String program) throws Exception {
+        if (new File(dir, program).exists())
+            return new File(dir, program).getAbsolutePath();
+        return program;
     }
     
     @AfterClass
@@ -199,7 +206,7 @@ public class AweIntegrationTest {
         UserAndJobStateClient jscl = new UserAndJobStateClient(new URL(getUjsUrl()), token);
         jscl.setAllSSLCertificatesTrusted(true);
         jscl.setIsInsecureHttpConnectionAllowed(true);
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < fvJobWaitSeconds; i++) {
             Thread.sleep(1000);
             Tuple7<String, String, String, Long, String, Long, Long> data = jscl.getJobStatus(jobId);
             //System.out.println("Job status: " + data);
@@ -214,7 +221,7 @@ public class AweIntegrationTest {
                 }
             }
         }
-        throw new IllegalStateException("Job wasn't finished in 30 seconds");
+        throw new IllegalStateException("Job wasn't finished in " + fvJobWaitSeconds + " seconds");
     }
 
     private static AuthToken getToken() throws AuthException, IOException {

@@ -36,9 +36,28 @@ RUN pip install scikit-learn
 RUN pip install scipy
 RUN apt-get install -y mongodb
 WORKDIR /kb/dev_container/modules
+######################### AWE binaries
+RUN git clone https://github.com/kbase/awe_service
+WORKDIR /kb/dev_container/modules/awe_service
+RUN mkdir bin
+RUN mkdir gopath
+ENV GOPATH /kb/dev_container/modules/awe_service/gopath
+RUN mkdir -p $GOPATH/src/github.com/MG-RAST
+RUN git submodule init
+RUN git submodule update
+RUN cp -r AWE $GOPATH/src/github.com/MG-RAST/
+RUN mkdir -p $GOPATH/src/github.com/docker
+RUN wget -O $GOPATH/src/github.com/docker/docker.zip https://github.com/docker/docker/archive/v1.6.1.zip
+RUN unzip -d $GOPATH/src/github.com/docker $GOPATH/src/github.com/docker/docker.zip
+RUN mv -v $GOPATH/src/github.com/docker/docker-1.6.1 $GOPATH/src/github.com/docker/docker
+RUN go get -v github.com/MG-RAST/AWE/...
+RUN cp $GOPATH/bin/awe-server /kb/runtime/bin/
+RUN cp $GOPATH/bin/awe-client /kb/runtime/bin/
+######################### Feature values module
+RUN R -e 'if(!require(clValid)) install.packages("clValid", repos="http://cran.us.r-project.org")'
+RUN R -e 'if(!require(sp)) install.packages("sp", repos="http://cran.us.r-project.org")'
+WORKDIR /kb/dev_container/modules
 RUN mkdir feature_values
 COPY . /kb/dev_container/modules/feature_values/
 WORKDIR /kb/dev_container/modules/feature_values
-RUN bash ./deps/integration_tests.sh
-RUN bash ./deps/r_lang.sh
 CMD make test

@@ -1,4 +1,7 @@
 #!/bin/bash
+if [[ -n "$(which awe-server)" && -n "$(which awe-client)" ]]; then
+	exit 0
+fi
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # "
 TEMP_TEST_DEPS_DIR=$DIR/../test/deps
 if [[ -f $TEMP_TEST_DEPS_DIR/bin/awe-server && -f $TEMP_TEST_DEPS_DIR/bin/awe-client ]]; then
