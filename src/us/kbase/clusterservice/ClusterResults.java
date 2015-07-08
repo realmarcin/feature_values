@@ -17,7 +17,9 @@ import us.kbase.kbasefeaturevalues.AnalysisReport;
  * <p>Original spec-file type: ClusterResults</p>
  * <pre>
  * clusters - set of lists consisting of positions of rows from original
- *     array.
+ *     matrix;
+ * dendrogram - tree in Newick format (node names are positions of 
+ *     rows from original matrix).
  * </pre>
  * 
  */
@@ -25,7 +27,8 @@ import us.kbase.kbasefeaturevalues.AnalysisReport;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "report",
-    "cluster_labels"
+    "cluster_labels",
+    "dendrogram"
 })
 public class ClusterResults {
 
@@ -42,6 +45,8 @@ public class ClusterResults {
     private AnalysisReport report;
     @JsonProperty("cluster_labels")
     private List<Long> clusterLabels;
+    @JsonProperty("dendrogram")
+    private String dendrogram;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
@@ -92,6 +97,21 @@ public class ClusterResults {
         return this;
     }
 
+    @JsonProperty("dendrogram")
+    public String getDendrogram() {
+        return dendrogram;
+    }
+
+    @JsonProperty("dendrogram")
+    public void setDendrogram(String dendrogram) {
+        this.dendrogram = dendrogram;
+    }
+
+    public ClusterResults withDendrogram(String dendrogram) {
+        this.dendrogram = dendrogram;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -104,7 +124,7 @@ public class ClusterResults {
 
     @Override
     public String toString() {
-        return ((((((("ClusterResults"+" [report=")+ report)+", clusterLabels=")+ clusterLabels)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("ClusterResults"+" [report=")+ report)+", clusterLabels=")+ clusterLabels)+", dendrogram=")+ dendrogram)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

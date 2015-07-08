@@ -273,10 +273,10 @@ class Application(object):
                              types=[dict])
         self.rpc_service.add(impl_ClusterServicePy.cluster_hierarchical,
                              name='ClusterServicePy.cluster_hierarchical',
-                             types=[dict, basestring, basestring, float, float])
+                             types=[dict, basestring, basestring, float, int])
         self.rpc_service.add(impl_ClusterServicePy.clusters_from_dendrogram,
                              name='ClusterServicePy.clusters_from_dendrogram',
-                             types=[float, float])
+                             types=[basestring, float])
 
     def __call__(self, environ, start_response):
         # Context object, equivalent to the perl impl CallContext

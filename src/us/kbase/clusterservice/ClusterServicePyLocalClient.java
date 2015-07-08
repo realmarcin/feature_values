@@ -69,19 +69,19 @@ public class ClusterServicePyLocalClient extends JsonLocalClientCaller implement
      * @param   matrix   instance of type {@link us.kbase.kbasefeaturevalues.FloatMatrix2D FloatMatrix2D}
      * @param   distanceMetric   instance of String
      * @param   linkageCriteria   instance of String
-     * @param   featureHeightCutoff   instance of Double
-     * @param   conditionHeightCutoff   instance of Double
+     * @param   heightCutoff   instance of Double
+     * @param   processRows   instance of original type "boolean" (Indicates true or false values, false = 0, true = 1 @range [0,1])
      * @return   instance of type {@link us.kbase.clusterservicepy.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double featureHeightCutoff, Double conditionHeightCutoff) throws IOException, JsonClientException {
+    public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
         args.add(distanceMetric);
         args.add(linkageCriteria);
-        args.add(featureHeightCutoff);
-        args.add(conditionHeightCutoff);
+        args.add(heightCutoff);
+        args.add(processRows);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
         List<ClusterResults> res = jsonrpcCall("ClusterServicePy.cluster_hierarchical", args, retType, true, false);
         return res.get(0);
@@ -94,16 +94,16 @@ public class ClusterServicePyLocalClient extends JsonLocalClientCaller implement
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>
-     * @param   featureHeightCutoff   instance of Double
-     * @param   conditionHeightCutoff   instance of Double
+     * @param   dendrogram   instance of String
+     * @param   heightCutoff   instance of Double
      * @return   instance of type {@link us.kbase.clusterservicepy.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clustersFromDendrogram(Double featureHeightCutoff, Double conditionHeightCutoff) throws IOException, JsonClientException {
+    public ClusterResults clustersFromDendrogram(String dendrogram, Double heightCutoff) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
-        args.add(featureHeightCutoff);
-        args.add(conditionHeightCutoff);
+        args.add(dendrogram);
+        args.add(heightCutoff);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
         List<ClusterResults> res = jsonrpcCall("ClusterServicePy.clusters_from_dendrogram", args, retType, true, false);
         return res.get(0);

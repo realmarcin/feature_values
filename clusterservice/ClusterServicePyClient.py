@@ -184,17 +184,17 @@ class ClusterServicePy(object):
                           [matrix], json_rpc_context)
         return resp[0]
   
-    def cluster_hierarchical(self, matrix, distance_metric, linkage_criteria, feature_height_cutoff, condition_height_cutoff, json_rpc_context = None):
+    def cluster_hierarchical(self, matrix, distance_metric, linkage_criteria, height_cutoff, process_rows, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method cluster_hierarchical: argument json_rpc_context is not type dict as required.')
         resp = self._call('ClusterServicePy.cluster_hierarchical',
-                          [matrix, distance_metric, linkage_criteria, feature_height_cutoff, condition_height_cutoff], json_rpc_context)
+                          [matrix, distance_metric, linkage_criteria, height_cutoff, process_rows], json_rpc_context)
         return resp[0]
   
-    def clusters_from_dendrogram(self, feature_height_cutoff, condition_height_cutoff, json_rpc_context = None):
+    def clusters_from_dendrogram(self, dendrogram, height_cutoff, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method clusters_from_dendrogram: argument json_rpc_context is not type dict as required.')
         resp = self._call('ClusterServicePy.clusters_from_dendrogram',
-                          [feature_height_cutoff, condition_height_cutoff], json_rpc_context)
+                          [dendrogram, height_cutoff], json_rpc_context)
         return resp[0]
  

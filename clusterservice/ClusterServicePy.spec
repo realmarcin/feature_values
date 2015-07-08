@@ -3,12 +3,21 @@
 module ClusterServicePy {
 
     /*
+        Indicates true or false values, false = 0, true = 1
+        @range [0,1]
+    */
+    typedef int boolean;
+
+    /*
         clusters - set of lists consisting of positions of rows from original
-            array.
+            matrix;
+        dendrogram - tree in Newick format (node names are positions of 
+            rows from original matrix).
     */
     typedef structure {
         KBaseFeatureValues.AnalysisReport report;
         list<int> cluster_labels;
+        string dendrogram;
     } ClusterResults;
 
     /*
@@ -29,7 +38,7 @@ module ClusterServicePy {
     */
     funcdef cluster_hierarchical(KBaseFeatureValues.FloatMatrix2D matrix, 
         string distance_metric, string linkage_criteria,
-        float feature_height_cutoff, float condition_height_cutoff)
+        float height_cutoff, boolean process_rows)
         returns (ClusterResults);
 
     /*
@@ -37,7 +46,7 @@ module ClusterServicePy {
         method, this function creates new clusters by cutting the dendogram at
         a specific hieght or by some other approach.
     */
-    funcdef clusters_from_dendrogram(float feature_height_cutoff,
-        float condition_height_cutoff) returns (ClusterResults);
+    funcdef clusters_from_dendrogram(string dendrogram,
+        float height_cutoff) returns (ClusterResults);
 
 };

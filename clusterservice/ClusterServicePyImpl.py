@@ -59,7 +59,7 @@ class ClusterServicePy:
         # return the results
         return [cluster_number]
 
-    def cluster_hierarchical(self, ctx, matrix, distance_metric, linkage_criteria, feature_height_cutoff, condition_height_cutoff):
+    def cluster_hierarchical(self, ctx, matrix, distance_metric, linkage_criteria, height_cutoff, process_rows):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN cluster_hierarchical
@@ -72,7 +72,7 @@ class ClusterServicePy:
         # return the results
         return [returnVal]
 
-    def clusters_from_dendrogram(self, ctx, feature_height_cutoff, condition_height_cutoff):
+    def clusters_from_dendrogram(self, ctx, dendrogram, height_cutoff):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN clusters_from_dendrogram
