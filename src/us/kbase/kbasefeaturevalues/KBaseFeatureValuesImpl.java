@@ -81,8 +81,26 @@ public class KBaseFeatureValuesImpl {
         return mathClient;
     }
     
-    public void estimateK(EstimateKParams params) throws Exception {
-        throw new IllegalStateException("Not yet implemented");
+    public String estimateK(EstimateKParams params) throws Exception {
+        ObjectData objData = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withRef(params.getInputMatrix()))).get(0);
+        BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
+        ClusterServiceLocalClient mathClient = getMathClient();
+        Long bestK = mathClient.estimateK(matrix.getData());
+        EstimateKResult toSave = new EstimateKResult().withBestK(bestK)
+                .withEstimateClusterSizes(new HashMap<Long, Double>());
+        List<ProvenanceAction> provenance = Arrays.asList(
+                new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
+                .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
+                .withDescription("K estimation for K-Means clustering method")
+                .withInputWsObjects(Arrays.asList(params.getInputMatrix()))
+                .withMethod("estimate_k")
+                .withMethodParams(Arrays.asList(new UObject(params))));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
+                .withObjects(Arrays.asList(new ObjectSaveData()
+                .withType("KBaseFeatureValues.EstimateKResult").withName(params.getOutEstimateResult())
+                .withData(new UObject(toSave)).withProvenance(provenance))));
+        return params.getOutWorkspace() + "/" + params.getOutEstimateResult();
     }
 
     public String clusterKMeans(ClusterKMeansParams params) throws Exception {
@@ -91,22 +109,8 @@ public class KBaseFeatureValuesImpl {
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
         ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK());
-        System.out.println("Cluster labels: " + res.getClusterLabels());
-        List<Map<String, Long>> featureClusters = new ArrayList<Map<String, Long>>();
-        Map<Long, Map<String, Long>> labelToCluster = new LinkedHashMap<Long, Map<String, Long>>();
-        ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData())
-                .withFeatureClusters(featureClusters);
-        for (int featurePos = 0; featurePos < res.getClusterLabels().size(); featurePos++) {
-            long clusterLabel = res.getClusterLabels().get(featurePos);
-            Map<String, Long> cluster = labelToCluster.get(clusterLabel);
-            if (cluster == null) {
-                cluster = new LinkedHashMap<String, Long>();
-                labelToCluster.put(clusterLabel, cluster);
-                featureClusters.add(cluster);
-            }
-            String featureLabel = matrix.getData().getRowIds().get(featurePos);
-            cluster.put(featureLabel, (long)featurePos);
-        }
+        ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData());
+        toSave.withFeatureClusters(clustersFromLabels(matrix, res));
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
                 .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
@@ -121,12 +125,72 @@ public class KBaseFeatureValuesImpl {
         return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }
 
-    public void clusterHierarchical(ClusterHierarchicalParams params) throws Exception {
-        throw new IllegalStateException("Not yet implemented");
+    public List<Map<String, Long>> clustersFromLabels(BioMatrix matrix, ClusterResults res) {
+        Map<Long, Map<String, Long>> labelToCluster = new LinkedHashMap<Long, Map<String, Long>>();
+        List<Map<String, Long>> featureClusters = new ArrayList<Map<String, Long>>();
+        for (int featurePos = 0; featurePos < res.getClusterLabels().size(); featurePos++) {
+            long clusterLabel = res.getClusterLabels().get(featurePos);
+            Map<String, Long> cluster = labelToCluster.get(clusterLabel);
+            if (cluster == null) {
+                cluster = new LinkedHashMap<String, Long>();
+                labelToCluster.put(clusterLabel, cluster);
+                featureClusters.add(cluster);
+            }
+            String featureLabel = matrix.getData().getRowIds().get(featurePos);
+            cluster.put(featureLabel, (long)featurePos);
+        }
+        return featureClusters;
     }
 
-    public void clustersFromDendrogram(ClustersFromDendrogramParams params) throws Exception {
-        throw new IllegalStateException("Not yet implemented");
+    public String clusterHierarchical(ClusterHierarchicalParams params) throws Exception {
+        ObjectData objData = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withRef(params.getInputData()))).get(0);
+        BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
+        ClusterServiceLocalClient mathClient = getMathClient();
+        ClusterResults res = mathClient.clusterHierarchical(matrix.getData(), params.getDistanceMetric(), 
+                params.getLinkageCriteria(), params.getFeatureHeightCutoff(), 1L);
+        ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData())
+                .withFeatureClusters(clustersFromLabels(matrix, res))
+                .withFeatureDendrogram(res.getDendrogram());
+        List<ProvenanceAction> provenance = Arrays.asList(
+                new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
+                .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
+                .withDescription("Hierarchical clustering method")
+                .withInputWsObjects(Arrays.asList(params.getInputData()))
+                .withMethod("cluster_hierarchical")
+                .withMethodParams(Arrays.asList(new UObject(params))));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
+                .withObjects(Arrays.asList(new ObjectSaveData()
+                .withType("KBaseFeatureValues.ClusterSet").withName(params.getOutClustersetId())
+                .withData(new UObject(toSave)).withProvenance(provenance))));
+        return params.getOutWorkspace() + "/" + params.getOutClustersetId();
+    }
+
+    public String clustersFromDendrogram(ClustersFromDendrogramParams params) throws Exception {
+        ObjectData objData = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withRef(params.getInputData()))).get(0);
+        ClusterSet input = objData.getData().asClassInstance(ClusterSet.class);
+        ObjectData objData2 = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withRef(input.getOriginalData()))).get(0);
+        BioMatrix matrix = objData2.getData().asClassInstance(BioMatrix.class);
+        ClusterServiceLocalClient mathClient = getMathClient();
+        ClusterResults res = mathClient.clustersFromDendrogram(input.getFeatureDendrogram(), 
+                params.getFeatureHeightCutoff());
+        ClusterSet toSave = new ClusterSet().withOriginalData(input.getOriginalData())
+                .withFeatureClusters(clustersFromLabels(matrix, res))
+                .withFeatureDendrogram(res.getDendrogram());
+        List<ProvenanceAction> provenance = Arrays.asList(
+                new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
+                .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
+                .withDescription("Clusters from dendrogram")
+                .withInputWsObjects(Arrays.asList(params.getInputData()))
+                .withMethod("clusters_from_dendrogram")
+                .withMethodParams(Arrays.asList(new UObject(params))));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
+                .withObjects(Arrays.asList(new ObjectSaveData()
+                .withType("KBaseFeatureValues.ClusterSet").withName(params.getOutClustersetId())
+                .withData(new UObject(toSave)).withProvenance(provenance))));
+        return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }
 
     public void evaluateClustersetQuality(EvaluateClustersetQualityParams params) throws Exception {

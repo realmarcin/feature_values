@@ -35,8 +35,12 @@ import us.kbase.common.service.Tuple7;
 import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
 import us.kbase.common.utils.ProcessHelper;
+import us.kbase.kbasefeaturevalues.ClusterHierarchicalParams;
 import us.kbase.kbasefeaturevalues.ClusterKMeansParams;
 import us.kbase.kbasefeaturevalues.ClusterSet;
+import us.kbase.kbasefeaturevalues.ClustersFromDendrogramParams;
+import us.kbase.kbasefeaturevalues.EstimateKParams;
+import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
@@ -145,30 +149,60 @@ public class AweIntegrationTest {
     public void testClusterKMeans() throws Exception {
         WorkspaceClient wscl = getWsClient();
         String exprObjName = "expression1";
-        String clustObjName = "clusters1";
+        String estimObjName = "estimate1";
+        String clustObj1Name = "clusters1";
+        String clustObj2Name = "clusters2";
+        String clustObj3Name = "clusters3";
         ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
                 .withData(getSampleMatrix());
         wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
                 new ObjectSaveData().withName(exprObjName).withType("KBaseFeatureValues.ExpressionMatrix")
                 .withData(new UObject(data)))));
-        String jobId = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
-                exprObjName).withK(3L).withOutWorkspace(testWsName).withOutClustersetId(clustObjName));
-        waitForJob(jobId);
-        ObjectData res = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
-                .withName(clustObjName))).get(0);
-        ClusterSet clSet = res.getData().asClassInstance(ClusterSet.class);
-        System.out.println(clSet.getFeatureClusters());
+        /////////////// estimate K /////////////////
+        String jobId1 = client.estimateK(new EstimateKParams().withInputMatrix(testWsName + "/" + 
+                exprObjName).withOutWorkspace(testWsName).withOutEstimateResult(estimObjName));
+        waitForJob(jobId1);
+        ObjectData res1 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(estimObjName))).get(0);
+        EstimateKResult estKRes = res1.getData().asClassInstance(EstimateKResult.class);
+        long k = estKRes.getBestK();
+        System.out.println("Best K: " + k);
+        /////////////// K-means /////////////////
+        String jobId2 = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
+                exprObjName).withK(k).withOutWorkspace(testWsName).withOutClustersetId(clustObj1Name));
+        waitForJob(jobId2);
+        ObjectData res2 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObj1Name))).get(0);
+        ClusterSet clSet2 = res2.getData().asClassInstance(ClusterSet.class);
+        System.out.println("K-means: " + clSet2.getFeatureClusters());
+        /////////////// Hierarchikal /////////////////
+        String jobId3 = client.clusterHierarchical(new ClusterHierarchicalParams().withInputData(testWsName + "/" + 
+                exprObjName).withFeatureHeightCutoff(0.5).withOutWorkspace(testWsName).withOutClustersetId(clustObj2Name));
+        waitForJob(jobId3);
+        ObjectData res3 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObj2Name))).get(0);
+        ClusterSet clSet3 = res3.getData().asClassInstance(ClusterSet.class);
+        System.out.println("Hierarchical: " + clSet3.getFeatureClusters());
+        System.out.println("Hierarchical: " + clSet3.getFeatureDendrogram());
+        /////////////// From dendrogram /////////////////
+        String jobId4 = client.clustersFromDendrogram(new ClustersFromDendrogramParams().withInputData(testWsName + "/" + 
+                clustObj2Name).withFeatureHeightCutoff(0.2).withOutWorkspace(testWsName).withOutClustersetId(clustObj3Name));
+        waitForJob(jobId4);
+        ObjectData res4 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObj3Name))).get(0);
+        ClusterSet clSet4 = res4.getData().asClassInstance(ClusterSet.class);
+        System.out.println("From dendrogram: " + clSet4.getFeatureClusters());        
     }
 
     private static FloatMatrix2D getSampleMatrix() {
         List<List<Double>> values = new ArrayList<List<Double>>();
-        values.add(Arrays.asList(1.0, 2.0, 3.0));
-        values.add(Arrays.asList(0.9, 1.9, 2.9));
-        values.add(Arrays.asList(1.4, 2.4, 3.4));
-        values.add(Arrays.asList(1.5, 2.5, 3.5));
-        values.add(Arrays.asList(-1.0, -2.0, -3.0));
-        values.add(Arrays.asList(-1.2, -2.2, -3.2));
-        values.add(Arrays.asList(-1.1, -2.1, -3.1));
+        values.add(Arrays.asList(13.0, 2.0, 3.0));
+        values.add(Arrays.asList(10.9, 1.95, 2.9));
+        values.add(Arrays.asList(2.45, 13.4, 4.4));
+        values.add(Arrays.asList(2.5, 11.5, 3.55));
+        values.add(Arrays.asList(-1.05, -2.0, -14.0));
+        values.add(Arrays.asList(-1.2, -2.25, -13.2));
+        values.add(Arrays.asList(-1.1, -2.1, -15.15));
         return new FloatMatrix2D().withValues(values)
                 .withRowIds(Arrays.asList("g1", "g2", "g3", "g4", "g5", "g6", "g7"))
                 .withColIds(Arrays.asList("c1", "c2", "c3"));

@@ -74,7 +74,10 @@ public class KBaseFeatureValuesScript {
             ex.printStackTrace(pw);
             pw.close();
             String stacktrace = sw.toString();
-            ujsClient.completeJob(jobId, token, "Error: " + ex.getMessage(), stacktrace, null);
+            String status = "Error: " + ex.getMessage();
+            if (status.length() > 200)
+                status = status.substring(0, 197) + "...";
+            ujsClient.completeJob(jobId, token, status, stacktrace, null);
         }
     }
 }

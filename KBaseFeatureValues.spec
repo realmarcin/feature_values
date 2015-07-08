@@ -264,7 +264,7 @@ module KBaseFeatureValues {
     typedef structure {
         float feature_height_cutoff;
         float condition_height_cutoff;
-        ws_matrix_id input_data;
+        ws_clusterset_id input_data;
         string out_workspace;
         string out_clusterset_id;
     } ClustersFromDendrogramParams;
