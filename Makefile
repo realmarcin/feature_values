@@ -3,7 +3,7 @@ DIR = $(shell pwd)
 LOCAL_BIN = $(DIR)/bin
 BIN = $(TARGET)/bin
 SERVICE_NAME = KBaseFeatureValues
-ASYNC_JOB_SCRIPT_NAME = run_KBaseFeatureValues_async_job.sh
+SUB_SERVICE_LOCAL_DIR = $(DIR)/clusterservice
 SUB1_SERVICE_NAME = ClusterServicePy
 SUB1_ASYNC_JOB_SCRIPT_FILE = run_ClusterServicePy_async_job.sh
 SUB2_SERVICE_NAME = ClusterServiceR
@@ -11,6 +11,7 @@ SUB2_ASYNC_JOB_SCRIPT_FILE = run_ClusterServiceR_async_job.sh
 ANT = ant
 TESTCFG ?= test.cfg
 SERVICE_DIR = $(TARGET)/services/$(SERVICE_NAME)
+SUB_SERVICE_DIR = $(SERVICE_DIR)/clusterservice
 KB_RUNTIME ?= /kb/runtime
 JAVA_HOME ?= $(KB_RUNTIME)/java
 SERVICE_PORT = 8082
@@ -25,17 +26,17 @@ compile:
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PYTHONPATH=$$KB_TOP/lib:$$PYTHONPATH' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
-	echo 'cd $(DIR)/clusterservice' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
+	echo 'cd $(SUB_SERVICE_LOCAL_DIR)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'python $(SUB1_SERVICE_NAME)Server.py $$1 $$2 $$3' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo '#!/bin/bash' > $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_TOP=$(TARGET)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	echo 'cd $(DIR)/clusterservice' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	echo 'cd $(SUB_SERVICE_LOCAL_DIR)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'Rscript $(SUB2_SERVICE_NAME)Impl.r $$1 $$2' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	$(ANT) compile -Djardir=$(DIR)/../jars/lib/jars -Dbindir=$(LOCAL_BIN)
+	$(ANT) compile -Djardir=$(DIR)/../jars/lib/jars -Dbindir=$(LOCAL_BIN) -Djava.home=$(JAVA_HOME)
 
 deploy: deploy-client deploy-service deploy-scripts
 
@@ -70,23 +71,23 @@ deploy-service: deploy-scripts
 
 deploy-scripts:
 	mkdir -p $(SERVICE_DIR)
-	cp -r $(DIR)/clusterservice $(SERVICE_DIR)/
+	cp -r $(SUB_SERVICE_LOCAL_DIR) $(SERVICE_DIR)/
 	echo '#!/bin/bash' > $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_TOP=$(TARGET)' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PYTHONPATH=$$KB_TOP/lib:$$PYTHONPATH' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
-	echo 'cd $(SERVICE_DIR)/clusterservice' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
+	echo 'cd $(SUB_SERVICE_DIR)' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'python $(SUB1_SERVICE_NAME)Server.py $$1 $$2 $$3' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo '#!/bin/bash' > $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_TOP=$(TARGET)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	echo 'cd $(SERVICE_DIR)/clusterservice' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	echo 'cd $(SUB_SERVICE_DIR)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'Rscript $(SUB2_SERVICE_NAME)Impl.r $$1 $$2' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	$(ANT) deploy -Djardir=$(TARGET)/lib/jars -Dbindir=$(BIN) -Dcopyjar=y
+	$(ANT) deploy -Djardir=$(TARGET)/lib/jars -Dbindir=$(BIN) -Djava.home=$(JAVA_HOME)
 
 test: compile test-client test-service test-scripts
 
