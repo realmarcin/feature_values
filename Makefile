@@ -53,6 +53,7 @@ deploy-service: deploy-scripts
 	cp $(DIR)/service/jetty.xml $(SERVICE_DIR)/
 	mkdir -p $(SERVICE_DIR)/webapps
 	cp $(DIR)/dist/$(SERVICE_NAME).war $(SERVICE_DIR)/webapps/
+	cp $(DIR)/deploy.cfg $(SERVICE_DIR)/
 	echo '#!/bin/bash' > $(SERVICE_DIR)/start_service
 	echo 'export JAVA_HOME=$(JAVA_HOME)' >> $(SERVICE_DIR)/start_service
 	echo 'export PATH=$(JAVA_HOME)/bin:$$PATH' >> $(SERVICE_DIR)/start_service
