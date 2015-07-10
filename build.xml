@@ -4,18 +4,21 @@
   <property name="classes" location="classes"/>
   <property name="dist"    location="dist"/>
   <property name="lib"     location="../jars/lib/jars/"/>
-  <property name="module"  value="KBaseFeatureValues"/>
-  <property name="jar.file" value="${module}.jar"/>
-  <property name="cmd.file" value="awe_KBaseFeatureValues_run_job.sh"/>
-  <property name="jardir" location="../jars/lib/jars"/>
-  <property name="bindir" location="./bin"/>
+  <property name="module"     value="KBaseFeatureValues"/>
+  <property name="jar.file"   value="${module}.jar"/>
+  <property name="war.file"   value="${module}.war"/>
+  <property name="war.lib" location="${dist}/lib"/>
+  <property name="service" location="service"/>
+  <property name="web.xml" location="${service}/web.xml"/>
+  <property name="cmd.file"   value="awe_KBaseFeatureValues_run_job.sh"/>
+  <property name="jardir"  location="../jars/lib/jars"/>
+  <property name="bindir"  location="./bin"/>
 
   <condition property="java.home" value="${env.JAVA_HOME}" else="/kb/runtime/java">
     <isset property="env.JAVA_HOME" />
   </condition>
 
-  <path id="compile.classpath">
-    <fileset dir="${jardir}">
+  <fileset dir="${jardir}" id="serverlib">
       <include name="jackson/jackson-annotations-2.2.3.jar"/>
       <include name="jackson/jackson-core-2.2.3.jar"/>
       <include name="jackson/jackson-databind-2.2.3.jar"/>
@@ -32,7 +35,10 @@
       <include name="apache_commons/http/httpcore-4.3.jar"/>
       <include name="apache_commons/http/httpmime-4.3.1.jar"/>
       <include name="apache_commons/commons-logging-1.1.1.jar"/>
-    </fileset>
+  </fileset>
+
+  <path id="compile.classpath">
+    <fileset refid="serverlib"/>
   </path>
 
   <target name="compile" description="compile the source">
@@ -65,14 +71,27 @@ java -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBase
   <target name="deploy" depends="compile" description="deploy scripts and war">
     <copy file="${dist}/${jar.file}" todir="${jardir}"/>
     <!-- Make shell file for AWE -->
-    <property name="jar.absolute.path" location="${jardir}/${jar.file}"/>
-    <pathconvert targetos="unix" property="lib.classpath" refid="compile.classpath"/>
+    <property name="jar.absolute.path2" location="${jardir}/${jar.file}"/>
+    <pathconvert targetos="unix" property="lib.classpath2" refid="compile.classpath"/>
     <echo file="${bindir}/${cmd.file}">#!/bin/sh
 export JAVA_HOME=${java.home}
 export PATH=${java.home}/bin:$PATH
-java -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
+java -cp ${jar.absolute.path2}:${lib.classpath2} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
     </echo>
     <chmod file="${bindir}/${cmd.file}" perm="a+x"/>
+    <!-- make the war file for the server-->
+    <mkdir dir="${war.lib}"/>
+    <copy todir="${war.lib}/" flatten="true">
+        <fileset refid="serverlib"/>
+    </copy>
+    <copy file="${dist}/${jar.file}" todir="${war.lib}"/>
+    <war destfile="${dist}/${war.file}" webxml="${web.xml}">
+        <lib dir="${war.lib}"/>
+        <fileset dir="${service}">
+            <include name="index.html"/>
+        </fileset>
+    </war>
+    <delete dir="${war.lib}"/>
   </target>
 
   <target name="preparejunitreportdir" if="env.JENKINS_REPORT_DIR">

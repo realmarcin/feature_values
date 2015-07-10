@@ -11,6 +11,9 @@ SUB2_ASYNC_JOB_SCRIPT_FILE = run_ClusterServiceR_async_job.sh
 ANT = ant
 TESTCFG ?= test.cfg
 SERVICE_DIR = $(TARGET)/services/$(SERVICE_NAME)
+JAVA_HOME ?= /kb/runtime/java
+SERVICE_PORT = 8082
+MAX_MEMORY_MB = 4000
 
 all: compile
 
@@ -39,6 +42,27 @@ deploy-client:
 	@echo "No deployment for client"
 
 deploy-service: deploy-scripts
+	cp $(DIR)/service/jetty.xml $(SERVICE_DIR)/
+	mkdir -p $(SERVICE_DIR)/webapps
+	cp $(DIR)/dist/$(SERVICE_NAME).war $(SERVICE_DIR)/webapps/
+	echo '#!/bin/bash' > $(SERVICE_DIR)/start_service
+	echo 'export JAVA_HOME=$(JAVA_HOME)' >> $(SERVICE_DIR)/start_service
+	echo 'export PATH=$(JAVA_HOME)/bin:$$PATH' >> $(SERVICE_DIR)/start_service
+	echo 'JARS=$(TARGET)/lib/jars' >> $(SERVICE_DIR)/start_service
+	echo 'if [ -z "$$KB_DEPLOYMENT_CONFIG" ]; then' >> $(SERVICE_DIR)/start_service
+	echo '    export KB_DEPLOYMENT_CONFIG=$(TARGET)/deployment.cfg' >> $(SERVICE_DIR)/start_service
+	echo 'fi' >> $(SERVICE_DIR)/start_service
+	echo 'cd $(SERVICE_DIR)' >> $(SERVICE_DIR)/start_service
+	echo 'java -cp $$JARS/jetty/jetty-start-7.0.0.jar:$$JARS/jetty/jetty-all-7.0.0.jar:$$JARS/servlet/servlet-api-2.5.jar -Xmx$(MAX_MEMORY_MB)m -DKB_DEPLOYMENT_CONFIG=$$KB_DEPLOYMENT_CONFIG -Djetty.port=$(SERVICE_PORT) org.eclipse.jetty.start.Main jetty.xml >out.txt 2>err.txt & pid=$$!' >> $(SERVICE_DIR)/start_service
+	echo 'echo $$pid > $(SERVICE_DIR)/pid.txt' >> $(SERVICE_DIR)/start_service
+	chmod a+x $(SERVICE_DIR)/start_service
+	echo '#!/bin/bash' > $(SERVICE_DIR)/stop_service
+	echo 'PIDFILE=$(SERVICE_DIR)/pid.txt' >> $(SERVICE_DIR)/stop_service
+	echo 'THEPID=$$(cat $$PIDFILE)' >> $(SERVICE_DIR)/stop_service
+	echo 'echo "Killing PID $$THEPID..."' >> $(SERVICE_DIR)/stop_service
+	echo 'kill $$THEPID' >> $(SERVICE_DIR)/stop_service
+	echo 'rm $$PIDFILE' >> $(SERVICE_DIR)/stop_service
+	chmod a+x $(SERVICE_DIR)/stop_service
 
 deploy-scripts:
 	mkdir -p $(SERVICE_DIR)

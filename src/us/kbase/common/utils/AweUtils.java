@@ -54,6 +54,7 @@ public class AweUtils {
         job.put("tasks", Arrays.asList(task));
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(aweServerUrl + "job");
+        httpPost.addHeader("Authorization", "OAuth " + token);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         ObjectMapper mapper = new ObjectMapper();
