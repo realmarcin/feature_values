@@ -73,7 +73,7 @@ deploy-service: deploy-scripts
 	echo 'rm $$PIDFILE' >> $(SERVICE_DIR)/stop_service
 	chmod a+x $(SERVICE_DIR)/stop_service
 
-deploy-scripts:
+deploy-scripts: check-deps
 	mkdir -p $(SERVICE_DIR)
 	cp -r $(SUB_SERVICE_LOCAL_DIR) $(SERVICE_DIR)/
 	echo '#!/bin/bash' > $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
@@ -101,9 +101,13 @@ test-client:
 test-service:
 	@echo "No tests for service"
 
-test-scripts:
+test-scripts: check-deps
 	test/cfg_to_runner.py $(TESTCFG) ""
 	test/run_tests.sh
+
+check-deps:
+	echo "Checking dependencies..."
+	bash $(DIR)/deps/r_lang.sh
 
 clean:
 	@echo "No clean is necessary"
