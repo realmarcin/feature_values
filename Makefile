@@ -1,3 +1,4 @@
+KB_TOP ?= /kb/dev_container
 TARGET ?= /kb/deployment
 DIR = $(shell pwd)
 LOCAL_BIN = $(DIR)/bin
@@ -16,21 +17,23 @@ KB_RUNTIME ?= /kb/runtime
 JAVA_HOME ?= $(KB_RUNTIME)/java
 SERVICE_PORT = 8082
 MAX_MEMORY_MB = 4000
+KB_PYTHON_PATH ?= $(shell find $(KB_TOP)/modules -maxdepth 2 -name lib -type d | xargs | sed -e 's/ /:/g')
 
 all: compile
 
 compile:
 	mkdir -p $(LOCAL_BIN)
 	echo '#!/bin/bash' > $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
-	echo 'export KB_TOP=$(TARGET)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
+	echo 'export KB_TOP=$(KB_TOP)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
-	echo 'export PYTHONPATH=$$KB_TOP/lib:$$PYTHONPATH' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
+	echo 'export KB_PYTHON_PATH=$(KB_PYTHON_PATH)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
+	echo 'export PYTHONPATH=$(TARGET)/lib:$$KB_PYTHON_PATH:$$PYTHONPATH' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'cd $(SUB_SERVICE_LOCAL_DIR)' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'python $(SUB1_SERVICE_NAME)Server.py $$1 $$2 $$3' >> $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(LOCAL_BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo '#!/bin/bash' > $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	echo 'export KB_TOP=$(TARGET)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	echo 'export KB_TOP=$(KB_TOP)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'cd $(SUB_SERVICE_LOCAL_DIR)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
