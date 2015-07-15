@@ -46,8 +46,7 @@ deploy: deploy-client deploy-service deploy-scripts
 undeploy:
 	@echo "Nothing to undeploy"
 
-deploy-client:
-	@echo "No deployment for client"
+deploy-client: deploy-scripts
 
 deploy-service: deploy-scripts
 	cp $(DIR)/service/jetty.xml $(SERVICE_DIR)/
