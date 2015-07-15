@@ -70,11 +70,11 @@ methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(dendrogram,
 
 tryCatch({
     args <- commandArgs(trailingOnly = TRUE)
-    input <- fromJSON(file(args[1]), flatten=TRUE, simplifyDataFrame=FALSE, 
+    input <- fromJSON(args[1], flatten=TRUE, simplifyDataFrame=FALSE, 
         simplifyVector=TRUE, simplifyMatrix=TRUE)
     params <- input[["params"]]
     if (class(params) != "list") {
-        input <- fromJSON(file(args[1]), flatten=TRUE, simplifyDataFrame=FALSE, 
+        input <- fromJSON(args[1], flatten=TRUE, simplifyDataFrame=FALSE, 
             simplifyVector=FALSE, simplifyMatrix=FALSE)
         params <- input[["params"]]
     }
