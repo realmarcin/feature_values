@@ -52,7 +52,7 @@ deploy-client:
 deploy-service: deploy-scripts
 	cp $(DIR)/service/jetty.xml $(SERVICE_DIR)/
 	mkdir -p $(SERVICE_DIR)/webapps
-	rm $(SERVICE_DIR)/webapps/*.war
+	rm -f $(SERVICE_DIR)/webapps/*.war
 	cp $(DIR)/dist/$(SERVICE_NAME).war $(SERVICE_DIR)/webapps/root.war
 	cp $(DIR)/deploy.cfg $(SERVICE_DIR)/
 	echo '#!/bin/bash' > $(SERVICE_DIR)/start_service
