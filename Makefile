@@ -107,7 +107,7 @@ test-scripts: check-deps
 
 check-deps:
 	echo "Checking dependencies..."
-	bash $(DIR)/deps/r_lang.sh
+	R_LIBS=$(TARGET)/lib bash $(DIR)/deps/r_lang.sh
 
 clean:
 	@echo "No clean is necessary"
