@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -45,6 +47,7 @@ import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
+import us.kbase.kbasefeaturevalues.ServiceStatus;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.CreateWorkspaceParams;
 import us.kbase.workspace.ObjectData;
@@ -145,6 +148,24 @@ public class AweIntegrationTest {
         }
     }
 
+    @Test
+    public void testServiceStatus() throws Exception {
+        ServiceStatus status = client.status();
+        Assert.assertEquals(KBaseFeatureValuesServer.SERVICE_VERSION, status.getVersion());
+        Assert.assertEquals("OK", status.getStatus());
+        assertNotEmpty(status.getStartupTime());
+        assertNotEmpty(status.getGiturl());
+        assertNotEmpty(status.getBranch());
+        assertNotEmpty(status.getCommit());
+        assertNotEmpty(status.getDeploymentCfgPath());
+        Assert.assertTrue(status.getSafeConfiguration().size() > 0);
+    }
+    
+    private static void assertNotEmpty(String text) throws Exception {
+        Assert.assertNotNull(text);
+        Assert.assertTrue(text.trim().length() > 0);
+    }
+    
     @Test
     public void testClusterKMeans() throws Exception {
         WorkspaceClient wscl = getWsClient();

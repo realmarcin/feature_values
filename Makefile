@@ -17,6 +17,7 @@ KB_RUNTIME ?= /kb/runtime
 JAVA_HOME ?= $(KB_RUNTIME)/java
 SERVICE_PORT = 8082
 MAX_MEMORY_MB = 4000
+CLIENT_MAX_MEMORY_MB = 3000
 KB_PYTHON_PATH ?= $(shell find $(KB_TOP)/modules -maxdepth 2 -name lib -type d | xargs | sed -e 's/ /:/g')
 
 all: compile
@@ -39,7 +40,7 @@ compile:
 	echo 'cd $(SUB_SERVICE_LOCAL_DIR)' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'Rscript $(SUB2_SERVICE_NAME)Impl.r $$1 $$2' >> $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(LOCAL_BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	$(ANT) compile -Djardir=$(DIR)/../jars/lib/jars -Dbindir=$(LOCAL_BIN) -Djava.home=$(JAVA_HOME)
+	$(ANT) compile -Djardir=$(DIR)/../jars/lib/jars -Dbindir=$(LOCAL_BIN) -Djava.home=$(JAVA_HOME) -Dawe.max.mem=$(CLIENT_MAX_MEMORY_MB)m
 
 deploy: deploy-client deploy-service deploy-scripts
 
@@ -73,7 +74,9 @@ deploy-service: deploy-scripts
 	echo 'rm $$PIDFILE' >> $(SERVICE_DIR)/stop_service
 	chmod a+x $(SERVICE_DIR)/stop_service
 
-deploy-scripts: check-deps
+deploy-scripts:
+	echo "Checking dependencies..."
+	R_LIBS=$(TARGET)/lib bash $(DIR)/deps/r_lang.sh
 	mkdir -p $(SERVICE_DIR)
 	cp -r $(SUB_SERVICE_LOCAL_DIR) $(SERVICE_DIR)/
 	echo '#!/bin/bash' > $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
@@ -88,10 +91,11 @@ deploy-scripts: check-deps
 	echo 'export KB_TOP=$(TARGET)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
+	echo 'export R_LIB=$(TARGET)/lib' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'cd $(SUB_SERVICE_DIR)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'Rscript $(SUB2_SERVICE_NAME)Impl.r $$1 $$2' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	chmod a+x $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	$(ANT) deploy -Djardir=$(TARGET)/lib/jars -Dbindir=$(BIN) -Djava.home=$(JAVA_HOME)
+	$(ANT) deploy -Djardir=$(TARGET)/lib/jars -Dbindir=$(BIN) -Djava.home=$(JAVA_HOME) -Dawe.max.mem=$(CLIENT_MAX_MEMORY_MB)m
 
 test: compile test-client test-service test-scripts
 
@@ -101,13 +105,11 @@ test-client:
 test-service:
 	@echo "No tests for service"
 
-test-scripts: check-deps
+test-scripts:
+	echo "Checking dependencies..."
+	bash $(DIR)/deps/r_lang.sh
 	test/cfg_to_runner.py $(TESTCFG) ""
 	test/run_tests.sh
-
-check-deps:
-	echo "Checking dependencies..."
-	R_LIBS=$(TARGET)/lib bash $(DIR)/deps/r_lang.sh
 
 clean:
 	@echo "No clean is necessary"

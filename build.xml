@@ -14,6 +14,8 @@
   <property name="jardir"  location="../jars/lib/jars"/>
   <property name="bindir"  location="./bin"/>
 
+  <property name="awe.max.mem"  value="1g"/>
+
   <condition property="java.home" value="${env.JAVA_HOME}" else="/kb/runtime/java">
     <isset property="env.JAVA_HOME" />
   </condition>
@@ -42,6 +44,13 @@
   </path>
 
   <target name="compile" description="compile the source">
+    <exec executable="git" outputproperty="git.url"><arg line="config --get remote.origin.url"/></exec>
+    <exec executable="git" outputproperty="git.branch"><arg line="rev-parse --abbrev-ref HEAD"/></exec>
+    <exec executable="git" outputproperty="git.commit"><arg line="rev-parse HEAD"/></exec>
+    <echo file="${src}/us/kbase/kbasefeaturevalues/git.properties">### PLEASE DO NOT CHANGE THIS FILE MANUALLY! ###
+giturl=${git.url}
+branch=${git.branch}
+commit=${git.commit}</echo>
     <mkdir dir="${classes}"/>
     <javac srcdir="${src}" destdir="${classes}" includeantruntime="false" debug="true" classpathref="compile.classpath"/>
     <copy todir="${classes}">
@@ -63,7 +72,7 @@
     <echo file="${bindir}/${cmd.file}">#!/bin/sh
 export JAVA_HOME=${java.home}
 export PATH=${java.home}/bin:$PATH
-java -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
+java -Xmx${awe.max.mem} -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
     </echo>
     <chmod file="${bindir}/${cmd.file}" perm="a+x"/>
   </target>
@@ -76,7 +85,7 @@ java -cp ${jar.absolute.path}:${lib.classpath} us.kbase.kbasefeaturevalues.KBase
     <echo file="${bindir}/${cmd.file}">#!/bin/sh
 export JAVA_HOME=${java.home}
 export PATH=${java.home}/bin:$PATH
-java -cp ${jar.absolute.path2}:${lib.classpath2} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
+java -Xmx${awe.max.mem} -cp ${jar.absolute.path2}:${lib.classpath2} us.kbase.kbasefeaturevalues.KBaseFeatureValuesScript $1
     </echo>
     <chmod file="${bindir}/${cmd.file}" perm="a+x"/>
     <!-- make the war file for the server-->

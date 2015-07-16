@@ -322,5 +322,17 @@ module KBaseFeatureValues {
     funcdef correct_matrix(CorrectMatrixParams params)
         returns (string job_id) authentication required;
 
+    typedef structure {
+        string version;
+        string status;
+        string startup_time;
+        string giturl;
+        string branch;
+        string commit;
+        string deployment_cfg_path;
+        mapping<string, string> safe_configuration;
+    } ServiceStatus;
+
+    funcdef status() returns (ServiceStatus);
 };
 

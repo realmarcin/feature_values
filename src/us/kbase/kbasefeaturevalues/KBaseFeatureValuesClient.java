@@ -273,4 +273,19 @@ public class KBaseFeatureValuesClient {
         List<String> res = caller.jsonrpcCall("KBaseFeatureValues.correct_matrix", args, retType, true, true);
         return res.get(0);
     }
+
+    /**
+     * <p>Original spec-file function name: status</p>
+     * <pre>
+     * </pre>
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.ServiceStatus ServiceStatus}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ServiceStatus status() throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        TypeReference<List<ServiceStatus>> retType = new TypeReference<List<ServiceStatus>>() {};
+        List<ServiceStatus> res = caller.jsonrpcCall("KBaseFeatureValues.status", args, retType, true, false);
+        return res.get(0);
+    }
 }

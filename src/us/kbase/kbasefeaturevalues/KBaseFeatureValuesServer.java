@@ -4,11 +4,15 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonServerMethod;
 import us.kbase.common.service.JsonServerServlet;
 
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 //BEGIN_HEADER
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import us.kbase.common.service.UObject;
 import us.kbase.common.utils.AweUtils;
@@ -223,6 +227,61 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         //BEGIN correct_matrix
         returnVal = runAweJob(authPart, params);
         //END correct_matrix
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: status</p>
+     * <pre>
+     * </pre>
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.ServiceStatus ServiceStatus}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.status")
+    public ServiceStatus status() throws Exception {
+        ServiceStatus returnVal = null;
+        //BEGIN status
+        String status = "OK";
+        String startupTime = "";
+        String gitUrl = "";
+        String branch = "";
+        String commit = "";
+        String deployCfgPath = "";
+        Map<String, String> safeConfig = new LinkedHashMap<String, String>();
+        try {
+            long dateTime = ManagementFactory.getRuntimeMXBean().getStartTime();
+            startupTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(dateTime);
+            String envVar = "KB_DEPLOYMENT_CONFIG";
+            deployCfgPath = System.getProperty(envVar) == null ? System.getenv(envVar) : 
+                System.getProperty(envVar);
+            if (config == null) {
+                status = "Error: configuration is not found";
+            } else {
+                String[] keys = {CONFIG_PARAM_SCRATCH, CONFIG_PARAM_WS_URL, CONFIG_PARAM_UJS_URL, 
+                        CONFIG_PARAM_SHOCK_URL, CONFIG_PARAM_AWE_URL};
+                for (String key : keys) {
+                    String value = config.get(key);
+                    if (value == null) {
+                        status = "Error: configuration parameter '" + key + "' is not defined";
+                    } else {
+                        safeConfig.put(key, value);
+                    }
+                }
+            }
+            Properties gitProps = new Properties();
+            InputStream is = this.getClass().getResourceAsStream("git.properties");
+            gitProps.load(is);
+            is.close();
+            gitUrl = gitProps.getProperty("giturl");
+            branch = gitProps.getProperty("branch");
+            commit = gitProps.getProperty("commit");
+        } catch (Exception ex) {
+            status = "Error: " + ex.getMessage();
+        }
+        returnVal = new ServiceStatus().withVersion(SERVICE_VERSION).withStatus(status)
+                .withStartupTime(startupTime).withGiturl(gitUrl).withBranch(branch)
+                .withCommit(commit).withSafeConfiguration(safeConfig)
+                .withDeploymentCfgPath(deployCfgPath);
+        //END status
         return returnVal;
     }
 
