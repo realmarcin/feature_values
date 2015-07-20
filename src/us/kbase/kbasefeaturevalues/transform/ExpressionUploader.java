@@ -7,9 +7,11 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.kohsuke.args4j.CmdLineException;
@@ -26,6 +28,7 @@ import us.kbase.workspace.WorkspaceClient;
 
 public class ExpressionUploader {
     private static Pattern tabDiv = Pattern.compile(Pattern.quote("\t"));
+    public static final String FORMAT_TYPE_MO = "MO";
     
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
@@ -73,9 +76,31 @@ public class ExpressionUploader {
         if (inputFile == null)
             throw new IllegalStateException("Input file with extention .txt or .tsv was not " +
             		"found among: " + fileList);
-        ExpressionMatrix matrix = parseMicrobsOnlineData(new BufferedReader(new FileReader(
-                inputFile)), parsedArgs.fmtType, parsedArgs.fillMissingValues, genome);
-        System.out.println(matrix);
+        String formatType = parsedArgs.fmtType;
+        if (formatType == null)
+            formatType = FORMAT_TYPE_MO;
+        ExpressionMatrix matrix = null;
+        if (formatType.equals(FORMAT_TYPE_MO)) {
+            matrix = parseMicrobsOnlineData(new BufferedReader(new FileReader(inputFile)));
+        } else {
+            throw new IllegalStateException("Unsupported format type: " + formatType);
+        }
+        if (genome != null) {
+            addFeatureMapping(matrix, genome);
+            matrix.withGenomeRef(parsedArgs.wsName + "/" + parsedArgs.goName);
+        }
+        if (parsedArgs.fillMissingValues)
+            fillMissingValues(matrix);
+        String outputFileName = parsedArgs.outName;
+        if (outputFileName == null)
+            outputFileName = "expression_output.json";
+        File workDir = parsedArgs.workDir;
+        if (workDir == null)
+            workDir = new File(".");
+        if (!workDir.exists())
+            workDir.mkdirs();
+        File outputFile = new File(workDir, outputFileName);
+        UObject.getMapper().writeValue(outputFile, matrix);
     }
     
     private static WorkspaceClient getWsClient(String wsUrl, AuthToken token) throws Exception {
@@ -97,8 +122,7 @@ public class ExpressionUploader {
         parser.printUsage(out);
     }
 
-    public static ExpressionMatrix parseMicrobsOnlineData(BufferedReader br, String formatType, 
-            boolean fillMissingValues, Map<String, Object> genome) throws Exception {
+    public static ExpressionMatrix parseMicrobsOnlineData(BufferedReader br) throws Exception {
         MOState state = MOState.init;
         Map<String, String> colNameToId = new LinkedHashMap<String, String>();
         List<String> colIds = new ArrayList<String>();
@@ -178,18 +202,68 @@ public class ExpressionUploader {
             }
         }
         br.close();
-        Map<String, String> featureMapping = null;
-        if (genome != null) {
-            featureMapping = new LinkedHashMap<String, String>();
-            List<Object> features = (List<Object>)genome.get("features");
-            System.out.println(features.size());
-            System.out.println(features.get(0));
-        }
         FloatMatrix2D matrix = new FloatMatrix2D().withValues(values).withColIds(colIds)
                 .withRowIds(rowIds);
         ExpressionMatrix ret = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
-                .withData(matrix).withFeatureMapping(featureMapping);
+                .withData(matrix);
         return ret;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void addFeatureMapping(ExpressionMatrix matrix, Map<String, Object> genome) {
+        List<String> rowIds = matrix.getData().getRowIds();
+        Map<String, String> featureMapping = null; // map from row_id to feature id in the genome
+        if (genome != null) {
+            Set<String> rowIdSet = new HashSet<String>(rowIds);
+            featureMapping = new LinkedHashMap<String, String>();
+            List<Map<String, Object>> features = (List<Map<String, Object>>)genome.get("features");
+            for (Map<String, Object> feature: features) {
+                String id = (String)feature.get("id");
+                if (rowIdSet.contains(id)) {
+                    featureMapping.put(id, id);
+                    rowIdSet.remove(id);
+                }
+            }
+            if (rowIdSet.size() > 0) {
+                for (Map<String, Object> feature: features) {
+                    String id = (String)feature.get("id");
+                    for (String alias : (List<String>)feature.get("aliases")) {
+                        if (rowIdSet.contains(alias)) {
+                            featureMapping.put(alias, id);
+                            rowIdSet.remove(alias);
+                        }
+                    }
+                }
+            }
+        }
+        matrix.withFeatureMapping(featureMapping);
+    }
+    
+    private static void fillMissingValues(ExpressionMatrix matrix) {
+        List<List<Double>> values = matrix.getData().getValues();
+        double avg = 0;
+        int count = 0;
+        boolean thereAreMissingVals = false;
+        for (List<Double> row : values) {
+            for (Double value : row) {
+                if (value == null) {
+                    thereAreMissingVals = true;
+                } else {
+                    avg += value;
+                    count++;
+                }
+            }
+        }
+        if (thereAreMissingVals) {
+            if (count > 0)
+                avg /= count;
+            for (List<Double> row : values) {
+                for (int pos = 0; pos < row.size(); pos++) {
+                    if (row.get(pos) == null)
+                        row.set(pos, avg);
+                }
+            }
+        }
     }
     
     public static class Args {
@@ -203,7 +277,7 @@ public class ExpressionUploader {
         String objName;
 
         @Option(name="-of", aliases={"--output_file_name"}, usage="Output file name", metaVar="<out-file>")
-        String outFile;
+        String outName;
 
         @Option(name="-id", aliases={"--input_directory"}, usage="Input directory", metaVar="<in-dir>")
         File inDir;
