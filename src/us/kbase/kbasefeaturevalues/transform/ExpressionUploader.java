@@ -29,6 +29,7 @@ import us.kbase.workspace.WorkspaceClient;
 public class ExpressionUploader {
     private static Pattern tabDiv = Pattern.compile(Pattern.quote("\t"));
     public static final String FORMAT_TYPE_MO = "MO";
+    public static final String FORMAT_TYPE_SIMPLE = "Simple";
     
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
@@ -65,7 +66,8 @@ public class ExpressionUploader {
         for (File f : parsedArgs.inDir.listFiles()) {
             if (!f.isFile())
                 continue;
-            if (f.getName().endsWith(".txt") || f.getName().endsWith(".tsv")) {
+            if (f.getName().endsWith(".txt") || f.getName().endsWith(".tsv") || 
+                    f.getName().endsWith(".csv")) {
                 inputFile = f;
                 break;
             }
@@ -77,14 +79,20 @@ public class ExpressionUploader {
             throw new IllegalStateException("Input file with extention .txt or .tsv was not " +
             		"found among: " + fileList);
         String formatType = parsedArgs.fmtType;
-        if (formatType == null)
-            formatType = FORMAT_TYPE_MO;
+        if (formatType == null || formatType.trim().isEmpty())
+            formatType = FORMAT_TYPE_SIMPLE;
         ExpressionMatrix matrix = null;
-        if (formatType.equals(FORMAT_TYPE_MO)) {
-            matrix = parseMicrobsOnlineData(new BufferedReader(new FileReader(inputFile)));
+        if (formatType.equalsIgnoreCase(FORMAT_TYPE_MO)) {
+            matrix = parseMicrobsOnlineFormat(new BufferedReader(new FileReader(inputFile)));
+        } else if (formatType.equalsIgnoreCase(FORMAT_TYPE_SIMPLE)) {
+            matrix = parseSimpleFormat(new BufferedReader(new FileReader(inputFile)));
         } else {
             throw new IllegalStateException("Unsupported format type: " + formatType);
         }
+        if (parsedArgs.dataType != null && !parsedArgs.dataType.isEmpty())
+            matrix.withType(parsedArgs.dataType);
+        if (parsedArgs.dataScale != null && !parsedArgs.dataScale.isEmpty())
+            matrix.withScale(parsedArgs.dataScale);
         if (genome != null) {
             addFeatureMapping(matrix, genome);
             matrix.withGenomeRef(parsedArgs.wsName + "/" + parsedArgs.goName);
@@ -122,7 +130,7 @@ public class ExpressionUploader {
         parser.printUsage(out);
     }
 
-    public static ExpressionMatrix parseMicrobsOnlineData(BufferedReader br) throws Exception {
+    public static ExpressionMatrix parseMicrobsOnlineFormat(BufferedReader br) throws Exception {
         MOState state = MOState.init;
         Map<String, String> colNameToId = new LinkedHashMap<String, String>();
         List<String> colIds = new ArrayList<String>();
@@ -199,6 +207,48 @@ public class ExpressionUploader {
                 break;
             default:
                 throw new IllegalStateException("Unsupported state: " + state);
+            }
+        }
+        br.close();
+        FloatMatrix2D matrix = new FloatMatrix2D().withValues(values).withColIds(colIds)
+                .withRowIds(rowIds);
+        ExpressionMatrix ret = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
+                .withData(matrix);
+        return ret;
+    }
+
+    public static ExpressionMatrix parseSimpleFormat(BufferedReader br) throws Exception {
+        List<String> colIds = new ArrayList<String>();
+        String line = br.readLine();
+        if (line == null)
+            throw new IllegalStateException("No header line found");
+        String[] parts = tabDiv.split(line);
+        for (int i = 1; i < parts.length; i++)
+            colIds.add(parts[i]);
+        List<String> rowIds = new ArrayList<String>();
+        List<List<Double>> values = new ArrayList<List<Double>>();
+        for (int pos = 0; ; pos++) {
+            line = br.readLine();
+            if (line == null)
+                break;
+            parts = tabDiv.split(line, -1);
+            int partCount = parts.length;
+            if (partCount > colIds.size() + 1 && parts[partCount - 1].isEmpty())
+                partCount--;
+            if (partCount != colIds.size() + 1)
+                throw new IllegalStateException("Feature row contain " + parts.length + " != " +  
+                        (colIds.size() + 1) + " cells at line " + (pos + 1) + ": " + line);
+            String rowId = parts[0];
+            int rowPos = rowIds.size();
+            rowIds.add(rowId);
+            if (values.size() != rowPos)
+                throw new IllegalStateException("Internal inconsistency: " + rowPos + " != " + values.size());
+            List<Double> row = new ArrayList<Double>();
+            values.add(row);
+            for (int i = 0; i < colIds.size(); i++) {
+                String exprValueText = parts[1 + i];
+                Double exprVallue = exprValueText.isEmpty() ? null : Double.parseDouble(exprValueText);
+                row.add(exprVallue);
             }
         }
         br.close();
@@ -296,6 +346,12 @@ public class ExpressionUploader {
         
         @Option(name="-fm", aliases={"--fill_missing_values"}, usage="Fill missing values (boolean, default value is false)")
         boolean fillMissingValues = false;        
+
+        @Option(name="-dt", aliases={"--data_type"}, usage="Data type (default is 'log-ratio')", metaVar="<data-type>")
+        String dataType;
+
+        @Option(name="-ds", aliases={"--data_scale"}, usage="Data scale (default is '1.0')", metaVar="<data-scale>")
+        String dataScale;
     }
     
     enum MOState {

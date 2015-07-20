@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,7 +91,7 @@ public class ExpressionUploaderTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testUploader() throws Exception {
+    public void testUploader1() throws Exception {
         WorkspaceClient wscl = getWsClient();
         String contigsetObjName = "Desulfovibrio_vulgaris_Hildenborough.contigset";
         String genomeObjName = "Desulfovibrio_vulgaris_Hildenborough.genome";
@@ -112,7 +114,7 @@ public class ExpressionUploaderTest {
         wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
                 new ObjectSaveData().withName(genomeObjName).withType("KBaseGenomes.Genome")
                 .withData(new UObject(genomeData)))));
-        File exprTempFile = new File(workDir, "expression_output.json");
+        File exprTempFile = new File(workDir, "expression_output1.json");
         ProcessHelper.cmd("bash", uploadCLI.getAbsolutePath(), 
                 "--workspace_service_url", getWsUrl(), 
                 "--workspace_name", testWsName, 
@@ -120,11 +122,31 @@ public class ExpressionUploaderTest {
                 "--input_directory", inputDir.getAbsolutePath(), 
                 "--fill_missing_values",
                 "--working_directory", exprTempFile.getParentFile().getAbsolutePath(), 
-                "--output_file_name", exprTempFile.getName()).exec(workDir);
+                "--output_file_name", exprTempFile.getName(),
+                "--format_type", "MO").exec(workDir);
         ExpressionMatrix data = UObject.getMapper().readValue(exprTempFile, ExpressionMatrix.class);
         wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
                 new ObjectSaveData().withName(exprObjName).withType("KBaseFeatureValues.ExpressionMatrix")
                 .withData(new UObject(data)))));
+    }
+
+    @Test
+    public void testUploader2() throws Exception {
+        File inputDir = new File("test/data/upload2");
+        File exprTempFile = new File(workDir, "expression_output2.json");
+        ProcessHelper.cmd("bash", uploadCLI.getAbsolutePath(), 
+                "--input_directory", inputDir.getAbsolutePath(), 
+                "--working_directory", exprTempFile.getParentFile().getAbsolutePath(), 
+                "--output_file_name", exprTempFile.getName(),
+                "--format_type", "Simple",
+                "--data_type", "log-ratio2",
+                "--data_scale", "2.0").exec(workDir);
+        ExpressionMatrix matrix = UObject.getMapper().readValue(exprTempFile, ExpressionMatrix.class);
+        Assert.assertNotNull(matrix.getData());
+        Assert.assertEquals(11, matrix.getData().getColIds().size());
+        Assert.assertEquals(2680, matrix.getData().getRowIds().size());
+        Assert.assertEquals("log-ratio2", matrix.getType());
+        Assert.assertEquals("2.0", matrix.getScale());
     }
 
     private static WorkspaceClient getWsClient() throws Exception {
