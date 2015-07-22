@@ -9,6 +9,7 @@ import java.util.List;
 
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.JsonLocalClientCaller;
+import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 /**
@@ -33,10 +34,13 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k) throws IOException, JsonClientException {
+    public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k, Long nStart, Long maxIter, Long randomSeed) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
         args.add(k);
+        args.add(nStart);
+        args.add(maxIter);
+        args.add(randomSeed);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
         List<ClusterResults> res = jsonrpcCall("ClusterServiceR.cluster_k_means", args, retType, true, false);
         return res.get(0);
@@ -53,11 +57,15 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public Long estimateK(FloatMatrix2D matrix) throws IOException, JsonClientException {
+    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
-        TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
-        List<Long> res = jsonrpcCall("ClusterServiceR.estimate_k", args, retType, true, false);
+        args.add(minK);
+        args.add(maxK);
+        args.add(maxIter);
+        args.add(randomSeed);
+        TypeReference<List<EstimateKResult>> retType = new TypeReference<List<EstimateKResult>>() {};
+        List<EstimateKResult> res = jsonrpcCall("ClusterServiceR.estimate_k", args, retType, true, false);
         return res.get(0);
     }
 

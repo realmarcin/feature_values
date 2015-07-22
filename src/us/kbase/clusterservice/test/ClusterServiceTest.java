@@ -19,7 +19,10 @@ import us.kbase.clusterservice.ClusterServicePyLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
 import us.kbase.common.service.ServerException;
 import us.kbase.common.service.UObject;
+import us.kbase.kbasefeaturevalues.EstimateKResult;
+import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
+import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 
 public class ClusterServiceTest {
     private static File rootTempDir = null;
@@ -33,7 +36,7 @@ public class ClusterServiceTest {
         cl.setBinDir(new File("bin"));
         try {
             List<Long> clusterLabels = cl.clusterKMeans(
-                    getSampleMatrix(), 3L).getClusterLabels();
+                    getSampleMatrix(), 3L, null, null, null).getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
         } catch (ServerException ex) {
@@ -50,10 +53,13 @@ public class ClusterServiceTest {
         cl.setBinDir(new File("bin"));
         FloatMatrix2D matrix = getSampleMatrix();
         try {
-            long k = cl.estimateK(matrix);
+            EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null);
+            long k = estK.getBestK();
             System.out.println("Estimated K: " + k);
+            System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());
             Assert.assertEquals(3, k);
-            List<Long> clusterLabels = cl.clusterKMeans(matrix, k).getClusterLabels();
+            Long randomSeed = 403L;
+            List<Long> clusterLabels = cl.clusterKMeans(matrix, k, null, null, randomSeed).getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
             ClusterResults clRes = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
@@ -94,6 +100,20 @@ public class ClusterServiceTest {
                 .withColIds(Arrays.asList("c1", "c2", "c3"));
     }
 
+    private static FloatMatrix2D getLargeMatrix(File tempDir) throws Exception {
+        File tempFile = File.createTempFile("expression_output", ".json", tempDir);
+        ExpressionUploader.main(new String[] { 
+                "--input_directory", "test/data/upload2", 
+                "--fill_missing_values",
+                "--working_directory", tempFile.getParentFile().getAbsolutePath(), 
+                "--output_file_name", tempFile.getName(),
+                "--format_type", "Simple"
+        });
+        ExpressionMatrix data = UObject.getMapper().readValue(tempFile, ExpressionMatrix.class);
+        tempFile.delete();
+        return data.getData();
+    }
+    
     @BeforeClass
     public static void prepare() throws Exception {
         rootTempDir = new File(getProp("test.temp-dir"));
@@ -145,8 +165,7 @@ public class ClusterServiceTest {
     }
 
     public static void main(String[] args) throws Exception {
-        //String json = "{\"type\":\"list\",\"attributes\":{\"names\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"merge\",\"height\",\"order\",\"labels\",\"method\",\"call\",\"dist.method\"]},\"class\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"hclust\"]}},\"value\":[{\"type\":\"integer\",\"attributes\":{\"dim\":{\"type\":\"integer\",\"attributes\":{},\"value\":[6,2]}},\"value\":[-1,-4,-5,-7,-3,4,-2,1,-6,3,2,5]},{\"type\":\"double\",\"attributes\":{},\"value\":[0,0,0,0,1.11022302e-16,2]},{\"type\":\"integer\",\"attributes\":{},\"value\":[7,5,6,3,4,1,2]},{\"type\":\"character\",\"attributes\":{},\"value\":[\"g1\",\"g2\",\"g3\",\"g4\",\"g5\",\"g6\",\"g7\"]},{\"type\":\"character\",\"attributes\":{},\"value\":[\"complete\"]},{\"type\":\"language\",\"attributes\":{},\"value\":[\"hcluster(x = cor_mat, method = \\\"correlation\\\")\"]},{\"type\":\"character\",\"attributes\":{},\"value\":[\"correlation\"]}]}";
-        String json = "{\"type\":\"list\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[7]},\"midpoint\":{\"type\":\"double\",\"attributes\":{},\"value\":[2.8125]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[2]},\"class\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"dendrogram\"]}},\"value\":[{\"type\":\"list\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[4]},\"midpoint\":{\"type\":\"double\",\"attributes\":{},\"value\":[0.875]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[3.4779149e-07]}},\"value\":[{\"type\":\"integer\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g2\"]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[2]},{\"type\":\"list\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[3]},\"midpoint\":{\"type\":\"double\",\"attributes\":{},\"value\":[0.75]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[3.99645309e-08]}},\"value\":[{\"type\":\"integer\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g1\"]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[1]},{\"type\":\"list\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[2]},\"midpoint\":{\"type\":\"double\",\"attributes\":{},\"value\":[0.5]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[9.50970414e-11]}},\"value\":[{\"type\":\"integer\",\"attributes\":{\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g3\"]},\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[3]},{\"type\":\"integer\",\"attributes\":{\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g4\"]},\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[4]}]}]}]},{\"type\":\"list\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[3]},\"midpoint\":{\"type\":\"double\",\"attributes\":{},\"value\":[0.75]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[3.4779149e-07]}},\"value\":[{\"type\":\"integer\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g6\"]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[6]},{\"type\":\"list\",\"attributes\":{\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[2]},\"midpoint\":{\"type\":\"double\",\"attributes\":{},\"value\":[0.5]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[9.50970414e-11]}},\"value\":[{\"type\":\"integer\",\"attributes\":{\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g5\"]},\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[5]},{\"type\":\"integer\",\"attributes\":{\"label\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"g7\"]},\"members\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1]},\"height\":{\"type\":\"double\",\"attributes\":{},\"value\":[0]},\"leaf\":{\"type\":\"logical\",\"attributes\":{},\"value\":[true]}},\"value\":[7]}]}]}]}";
+        String json = "{\"type\":\"list\"}";
         System.out.println(UObject.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(UObject.getMapper().readValue(json, Map.class)));
     }
 }

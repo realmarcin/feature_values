@@ -7,29 +7,52 @@ library(ape)
 
 methods <- list()
 
-methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k) {
+methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start, 
+        max_iter, random_seed) {
+    if (is.null(n_start))
+        n_start <- 1000
+    if (is.null(max_iter))
+        max_iter <- 1000
     values <- matrix[["values"]]
     #row_names <- matrix[["row_ids"]]
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
     values <- data.matrix(values)
     #col_ids <- matrix[["col_ids"]]
-    km <- kmeans(values, k, iter.max = 1000, nstart=1000,algorithm="Lloyd")
+    if (!is.null(random_seed))
+        set.seed(random_seed)
+    km <- kmeans(values, k, iter.max = max_iter, nstart=n_start, algorithm="Lloyd")
     list(cluster_labels=km[["cluster"]])
 }
 
-methods[["ClusterServiceR.estimate_k"]] <- function(matrix) {
+methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k, 
+        max_iter, random_seed) {
+    if (is.null(min_k))
+        min_k <- 2
+    if (is.null(max_k))
+        max_k <- 200
+    if (is.null(max_iter))
+        max_iter <- 100
     values <- matrix[["values"]]
     #row_names <- matrix[["row_ids"]]
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
     values <- data.matrix(values)
-    max_clust_num = min(c(50,nrow(values)-1))
-    valid <- clValid(values, nClust=c(2:max_clust_num), maxitems=nrow(values), 
-        clMethods=c("kmeans"),validation=c("internal"))
+    max_clust_num = min(c(max_k,nrow(values)-1))
+    if (!is.null(random_seed))
+        set.seed(random_seed)
+    valid <- clValid(values, nClust=c(min_k:max_clust_num), maxitems=nrow(values), 
+        clMethods=c("kmeans"),validation=c("internal"), iter.max = max_iter)
     ret <- measures(valid, "Silhouette")[1,,1]
+    ret_names <- names(ret)
     best_pos <- which.max(ret)
-    unbox(as.numeric(names(ret)[best_pos]))
+    cluster_count_qualities<-list()
+    for (pos in 1:length(ret)) {
+        cluster_count <- unbox(ret_names[pos])
+        quality <- unbox(ret[pos])
+        cluster_count_qualities[[cluster_count]] <- quality
+    }
+    list(best_k=unbox(as.numeric(ret_names[best_pos])), estimate_cluster_sizes=cluster_count_qualities)
 }
 
 methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix, 

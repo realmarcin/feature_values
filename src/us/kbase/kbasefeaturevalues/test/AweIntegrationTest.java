@@ -188,6 +188,7 @@ public class AweIntegrationTest {
         EstimateKResult estKRes = res1.getData().asClassInstance(EstimateKResult.class);
         long k = estKRes.getBestK();
         System.out.println("Best K: " + k);
+        System.out.println("Cluster count qualities: " + estKRes.getEstimateClusterSizes());
         /////////////// K-means /////////////////
         String jobId2 = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
                 exprObjName).withK(k).withOutWorkspace(testWsName).withOutClustersetId(clustObj1Name));

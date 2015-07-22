@@ -86,9 +86,7 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(params.getInputMatrix()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        Long bestK = mathClient.estimateK(matrix.getData());
-        EstimateKResult toSave = new EstimateKResult().withBestK(bestK)
-                .withEstimateClusterSizes(new HashMap<Long, Double>());
+        EstimateKResult toSave = mathClient.estimateK(matrix.getData(), null, null, null, null);
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
                 .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
@@ -108,7 +106,7 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(params.getInputData()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK());
+        ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK(), null, null, null);
         ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData());
         toSave.withFeatureClusters(clustersFromLabels(matrix, res));
         List<ProvenanceAction> provenance = Arrays.asList(
