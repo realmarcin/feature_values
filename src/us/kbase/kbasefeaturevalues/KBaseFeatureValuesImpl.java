@@ -172,8 +172,8 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(input.getOriginalData()))).get(0);
         BioMatrix matrix = objData2.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        ClusterResults res = mathClient.clustersFromDendrogram(input.getFeatureDendrogram(), 
-                params.getFeatureHeightCutoff());
+        ClusterResults res = mathClient.clustersFromDendrogram(matrix.getData(), 
+                input.getFeatureDendrogram(), params.getFeatureHeightCutoff());
         ClusterSet toSave = new ClusterSet().withOriginalData(input.getOriginalData())
                 .withFeatureClusters(clustersFromLabels(matrix, res))
                 .withFeatureDendrogram(res.getDendrogram());

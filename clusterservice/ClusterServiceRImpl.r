@@ -5,6 +5,49 @@ library(amap)
 #library(sp)
 library(ape)
 
+calc_cluster_props = function(logratios_median, cluster, ret) {
+    ###mean pairwise correlation
+    meancor <- c()
+    for(i in 1:max(cluster)) {
+        clust_ind <- which(cluster == i)
+        cors <- cor(t(logratios_median[clust_ind,]), use="pairwise.complete.obs",method="pearson")
+        AbCorC <- mean(cors[lower.tri(cors, diag=FALSE)])
+        meancor <- c(meancor, AbCorC)
+    }
+
+    ###MSEC
+    MSECs <- c()
+    for(i in 1:max(cluster)) {
+        clust_ind <- which(cluster == i)
+        curdata <- logratios_median[clust_ind,]
+        MSEall <- median((curdata-median(curdata))^2)
+        cmeans <- colMeans(curdata,na.rm=TRUE)
+        csds <- apply(curdata,2,sd,na.rm=TRUE)
+        MSEC <- median((sweep(curdata,2,cmeans))^2/MSEall)
+        MSECs <- c(MSECs, MSEC)
+    }
+
+    ret[["meancor"]] <- meancor
+    ret[["msecs"]] <- MSECs
+    ret
+}
+
+clusters_from_dendrogram = function(values, dendrogram, height_cutoff) {
+    hcout <- as.hclust.phylo(read.tree(text=dendrogram))
+    #pdf("hcout.pdf", width=8.5, height=11)
+    #plot(hcout)
+    groups <- cutree(hcout, h=height_cutoff)
+    names <- names(groups)
+    cluster_labels <- numeric(length(groups))
+    for (pos in 1:length(groups)) {
+        name <- as.integer(names[pos])
+        value <- as.integer(groups[pos])
+        cluster_labels[name + 1] <- value
+    }
+    calc_cluster_props(values, cluster_labels, list(cluster_labels=cluster_labels, 
+        dendrogram=unbox(dendrogram)))
+}
+
 methods <- list()
 
 methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start, 
@@ -22,7 +65,7 @@ methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start,
     if (!is.null(random_seed))
         set.seed(random_seed)
     km <- kmeans(values, k, iter.max = max_iter, nstart=n_start, algorithm="Lloyd")
-    list(cluster_labels=km[["cluster"]])
+    calc_cluster_props(values, km[["cluster"]], list(cluster_labels=km[["cluster"]]))
 }
 
 methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k, 
@@ -69,26 +112,16 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
     #print(is.ultrametric(tree))
     #print(is.binary.tree(tree))
     #print(is.rooted(tree))
-    
-    ret <- do.call(methods[["ClusterServiceR.clusters_from_dendrogram"]],
-        list(newick, height_cutoff))
-    ret
+    clusters_from_dendrogram(values, newick, height_cutoff)
 }
 
-methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(dendrogram,
-        height_cutoff) {
-    hcout <- as.hclust.phylo(read.tree(text=dendrogram))
-    #pdf("hcout.pdf", width=8.5, height=11)
-    #plot(hcout)
-    groups <- cutree(hcout, h=height_cutoff)
-    names <- names(groups)
-    cluster_labels <- numeric(length(groups))
-    for (pos in 1:length(groups)) {
-        name <- as.integer(names[pos])
-        value <- as.integer(groups[pos])
-        cluster_labels[name + 1] <- value
-    }
-    list(cluster_labels=cluster_labels, dendrogram=unbox(dendrogram))
+methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(
+        matrix, dendrogram, height_cutoff) {
+    values <- matrix[["values"]]
+    row_names <- c(1:length(matrix[["row_ids"]]))-1
+    row.names(values) <- row_names
+    values <- data.matrix(values)
+    clusters_from_dendrogram(values, dendrogram, height_cutoff);
 }
 
 tryCatch({

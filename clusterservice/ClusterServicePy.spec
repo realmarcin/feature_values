@@ -12,11 +12,16 @@ module ClusterServicePy {
         clusters - set of lists consisting of positions of rows from original
             matrix;
         dendrogram - tree in Newick format (node names are positions of 
-            rows from original matrix).
+            rows from original matrix);
+        meancor and msecs - optional properties of clusters; position in each 
+            of these arrays corresponds to cluster label (minus 1 if cluster  
+            labels start from 1).
     */
     typedef structure {
         KBaseFeatureValues.AnalysisReport report;
         list<int> cluster_labels;
+        list<float> meancor;
+        list<float> msecs;
         string dendrogram;
     } ClusterResults;
 
@@ -24,7 +29,8 @@ module ClusterServicePy {
         Clusters features by K-means clustering.
     */
     funcdef cluster_k_means(KBaseFeatureValues.FloatMatrix2D matrix,
-         int k, int n_start, int max_iter, int random_seed) returns (ClusterResults);
+         int k, int n_start, int max_iter, int random_seed) 
+         returns (ClusterResults);
 
     /*
         Used as an analysis step before generating clusters using K-means 
@@ -47,7 +53,7 @@ module ClusterServicePy {
         method, this function creates new clusters by cutting the dendogram at
         a specific hieght or by some other approach.
     */
-    funcdef clusters_from_dendrogram(string dendrogram,
-        float height_cutoff) returns (ClusterResults);
+    funcdef clusters_from_dendrogram(KBaseFeatureValues.FloatMatrix2D matrix, 
+        string dendrogram, float height_cutoff) returns (ClusterResults);
 
 };

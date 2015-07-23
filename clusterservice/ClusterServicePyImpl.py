@@ -28,7 +28,7 @@ class ClusterServicePy:
         #END_CONSTRUCTOR
         pass
 
-    def cluster_k_means(self, ctx, matrix, k):
+    def cluster_k_means(self, ctx, matrix, k, n_start, max_iter, random_seed):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN cluster_k_means
@@ -46,18 +46,18 @@ class ClusterServicePy:
         # return the results
         return [returnVal]
 
-    def estimate_k(self, ctx, matrix):
+    def estimate_k(self, ctx, matrix, min_k, max_k, max_iter, random_seed):
         # ctx is the context object
-        # return variables are: cluster_number
+        # return variables are: returnVal
         #BEGIN estimate_k
         #END estimate_k
 
         # At some point might do deeper type checking...
-        if not isinstance(cluster_number, int):
+        if not isinstance(returnVal, dict):
             raise ValueError('Method estimate_k return value ' +
-                             'cluster_number is not type int as required.')
+                             'returnVal is not type dict as required.')
         # return the results
-        return [cluster_number]
+        return [returnVal]
 
     def cluster_hierarchical(self, ctx, matrix, distance_metric, linkage_criteria, height_cutoff, process_rows):
         # ctx is the context object
@@ -72,7 +72,7 @@ class ClusterServicePy:
         # return the results
         return [returnVal]
 
-    def clusters_from_dendrogram(self, ctx, dendrogram, height_cutoff):
+    def clusters_from_dendrogram(self, ctx, matrix, dendrogram, height_cutoff):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN clusters_from_dendrogram

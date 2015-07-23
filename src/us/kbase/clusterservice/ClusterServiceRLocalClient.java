@@ -30,7 +30,10 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * </pre>
      * @param   matrix   instance of type {@link us.kbase.kbasefeaturevalues.FloatMatrix2D FloatMatrix2D}
      * @param   k   instance of Long
-     * @return   instance of type {@link us.kbase.clusterservicepy.ClusterResults ClusterResults}
+     * @param   nStart   instance of Long
+     * @param   maxIter   instance of Long
+     * @param   randomSeed   instance of Long
+     * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
@@ -53,7 +56,11 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * clustering, this method provides an estimate of K by [...]
      * </pre>
      * @param   matrix   instance of type {@link us.kbase.kbasefeaturevalues.FloatMatrix2D FloatMatrix2D}
-     * @return   parameter "cluster_number" of Long
+     * @param   minK   instance of Long
+     * @param   maxK   instance of Long
+     * @param   maxIter   instance of Long
+     * @param   randomSeed   instance of Long
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKResult EstimateKResult}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
@@ -79,7 +86,7 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * @param   linkageCriteria   instance of String
      * @param   heightCutoff   instance of Double
      * @param   processRows   instance of original type "boolean" (Indicates true or false values, false = 0, true = 1 @range [0,1])
-     * @return   instance of type {@link us.kbase.clusterservicepy.ClusterResults ClusterResults}
+     * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
@@ -102,14 +109,16 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>
+     * @param   matrix   instance of type {@link us.kbase.kbasefeaturevalues.FloatMatrix2D FloatMatrix2D}
      * @param   dendrogram   instance of String
      * @param   heightCutoff   instance of Double
-     * @return   instance of type {@link us.kbase.clusterservicepy.ClusterResults ClusterResults}
+     * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clustersFromDendrogram(String dendrogram, Double heightCutoff) throws IOException, JsonClientException {
+    public ClusterResults clustersFromDendrogram(FloatMatrix2D matrix, String dendrogram, Double heightCutoff) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
+        args.add(matrix);
         args.add(dendrogram);
         args.add(heightCutoff);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};

@@ -59,13 +59,18 @@ public class ClusterServiceTest {
             System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());
             Assert.assertEquals(3, k);
             Long randomSeed = 403L;
-            List<Long> clusterLabels = cl.clusterKMeans(matrix, k, null, null, randomSeed).getClusterLabels();
+            ClusterResults cr1 = cl.clusterKMeans(matrix, k, null, null, randomSeed);
+            System.out.println(cr1);
+            List<Long> clusterLabels = cr1.getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
-            ClusterResults clRes = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
-            String dendrogram = clRes.getDendrogram();
+            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
+            //System.out.println(cr2);
+            String dendrogram = cr2.getDendrogram();
             System.out.println(dendrogram);
-            List<Long> clusterLabels2 = cl.clustersFromDendrogram(dendrogram, 0.2).getClusterLabels();
+            ClusterResults cr3 = cl.clustersFromDendrogram(matrix, dendrogram, 0.2);
+            //System.out.println(cr3);
+            List<Long> clusterLabels2 = cr3.getClusterLabels();
             System.out.println(clusterLabels2);
             checkClusterLabels(clusterLabels2);
         } catch (ServerException ex) {

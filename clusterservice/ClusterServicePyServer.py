@@ -267,16 +267,16 @@ class Application(object):
         self.rpc_service = JSONRPCServiceCustom()
         self.rpc_service.add(impl_ClusterServicePy.cluster_k_means,
                              name='ClusterServicePy.cluster_k_means',
-                             types=[dict, int])
+                             types=[dict, int, int, int, int])
         self.rpc_service.add(impl_ClusterServicePy.estimate_k,
                              name='ClusterServicePy.estimate_k',
-                             types=[dict])
+                             types=[dict, int, int, int, int])
         self.rpc_service.add(impl_ClusterServicePy.cluster_hierarchical,
                              name='ClusterServicePy.cluster_hierarchical',
                              types=[dict, basestring, basestring, float, int])
         self.rpc_service.add(impl_ClusterServicePy.clusters_from_dendrogram,
                              name='ClusterServicePy.clusters_from_dendrogram',
-                             types=[basestring, float])
+                             types=[dict, basestring, float])
 
     def __call__(self, environ, start_response):
         # Context object, equivalent to the perl impl CallContext
