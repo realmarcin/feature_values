@@ -86,7 +86,8 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(params.getInputMatrix()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        EstimateKResult toSave = mathClient.estimateK(matrix.getData(), null, null, null, null);
+        EstimateKResult toSave = mathClient.estimateK(matrix.getData(), params.getMinK(), 
+                params.getMaxK(), params.getMaxIter(), params.getRandomSeed());
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
                 .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
@@ -106,7 +107,8 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(params.getInputData()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK(), null, null, null);
+        ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK(), 
+                params.getNStart(), params.getMaxIter(), params.getRandomSeed());
         ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData());
         toSave.withFeatureClusters(clustersFromLabels(matrix, res));
         List<ProvenanceAction> provenance = Arrays.asList(
@@ -124,18 +126,31 @@ public class KBaseFeatureValuesImpl {
     }
 
     public List<LabeledCluster> clustersFromLabels(BioMatrix matrix, ClusterResults res) {
-        Map<Long, Map<String, Long>> labelToCluster = new LinkedHashMap<Long, Map<String, Long>>();
+        Map<Long, LabeledCluster> labelToCluster = new LinkedHashMap<Long, LabeledCluster>();
         List<LabeledCluster> featureClusters = new ArrayList<LabeledCluster>();
+        int minClusterLabel = -1;
         for (int featurePos = 0; featurePos < res.getClusterLabels().size(); featurePos++) {
             long clusterLabel = res.getClusterLabels().get(featurePos);
-            Map<String, Long> cluster = labelToCluster.get(clusterLabel);
+            if (minClusterLabel < 0 || minClusterLabel > clusterLabel)
+                minClusterLabel = (int)clusterLabel;
+            LabeledCluster cluster = labelToCluster.get(clusterLabel);
             if (cluster == null) {
-                cluster = new LinkedHashMap<String, Long>();
+                cluster = new LabeledCluster().withIdToPos(new LinkedHashMap<String, Long>());
                 labelToCluster.put(clusterLabel, cluster);
-                featureClusters.add(new LabeledCluster().withIdToPos(cluster));
+                featureClusters.add(cluster);
             }
             String featureLabel = matrix.getData().getRowIds().get(featurePos);
-            cluster.put(featureLabel, (long)featurePos);
+            cluster.getIdToPos().put(featureLabel, (long)featurePos);
+        }
+        if (res.getMeancor() != null || res.getMsecs() != null) {
+            for (long clusterLabel : labelToCluster.keySet()) {
+                LabeledCluster cluster = labelToCluster.get(clusterLabel);
+                int clusterPos = (int)clusterLabel - minClusterLabel;
+                if (res.getMeancor() != null)
+                    cluster.withMeancor(res.getMeancor().get(clusterPos));
+                if (res.getMsecs() != null)
+                    cluster.withMsec(res.getMsecs().get(clusterPos));
+            }
         }
         return featureClusters;
     }
