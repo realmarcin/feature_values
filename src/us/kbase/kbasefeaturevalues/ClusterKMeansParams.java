@@ -21,6 +21,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "k",
     "input_data",
+    "n_start",
+    "max_iter",
+    "random_seed",
     "out_workspace",
     "out_clusterset_id"
 })
@@ -30,6 +33,12 @@ public class ClusterKMeansParams {
     private Long k;
     @JsonProperty("input_data")
     private String inputData;
+    @JsonProperty("n_start")
+    private Long nStart;
+    @JsonProperty("max_iter")
+    private Long maxIter;
+    @JsonProperty("random_seed")
+    private Long randomSeed;
     @JsonProperty("out_workspace")
     private String outWorkspace;
     @JsonProperty("out_clusterset_id")
@@ -63,6 +72,51 @@ public class ClusterKMeansParams {
 
     public ClusterKMeansParams withInputData(String inputData) {
         this.inputData = inputData;
+        return this;
+    }
+
+    @JsonProperty("n_start")
+    public Long getNStart() {
+        return nStart;
+    }
+
+    @JsonProperty("n_start")
+    public void setNStart(Long nStart) {
+        this.nStart = nStart;
+    }
+
+    public ClusterKMeansParams withNStart(Long nStart) {
+        this.nStart = nStart;
+        return this;
+    }
+
+    @JsonProperty("max_iter")
+    public Long getMaxIter() {
+        return maxIter;
+    }
+
+    @JsonProperty("max_iter")
+    public void setMaxIter(Long maxIter) {
+        this.maxIter = maxIter;
+    }
+
+    public ClusterKMeansParams withMaxIter(Long maxIter) {
+        this.maxIter = maxIter;
+        return this;
+    }
+
+    @JsonProperty("random_seed")
+    public Long getRandomSeed() {
+        return randomSeed;
+    }
+
+    @JsonProperty("random_seed")
+    public void setRandomSeed(Long randomSeed) {
+        this.randomSeed = randomSeed;
+    }
+
+    public ClusterKMeansParams withRandomSeed(Long randomSeed) {
+        this.randomSeed = randomSeed;
         return this;
     }
 
@@ -108,7 +162,7 @@ public class ClusterKMeansParams {
 
     @Override
     public String toString() {
-        return ((((((((((("ClusterKMeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((("ClusterKMeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", nStart=")+ nStart)+", maxIter=")+ maxIter)+", randomSeed=")+ randomSeed)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

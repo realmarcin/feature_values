@@ -1,12 +1,13 @@
 package us.kbase.kbasefeaturevalues;
 
+import java.util.List;
 import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonServerMethod;
 import us.kbase.common.service.JsonServerServlet;
 
+//BEGIN_HEADER
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-//BEGIN_HEADER
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -282,6 +283,111 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
                 .withCommit(commit).withSafeConfiguration(safeConfig)
                 .withDeploymentCfgPath(deployCfgPath);
         //END status
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_item_descriptors</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemDescriptorsParams GetMatrixItemDescriptorsParams}
+     * @return   instance of list of type {@link us.kbase.kbasefeaturevalues.ItemDescriptor ItemDescriptor}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_item_descriptors")
+    public List<ItemDescriptor> getMatrixItemDescriptors(GetMatrixItemDescriptorsParams arg1, AuthToken authPart) throws Exception {
+        List<ItemDescriptor> returnVal = null;
+        //BEGIN get_matrix_item_descriptors
+        //END get_matrix_item_descriptors
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_items_stat</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemsStatParams GetMatrixItemsStatParams}
+     * @return   instance of list of type {@link us.kbase.kbasefeaturevalues.ItemStat ItemStat}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_items_stat")
+    public List<ItemStat> getMatrixItemsStat(GetMatrixItemsStatParams arg1, AuthToken authPart) throws Exception {
+        List<ItemStat> returnVal = null;
+        //BEGIN get_matrix_items_stat
+        //END get_matrix_items_stat
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_sets_stat</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixSetsStatParams GetMatrixSetsStatParams}
+     * @return   instance of list of type {@link us.kbase.kbasefeaturevalues.SetStat SetStat}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_sets_stat")
+    public List<SetStat> getMatrixSetsStat(GetMatrixSetsStatParams arg1, AuthToken authPart) throws Exception {
+        List<SetStat> returnVal = null;
+        //BEGIN get_matrix_sets_stat
+        //END get_matrix_sets_stat
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_items_correlation</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemsCorrelationParams GetMatrixItemsCorrelationParams}
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.PairwiseMatrixStat PairwiseMatrixStat}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_items_correlation")
+    public PairwiseMatrixStat getMatrixItemsCorrelation(GetMatrixItemsCorrelationParams arg1, AuthToken authPart) throws Exception {
+        PairwiseMatrixStat returnVal = null;
+        //BEGIN get_matrix_items_correlation
+        //END get_matrix_items_correlation
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_descriptor</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixDescriptorParams GetMatrixDescriptorParams}
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.MatrixDescriptor MatrixDescriptor}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_descriptor")
+    public MatrixDescriptor getMatrixDescriptor(GetMatrixDescriptorParams arg1, AuthToken authPart) throws Exception {
+        MatrixDescriptor returnVal = null;
+        //BEGIN get_matrix_descriptor
+        //END get_matrix_descriptor
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_ui</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixUIParams GetMatrixUIParams}
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.MatrixUI MatrixUI}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_ui")
+    public MatrixUI getMatrixUi(GetMatrixUIParams arg1, AuthToken authPart) throws Exception {
+        MatrixUI returnVal = null;
+        //BEGIN get_matrix_ui
+        //END get_matrix_ui
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_featureset_ui</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixFeatureSetUIParams GetMatrixFeatureSetUIParams}
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.MatrixFeatureSetUI MatrixFeatureSetUI}
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.get_matrix_featureset_ui")
+    public MatrixFeatureSetUI getMatrixFeaturesetUi(GetMatrixFeatureSetUIParams arg1, AuthToken authPart) throws Exception {
+        MatrixFeatureSetUI returnVal = null;
+        //BEGIN get_matrix_featureset_ui
+        //END get_matrix_featureset_ui
         return returnVal;
     }
 

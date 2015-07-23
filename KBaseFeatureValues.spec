@@ -168,11 +168,16 @@ module KBaseFeatureValues {
     typedef string ws_matrix_id;
 
     /*
-        Simple representation of a cluster, which maps features/conditions of the cluster to the
+        id_to_pos - simple representation of a cluster, which maps features/conditions of the cluster to the
         row/col index in the data (0-based index).  The index is useful for fast lookup of data
         for a specified feature/condition in the cluster.
+        @optional meancor msec
     */
-    typedef mapping<string, int> labeled_cluster;
+    typedef structure { 
+        mapping<string, int> id_to_pos;
+        float meancor;
+        float msec;
+    } labeled_cluster;
 
     /*
         A set of clusters, typically generated for a Float2DMatrix wrapper, such as Expression
@@ -217,6 +222,10 @@ module KBaseFeatureValues {
 
     typedef structure {
         ws_matrix_id input_matrix;
+        int min_k;
+        int max_k;
+        int max_iter;
+        int random_seed;
         string out_workspace;
         string out_estimate_result;
     } EstimateKParams;
@@ -233,6 +242,9 @@ module KBaseFeatureValues {
     typedef structure {
         int k;
         ws_matrix_id input_data;
+        int n_start;
+        int max_iter;
+        int random_seed;
         string out_workspace;
         string out_clusterset_id;
     } ClusterKMeansParams;

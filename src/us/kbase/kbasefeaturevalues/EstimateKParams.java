@@ -20,6 +20,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "input_matrix",
+    "min_k",
+    "max_k",
+    "max_iter",
+    "random_seed",
     "out_workspace",
     "out_estimate_result"
 })
@@ -27,6 +31,14 @@ public class EstimateKParams {
 
     @JsonProperty("input_matrix")
     private String inputMatrix;
+    @JsonProperty("min_k")
+    private Long minK;
+    @JsonProperty("max_k")
+    private Long maxK;
+    @JsonProperty("max_iter")
+    private Long maxIter;
+    @JsonProperty("random_seed")
+    private Long randomSeed;
     @JsonProperty("out_workspace")
     private String outWorkspace;
     @JsonProperty("out_estimate_result")
@@ -45,6 +57,66 @@ public class EstimateKParams {
 
     public EstimateKParams withInputMatrix(String inputMatrix) {
         this.inputMatrix = inputMatrix;
+        return this;
+    }
+
+    @JsonProperty("min_k")
+    public Long getMinK() {
+        return minK;
+    }
+
+    @JsonProperty("min_k")
+    public void setMinK(Long minK) {
+        this.minK = minK;
+    }
+
+    public EstimateKParams withMinK(Long minK) {
+        this.minK = minK;
+        return this;
+    }
+
+    @JsonProperty("max_k")
+    public Long getMaxK() {
+        return maxK;
+    }
+
+    @JsonProperty("max_k")
+    public void setMaxK(Long maxK) {
+        this.maxK = maxK;
+    }
+
+    public EstimateKParams withMaxK(Long maxK) {
+        this.maxK = maxK;
+        return this;
+    }
+
+    @JsonProperty("max_iter")
+    public Long getMaxIter() {
+        return maxIter;
+    }
+
+    @JsonProperty("max_iter")
+    public void setMaxIter(Long maxIter) {
+        this.maxIter = maxIter;
+    }
+
+    public EstimateKParams withMaxIter(Long maxIter) {
+        this.maxIter = maxIter;
+        return this;
+    }
+
+    @JsonProperty("random_seed")
+    public Long getRandomSeed() {
+        return randomSeed;
+    }
+
+    @JsonProperty("random_seed")
+    public void setRandomSeed(Long randomSeed) {
+        this.randomSeed = randomSeed;
+    }
+
+    public EstimateKParams withRandomSeed(Long randomSeed) {
+        this.randomSeed = randomSeed;
         return this;
     }
 
@@ -90,7 +162,7 @@ public class EstimateKParams {
 
     @Override
     public String toString() {
-        return ((((((((("EstimateKParams"+" [inputMatrix=")+ inputMatrix)+", outWorkspace=")+ outWorkspace)+", outEstimateResult=")+ outEstimateResult)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((("EstimateKParams"+" [inputMatrix=")+ inputMatrix)+", minK=")+ minK)+", maxK=")+ maxK)+", maxIter=")+ maxIter)+", randomSeed=")+ randomSeed)+", outWorkspace=")+ outWorkspace)+", outEstimateResult=")+ outEstimateResult)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

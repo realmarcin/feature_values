@@ -123,16 +123,16 @@ public class KBaseFeatureValuesImpl {
         return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }
 
-    public List<Map<String, Long>> clustersFromLabels(BioMatrix matrix, ClusterResults res) {
+    public List<LabeledCluster> clustersFromLabels(BioMatrix matrix, ClusterResults res) {
         Map<Long, Map<String, Long>> labelToCluster = new LinkedHashMap<Long, Map<String, Long>>();
-        List<Map<String, Long>> featureClusters = new ArrayList<Map<String, Long>>();
+        List<LabeledCluster> featureClusters = new ArrayList<LabeledCluster>();
         for (int featurePos = 0; featurePos < res.getClusterLabels().size(); featurePos++) {
             long clusterLabel = res.getClusterLabels().get(featurePos);
             Map<String, Long> cluster = labelToCluster.get(clusterLabel);
             if (cluster == null) {
                 cluster = new LinkedHashMap<String, Long>();
                 labelToCluster.put(clusterLabel, cluster);
-                featureClusters.add(cluster);
+                featureClusters.add(new LabeledCluster().withIdToPos(cluster));
             }
             String featureLabel = matrix.getData().getRowIds().get(featurePos);
             cluster.put(featureLabel, (long)featurePos);

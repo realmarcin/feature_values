@@ -45,15 +45,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class ClusterSet {
 
     @JsonProperty("feature_clusters")
-    private List<Map<String, Long>> featureClusters;
+    private List<us.kbase.kbasefeaturevalues.LabeledCluster> featureClusters;
     @JsonProperty("condition_clusters")
-    private List<Map<String, Long>> conditionClusters;
+    private List<us.kbase.kbasefeaturevalues.LabeledCluster> conditionClusters;
     @JsonProperty("feature_dendrogram")
-    private java.lang.String featureDendrogram;
+    private String featureDendrogram;
     @JsonProperty("condition_dendrogram")
-    private java.lang.String conditionDendrogram;
+    private String conditionDendrogram;
     @JsonProperty("original_data")
-    private java.lang.String originalData;
+    private String originalData;
     /**
      * <p>Original spec-file type: AnalysisReport</p>
      * <pre>
@@ -65,79 +65,79 @@ public class ClusterSet {
      */
     @JsonProperty("report")
     private AnalysisReport report;
-    private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("feature_clusters")
-    public List<Map<String, Long>> getFeatureClusters() {
+    public List<us.kbase.kbasefeaturevalues.LabeledCluster> getFeatureClusters() {
         return featureClusters;
     }
 
     @JsonProperty("feature_clusters")
-    public void setFeatureClusters(List<Map<String, Long>> featureClusters) {
+    public void setFeatureClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> featureClusters) {
         this.featureClusters = featureClusters;
     }
 
-    public ClusterSet withFeatureClusters(List<Map<String, Long>> featureClusters) {
+    public ClusterSet withFeatureClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> featureClusters) {
         this.featureClusters = featureClusters;
         return this;
     }
 
     @JsonProperty("condition_clusters")
-    public List<Map<String, Long>> getConditionClusters() {
+    public List<us.kbase.kbasefeaturevalues.LabeledCluster> getConditionClusters() {
         return conditionClusters;
     }
 
     @JsonProperty("condition_clusters")
-    public void setConditionClusters(List<Map<String, Long>> conditionClusters) {
+    public void setConditionClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> conditionClusters) {
         this.conditionClusters = conditionClusters;
     }
 
-    public ClusterSet withConditionClusters(List<Map<String, Long>> conditionClusters) {
+    public ClusterSet withConditionClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> conditionClusters) {
         this.conditionClusters = conditionClusters;
         return this;
     }
 
     @JsonProperty("feature_dendrogram")
-    public java.lang.String getFeatureDendrogram() {
+    public String getFeatureDendrogram() {
         return featureDendrogram;
     }
 
     @JsonProperty("feature_dendrogram")
-    public void setFeatureDendrogram(java.lang.String featureDendrogram) {
+    public void setFeatureDendrogram(String featureDendrogram) {
         this.featureDendrogram = featureDendrogram;
     }
 
-    public ClusterSet withFeatureDendrogram(java.lang.String featureDendrogram) {
+    public ClusterSet withFeatureDendrogram(String featureDendrogram) {
         this.featureDendrogram = featureDendrogram;
         return this;
     }
 
     @JsonProperty("condition_dendrogram")
-    public java.lang.String getConditionDendrogram() {
+    public String getConditionDendrogram() {
         return conditionDendrogram;
     }
 
     @JsonProperty("condition_dendrogram")
-    public void setConditionDendrogram(java.lang.String conditionDendrogram) {
+    public void setConditionDendrogram(String conditionDendrogram) {
         this.conditionDendrogram = conditionDendrogram;
     }
 
-    public ClusterSet withConditionDendrogram(java.lang.String conditionDendrogram) {
+    public ClusterSet withConditionDendrogram(String conditionDendrogram) {
         this.conditionDendrogram = conditionDendrogram;
         return this;
     }
 
     @JsonProperty("original_data")
-    public java.lang.String getOriginalData() {
+    public String getOriginalData() {
         return originalData;
     }
 
     @JsonProperty("original_data")
-    public void setOriginalData(java.lang.String originalData) {
+    public void setOriginalData(String originalData) {
         this.originalData = originalData;
     }
 
-    public ClusterSet withOriginalData(java.lang.String originalData) {
+    public ClusterSet withOriginalData(String originalData) {
         this.originalData = originalData;
         return this;
     }
@@ -176,17 +176,17 @@ public class ClusterSet {
     }
 
     @JsonAnyGetter
-    public Map<java.lang.String, Object> getAdditionalProperties() {
+    public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
     @JsonAnySetter
-    public void setAdditionalProperties(java.lang.String name, Object value) {
+    public void setAdditionalProperties(String name, Object value) {
         this.additionalProperties.put(name, value);
     }
 
     @Override
-    public java.lang.String toString() {
+    public String toString() {
         return ((((((((((((((("ClusterSet"+" [featureClusters=")+ featureClusters)+", conditionClusters=")+ conditionClusters)+", featureDendrogram=")+ featureDendrogram)+", conditionDendrogram=")+ conditionDendrogram)+", originalData=")+ originalData)+", report=")+ report)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
