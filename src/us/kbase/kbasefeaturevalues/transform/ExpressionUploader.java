@@ -49,17 +49,13 @@ public class ExpressionUploader {
             showUsage(parser, message);
             return;
         }
-        Map<String, Object> genome = null;
+        AuthToken token = null;
         if (parsedArgs.goName != null) {
             String user = System.getProperty("test.user");
             String pwd = System.getProperty("test.pwd");
             String tokenString = System.getenv("KB_AUTH_TOKEN");
-            AuthToken token = tokenString == null ? AuthService.login(user, pwd).getToken() :
+            token = tokenString == null ? AuthService.login(user, pwd).getToken() :
                 new AuthToken(tokenString);
-            WorkspaceClient cl = getWsClient(parsedArgs.wsUrl, token);
-            UObject genomeObj = cl.getObjects(Arrays.asList(new ObjectIdentity().withRef(
-                    parsedArgs.wsName + "/" + parsedArgs.goName))).get(0).getData();
-            genome = genomeObj.asClassInstance(Map.class);
         }
         File inputFile = null;
         StringBuilder fileList = new StringBuilder();
@@ -78,27 +74,9 @@ public class ExpressionUploader {
         if (inputFile == null)
             throw new IllegalStateException("Input file with extention .txt or .tsv was not " +
             		"found among: " + fileList);
-        String formatType = parsedArgs.fmtType;
-        if (formatType == null || formatType.trim().isEmpty())
-            formatType = FORMAT_TYPE_SIMPLE;
-        ExpressionMatrix matrix = null;
-        if (formatType.equalsIgnoreCase(FORMAT_TYPE_MO)) {
-            matrix = parseMicrobsOnlineFormat(new BufferedReader(new FileReader(inputFile)));
-        } else if (formatType.equalsIgnoreCase(FORMAT_TYPE_SIMPLE)) {
-            matrix = parseSimpleFormat(new BufferedReader(new FileReader(inputFile)));
-        } else {
-            throw new IllegalStateException("Unsupported format type: " + formatType);
-        }
-        if (parsedArgs.dataType != null && !parsedArgs.dataType.isEmpty())
-            matrix.withType(parsedArgs.dataType);
-        if (parsedArgs.dataScale != null && !parsedArgs.dataScale.isEmpty())
-            matrix.withScale(parsedArgs.dataScale);
-        if (genome != null) {
-            addFeatureMapping(matrix, genome);
-            matrix.withGenomeRef(parsedArgs.wsName + "/" + parsedArgs.goName);
-        }
-        if (parsedArgs.fillMissingValues)
-            fillMissingValues(matrix);
+        ExpressionMatrix matrix = parse(parsedArgs.wsUrl, parsedArgs.wsName, inputFile, 
+                parsedArgs.fmtType, parsedArgs.goName, parsedArgs.fillMissingValues, 
+                parsedArgs.dataType, parsedArgs.dataScale, token);
         String outputFileName = parsedArgs.outName;
         if (outputFileName == null)
             outputFileName = "expression_output.json";
@@ -109,6 +87,40 @@ public class ExpressionUploader {
             workDir.mkdirs();
         File outputFile = new File(workDir, outputFileName);
         UObject.getMapper().writeValue(outputFile, matrix);
+    }
+    
+    public static ExpressionMatrix parse(String wsUrl, String wsName, File inputFile, 
+            String fmtType, String goName, boolean fillMissingValues, String dataType, 
+            String dataScale, AuthToken token) throws Exception {
+        Map<String, Object> genome = null;
+        if (goName != null) {
+            WorkspaceClient cl = getWsClient(wsUrl, token);
+            UObject genomeObj = cl.getObjects(Arrays.asList(new ObjectIdentity().withRef(
+                    wsName + "/" + goName))).get(0).getData();
+            genome = genomeObj.asClassInstance(Map.class);
+        }
+        String formatType = fmtType;
+        if (formatType == null || formatType.trim().isEmpty())
+            formatType = FORMAT_TYPE_SIMPLE;
+        ExpressionMatrix matrix = null;
+        if (formatType.equalsIgnoreCase(FORMAT_TYPE_MO)) {
+            matrix = parseMicrobsOnlineFormat(new BufferedReader(new FileReader(inputFile)));
+        } else if (formatType.equalsIgnoreCase(FORMAT_TYPE_SIMPLE)) {
+            matrix = parseSimpleFormat(new BufferedReader(new FileReader(inputFile)));
+        } else {
+            throw new IllegalStateException("Unsupported format type: " + formatType);
+        }
+        if (dataType != null && !dataType.isEmpty())
+            matrix.withType(dataType);
+        if (dataScale != null && !dataScale.isEmpty())
+            matrix.withScale(dataScale);
+        if (genome != null) {
+            addFeatureMapping(matrix, genome);
+            matrix.withGenomeRef(wsName + "/" + goName);
+        }
+        if (fillMissingValues)
+            fillMissingValues(matrix);
+        return matrix;
     }
     
     private static WorkspaceClient getWsClient(String wsUrl, AuthToken token) throws Exception {

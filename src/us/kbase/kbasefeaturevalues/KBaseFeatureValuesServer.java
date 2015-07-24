@@ -20,6 +20,7 @@ import us.kbase.common.utils.AweUtils;
 import us.kbase.common.utils.TextUtils;
 import us.kbase.userandjobstate.InitProgress;
 import us.kbase.userandjobstate.UserAndJobStateClient;
+import us.kbase.workspace.WorkspaceClient;
 //END_HEADER
 
 /**
@@ -61,6 +62,16 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         return ret;
     }
     
+    public WorkspaceClient getWsClient(AuthToken authPart) throws Exception {
+        String wsUrl = config.get(CONFIG_PARAM_WS_URL);
+        if (wsUrl == null)
+            throw new IllegalStateException("Parameter '" + CONFIG_PARAM_WS_URL +
+                    "' is not defined in configuration");
+        WorkspaceClient wsClient = new WorkspaceClient(new URL(wsUrl), authPart);
+        wsClient.setAuthAllowedForHttp(true);
+        return wsClient;
+    }
+
     private String getAweUrl() throws Exception {
         String aweUrl = config.get(CONFIG_PARAM_AWE_URL);
         if (aweUrl == null)
@@ -96,6 +107,9 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         return jobId;
     }
     
+    private KBaseFeatureValuesImpl impl(AuthToken authPart) throws Exception {
+        return new KBaseFeatureValuesImpl(null, authPart.toString(), config, null);
+    }
     //END_CLASS_HEADER
 
     public KBaseFeatureValuesServer() throws Exception {
@@ -357,6 +371,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public MatrixDescriptor getMatrixDescriptor(GetMatrixDescriptorParams arg1, AuthToken authPart) throws Exception {
         MatrixDescriptor returnVal = null;
         //BEGIN get_matrix_descriptor
+        returnVal = impl(authPart).getMatrixDescriptor(arg1);
         //END get_matrix_descriptor
         return returnVal;
     }

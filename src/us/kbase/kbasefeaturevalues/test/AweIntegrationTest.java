@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,9 +46,12 @@ import us.kbase.kbasefeaturevalues.EstimateKParams;
 import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
+import us.kbase.kbasefeaturevalues.GetMatrixDescriptorParams;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
+import us.kbase.kbasefeaturevalues.MatrixDescriptor;
 import us.kbase.kbasefeaturevalues.ServiceStatus;
+import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.CreateWorkspaceParams;
 import us.kbase.workspace.ObjectData;
@@ -72,6 +76,8 @@ public class AweIntegrationTest {
     private static int mongoInitWaitSeconds = 240;
     private static int aweServerInitWaitSeconds = 60;
     private static int fvJobWaitSeconds = 60;
+
+    public static final String commonExpressionObjectName = "Desulfovibrio_vulgaris_Hildenborough.expression";
 
     
     @BeforeClass
@@ -118,6 +124,34 @@ public class AweIntegrationTest {
         }
         if (error != null)
             throw error;
+        //////////////////////////// Prepare common data //////////////////////////////
+        String contigsetObjName = "Desulfovibrio_vulgaris_Hildenborough.contigset";
+        String genomeObjName = "Desulfovibrio_vulgaris_Hildenborough.genome";
+        File inputDir = new File("test/data/upload1");
+        File inputFile = new File(inputDir, "Desulfovibrio_vulgaris_Hildenborough_microarray_log_level_data.txt");
+        Map<String, Object> contigsetData = new LinkedHashMap<String, Object>();
+        contigsetData.put("contigs", new ArrayList<Object>());
+        contigsetData.put("id", "1945.contigset");
+        contigsetData.put("md5", "md5");
+        contigsetData.put("name", "1945");
+        contigsetData.put("source", "User uploaded data");
+        contigsetData.put("source_id", "noid");
+        contigsetData.put("type", "Organism");
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(contigsetObjName).withType("KBaseGenomes.ContigSet")
+                .withData(new UObject(contigsetData)))));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> genomeData = UObject.getMapper().readValue(new File(inputDir,
+                "Desulfovibrio_vulgaris_Hildenborough_reduced_genome.json"), Map.class);
+        genomeData.put("contigset_ref", testWsName + "/" + contigsetObjName);
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(genomeObjName).withType("KBaseGenomes.Genome")
+                .withData(new UObject(genomeData)))));
+        ExpressionMatrix data = ExpressionUploader.parse(getWsUrl(), testWsName, inputFile, "MO", 
+                genomeObjName, true, null, null, token);
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(commonExpressionObjectName)
+                .withType("KBaseFeatureValues.ExpressionMatrix").withData(new UObject(data)))));
     }
     
     private static String findAweBinary(File dir, String program) throws Exception {
@@ -215,7 +249,14 @@ public class AweIntegrationTest {
         ClusterSet clSet4 = res4.getData().asClassInstance(ClusterSet.class);
         System.out.println("From dendrogram: " + clSet4.getFeatureClusters());        
     }
-
+    
+    @Test
+    public void testDataAPI() throws Exception {
+        MatrixDescriptor md1 = client.getMatrixDescriptor(new GetMatrixDescriptorParams().withInputData(
+                testWsName + "/" + commonExpressionObjectName));
+        System.out.println(md1);
+    }
+    
     private static FloatMatrix2D getSampleMatrix() {
         List<List<Double>> values = new ArrayList<List<Double>>();
         values.add(Arrays.asList(13.0, 2.0, 3.0));

@@ -24,6 +24,7 @@ import us.kbase.workspace.ObjectIdentity;
 import us.kbase.workspace.ObjectSaveData;
 import us.kbase.workspace.ProvenanceAction;
 import us.kbase.workspace.SaveObjectsParams;
+import us.kbase.workspace.SubObjectIdentity;
 import us.kbase.workspace.WorkspaceClient;
 
 public class KBaseFeatureValuesImpl {
@@ -218,6 +219,52 @@ public class KBaseFeatureValuesImpl {
         throw new IllegalStateException("Not yet implemented");
     }
 
+    @SuppressWarnings("unchecked")
+    public MatrixDescriptor getMatrixDescriptor(GetMatrixDescriptorParams params) throws Exception {
+        WorkspaceClient wsCl = getWsClient();
+        ObjectData obj = wsCl.getObjectSubset(Arrays.asList(new SubObjectIdentity().withRef(
+                params.getInputData()).withIncluded(Arrays.asList("data/col_ids", "data/row_ids", 
+                        "genome_ref", "scale", "type","row_normalization", "col_normalization")))).get(0);
+        Map<String, Object> matrix = obj.getData().asClassInstance(Map.class);
+        String matrixId = obj.getInfo().getE2();
+        String matrixName = obj.getInfo().getE2();
+        String matrixDescription = obj.getInfo().getE2();
+        String genomeId = null;
+        String genomeName = null;
+        int rowCount = -1;
+        int colCount = -1;
+        String scale = (String)matrix.get("scale");
+        String type = (String)matrix.get("type");
+        String rowNormalization = (String)matrix.get("row_normalization");
+        String colNormalization = (String)matrix.get("col_normalization");
+        Map<String, Object> data = (Map<String, Object>)matrix.get("data");
+        if (data != null) {
+            List<String> rowIds = (List<String>)data.get("row_ids");
+            rowCount = rowIds.size();
+            List<String> colIds = (List<String>)data.get("col_ids");
+            colCount = colIds.size();
+        } else {
+            Map<String, String> meta = obj.getInfo().getE11();
+            if (meta.containsKey("feature_count"))
+                rowCount = Integer.parseInt(meta.get("feature_count"));
+            if (meta.containsKey("condition_count"))
+                colCount = Integer.parseInt(meta.get("condition_count"));
+        }
+        String genomeRef = (String)matrix.get("genome_ref");
+        if (genomeRef != null) {
+            ObjectData genomeObj = wsCl.getObjectSubset(Arrays.asList(new SubObjectIdentity().withRef(
+                    genomeRef).withIncluded(Arrays.asList("scientific_name")))).get(0);
+            Map<String, Object> genomeMap = genomeObj.getData().asClassInstance(Map.class);
+            genomeId = genomeObj.getInfo().getE2();
+            genomeName = (String)genomeMap.get("scientific_name");
+        }
+        return new MatrixDescriptor().withMatrixId(matrixId).withMatrixName(matrixName)
+                .withMatrixDescription(matrixDescription).withGenomeId(genomeId)
+                .withGenomeName(genomeName).withRowsCount((long)rowCount)
+                .withColumnsCount((long)colCount).withScale(scale).withType(type)
+                .withRowNormalization(rowNormalization).withColNormalization(colNormalization);
+    }
+    
     public static class BioMatrix {
         @JsonProperty("genome_ref")
         private java.lang.String genomeRef;
