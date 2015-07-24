@@ -226,6 +226,7 @@ module KBaseFeatureValues {
         int max_k;
         int max_iter;
         int random_seed;
+        int neighb_size;
         string out_workspace;
         string out_estimate_result;
     } EstimateKParams;
@@ -245,6 +246,7 @@ module KBaseFeatureValues {
         int n_start;
         int max_iter;
         int random_seed;
+        string algorithm;
         string out_workspace;
         string out_clusterset_id;
     } ClusterKMeansParams;

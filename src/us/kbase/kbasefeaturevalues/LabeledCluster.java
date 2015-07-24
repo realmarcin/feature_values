@@ -14,9 +14,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: labeled_cluster</p>
  * <pre>
- * Simple representation of a cluster, which maps features/conditions of the cluster to the
+ * id_to_pos - simple representation of a cluster, which maps features/conditions of the cluster to the
  * row/col index in the data (0-based index).  The index is useful for fast lookup of data
  * for a specified feature/condition in the cluster.
+ * @optional meancor msec
  * </pre>
  * 
  */

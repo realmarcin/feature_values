@@ -82,13 +82,18 @@ public class KBaseFeatureValuesImpl {
         return mathClient;
     }
     
+    public String getJobId() {
+        return jobId;
+    }
+    
     public String estimateK(EstimateKParams params) throws Exception {
         ObjectData objData = getWsClient().getObjects(Arrays.asList(
                 new ObjectIdentity().withRef(params.getInputMatrix()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
         EstimateKResult toSave = mathClient.estimateK(matrix.getData(), params.getMinK(), 
-                params.getMaxK(), params.getMaxIter(), params.getRandomSeed());
+                params.getMaxK(), params.getMaxIter(), params.getRandomSeed(),
+                params.getNeighbSize());
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
                 .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
@@ -109,7 +114,8 @@ public class KBaseFeatureValuesImpl {
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
         ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK(), 
-                params.getNStart(), params.getMaxIter(), params.getRandomSeed());
+                params.getNStart(), params.getMaxIter(), params.getRandomSeed(),
+                params.getAlgorithm());
         ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData());
         toSave.withFeatureClusters(clustersFromLabels(matrix, res));
         List<ProvenanceAction> provenance = Arrays.asList(

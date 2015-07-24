@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "n_start",
     "max_iter",
     "random_seed",
+    "algorithm",
     "out_workspace",
     "out_clusterset_id"
 })
@@ -39,6 +40,8 @@ public class ClusterKMeansParams {
     private Long maxIter;
     @JsonProperty("random_seed")
     private Long randomSeed;
+    @JsonProperty("algorithm")
+    private String algorithm;
     @JsonProperty("out_workspace")
     private String outWorkspace;
     @JsonProperty("out_clusterset_id")
@@ -120,6 +123,21 @@ public class ClusterKMeansParams {
         return this;
     }
 
+    @JsonProperty("algorithm")
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    @JsonProperty("algorithm")
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public ClusterKMeansParams withAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+        return this;
+    }
+
     @JsonProperty("out_workspace")
     public String getOutWorkspace() {
         return outWorkspace;
@@ -162,7 +180,7 @@ public class ClusterKMeansParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("ClusterKMeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", nStart=")+ nStart)+", maxIter=")+ maxIter)+", randomSeed=")+ randomSeed)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((("ClusterKMeansParams"+" [k=")+ k)+", inputData=")+ inputData)+", nStart=")+ nStart)+", maxIter=")+ maxIter)+", randomSeed=")+ randomSeed)+", algorithm=")+ algorithm)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

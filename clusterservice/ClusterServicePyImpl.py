@@ -28,7 +28,20 @@ class ClusterServicePy:
         #END_CONSTRUCTOR
         pass
 
-    def cluster_k_means(self, ctx, matrix, k, n_start, max_iter, random_seed):
+    def estimate_k(self, ctx, matrix, min_k, max_k, max_iter, random_seed, neighb_size):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN estimate_k
+        #END estimate_k
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method estimate_k return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
+    def cluster_k_means(self, ctx, matrix, k, n_start, max_iter, random_seed, algorithm):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN cluster_k_means
@@ -42,19 +55,6 @@ class ClusterServicePy:
         # At some point might do deeper type checking...
         if not isinstance(returnVal, dict):
             raise ValueError('Method cluster_k_means return value ' +
-                             'returnVal is not type dict as required.')
-        # return the results
-        return [returnVal]
-
-    def estimate_k(self, ctx, matrix, min_k, max_k, max_iter, random_seed):
-        # ctx is the context object
-        # return variables are: returnVal
-        #BEGIN estimate_k
-        #END estimate_k
-
-        # At some point might do deeper type checking...
-        if not isinstance(returnVal, dict):
-            raise ValueError('Method estimate_k return value ' +
                              'returnVal is not type dict as required.')
         # return the results
         return [returnVal]

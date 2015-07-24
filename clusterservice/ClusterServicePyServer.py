@@ -265,12 +265,12 @@ class Application(object):
             call_id=True, logfile=self.userlog.get_log_file())
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
-        self.rpc_service.add(impl_ClusterServicePy.cluster_k_means,
-                             name='ClusterServicePy.cluster_k_means',
-                             types=[dict, int, int, int, int])
         self.rpc_service.add(impl_ClusterServicePy.estimate_k,
                              name='ClusterServicePy.estimate_k',
-                             types=[dict, int, int, int, int])
+                             types=[dict, int, int, int, int, int])
+        self.rpc_service.add(impl_ClusterServicePy.cluster_k_means,
+                             name='ClusterServicePy.cluster_k_means',
+                             types=[dict, int, int, int, int, basestring])
         self.rpc_service.add(impl_ClusterServicePy.cluster_hierarchical,
                              name='ClusterServicePy.cluster_hierarchical',
                              types=[dict, basestring, basestring, float, int])

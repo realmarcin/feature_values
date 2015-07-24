@@ -26,19 +26,19 @@ module ClusterServicePy {
     } ClusterResults;
 
     /*
-        Clusters features by K-means clustering.
-    */
-    funcdef cluster_k_means(KBaseFeatureValues.FloatMatrix2D matrix,
-         int k, int n_start, int max_iter, int random_seed) 
-         returns (ClusterResults);
-
-    /*
         Used as an analysis step before generating clusters using K-means 
         clustering, this method provides an estimate of K by [...]
     */
     funcdef estimate_k(KBaseFeatureValues.FloatMatrix2D matrix, int min_k, 
-        int max_k, int max_iter, int random_seed) 
+        int max_k, int max_iter, int random_seed, int neighb_size) 
         returns (KBaseFeatureValues.EstimateKResult);
+
+    /*
+        Clusters features by K-means clustering.
+    */
+    funcdef cluster_k_means(KBaseFeatureValues.FloatMatrix2D matrix,
+         int k, int n_start, int max_iter, int random_seed, 
+         string algorithm) returns (ClusterResults);
 
     /*
         Clusters features by hierarchical clustering.

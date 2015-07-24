@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "max_k",
     "max_iter",
     "random_seed",
+    "neighb_size",
     "out_workspace",
     "out_estimate_result"
 })
@@ -39,6 +40,8 @@ public class EstimateKParams {
     private Long maxIter;
     @JsonProperty("random_seed")
     private Long randomSeed;
+    @JsonProperty("neighb_size")
+    private Long neighbSize;
     @JsonProperty("out_workspace")
     private String outWorkspace;
     @JsonProperty("out_estimate_result")
@@ -120,6 +123,21 @@ public class EstimateKParams {
         return this;
     }
 
+    @JsonProperty("neighb_size")
+    public Long getNeighbSize() {
+        return neighbSize;
+    }
+
+    @JsonProperty("neighb_size")
+    public void setNeighbSize(Long neighbSize) {
+        this.neighbSize = neighbSize;
+    }
+
+    public EstimateKParams withNeighbSize(Long neighbSize) {
+        this.neighbSize = neighbSize;
+        return this;
+    }
+
     @JsonProperty("out_workspace")
     public String getOutWorkspace() {
         return outWorkspace;
@@ -162,7 +180,7 @@ public class EstimateKParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("EstimateKParams"+" [inputMatrix=")+ inputMatrix)+", minK=")+ minK)+", maxK=")+ maxK)+", maxIter=")+ maxIter)+", randomSeed=")+ randomSeed)+", outWorkspace=")+ outWorkspace)+", outEstimateResult=")+ outEstimateResult)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((("EstimateKParams"+" [inputMatrix=")+ inputMatrix)+", minK=")+ minK)+", maxK=")+ maxK)+", maxIter=")+ maxIter)+", randomSeed=")+ randomSeed)+", neighbSize=")+ neighbSize)+", outWorkspace=")+ outWorkspace)+", outEstimateResult=")+ outEstimateResult)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -33,17 +33,19 @@ public class ClusterServicePyLocalClient extends JsonLocalClientCaller implement
      * @param   nStart   instance of Long
      * @param   maxIter   instance of Long
      * @param   randomSeed   instance of Long
+     * @param   algorithm   instance of String
      * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k, Long nStart, Long maxIter, Long randomSeed) throws IOException, JsonClientException {
+    public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k, Long nStart, Long maxIter, Long randomSeed, String algorithm) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
         args.add(k);
         args.add(nStart);
         args.add(maxIter);
         args.add(randomSeed);
+        args.add(algorithm);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
         List<ClusterResults> res = jsonrpcCall("ClusterServicePy.cluster_k_means", args, retType, true, false);
         return res.get(0);
@@ -60,17 +62,19 @@ public class ClusterServicePyLocalClient extends JsonLocalClientCaller implement
      * @param   maxK   instance of Long
      * @param   maxIter   instance of Long
      * @param   randomSeed   instance of Long
+     * @param   neighbSize   instance of Long
      * @return   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKResult EstimateKResult}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed) throws IOException, JsonClientException {
+    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed, Long neighbSize) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
         args.add(minK);
         args.add(maxK);
         args.add(maxIter);
         args.add(randomSeed);
+        args.add(neighbSize);
         TypeReference<List<EstimateKResult>> retType = new TypeReference<List<EstimateKResult>>() {};
         List<EstimateKResult> res = jsonrpcCall("ClusterServicePy.estimate_k", args, retType, true, false);
         return res.get(0);

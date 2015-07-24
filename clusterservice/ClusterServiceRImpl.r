@@ -5,6 +5,13 @@ library(amap)
 #library(sp)
 library(ape)
 
+mean_m = function(vec){
+  vec[as.vector(is.nan(vec))] <- NA
+  n <- sum(!is.na(vec))
+  summ <- sum(vec,na.rm=TRUE)
+  summ/n
+}
+
 calc_cluster_props = function(logratios_median, cluster, ret) {
     ###mean pairwise correlation
     meancor <- c()
@@ -20,10 +27,10 @@ calc_cluster_props = function(logratios_median, cluster, ret) {
     for(i in 1:max(cluster)) {
         clust_ind <- which(cluster == i)
         curdata <- logratios_median[clust_ind,]
-        MSEall <- median((curdata-median(curdata))^2)
+        MSEall <- mean_m((curdata-mean_m(curdata))^2)
         cmeans <- colMeans(curdata,na.rm=TRUE)
         csds <- apply(curdata,2,sd,na.rm=TRUE)
-        MSEC <- median((sweep(curdata,2,cmeans))^2/MSEall)
+        MSEC <- mean_m((sweep(curdata,2,cmeans))^2/MSEall)
         MSECs <- c(MSECs, MSEC)
     }
 
@@ -50,32 +57,16 @@ clusters_from_dendrogram = function(values, dendrogram, height_cutoff) {
 
 methods <- list()
 
-methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start, 
-        max_iter, random_seed) {
-    if (is.null(n_start))
-        n_start <- 1000
-    if (is.null(max_iter))
-        max_iter <- 1000
-    values <- matrix[["values"]]
-    #row_names <- matrix[["row_ids"]]
-    row_names <- c(1:length(matrix[["row_ids"]]))-1
-    row.names(values) <- row_names
-    values <- data.matrix(values)
-    #col_ids <- matrix[["col_ids"]]
-    if (!is.null(random_seed))
-        set.seed(random_seed)
-    km <- kmeans(values, k, iter.max = max_iter, nstart=n_start, algorithm="Lloyd")
-    calc_cluster_props(values, km[["cluster"]], list(cluster_labels=km[["cluster"]]))
-}
-
 methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k, 
-        max_iter, random_seed) {
+        max_iter, random_seed, neighb_size) {
     if (is.null(min_k))
         min_k <- 2
     if (is.null(max_k))
         max_k <- 200
     if (is.null(max_iter))
         max_iter <- 100
+    if (is.null(neighb_size))
+        neighb_size <- 10
     values <- matrix[["values"]]
     #row_names <- matrix[["row_ids"]]
     row_names <- c(1:length(matrix[["row_ids"]]))-1
@@ -85,7 +76,8 @@ methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k,
     if (!is.null(random_seed))
         set.seed(random_seed)
     valid <- clValid(values, nClust=c(min_k:max_clust_num), maxitems=nrow(values), 
-        clMethods=c("kmeans"),validation=c("internal"), iter.max = max_iter)
+        clMethods=c("kmeans"),validation=c("internal"), iter.max=max_iter,
+        neighbSize=neighb_size)
     ret <- measures(valid, "Silhouette")[1,,1]
     ret_names <- names(ret)
     best_pos <- which.max(ret)
@@ -96,6 +88,26 @@ methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k,
         cluster_count_qualities[[cluster_count]] <- quality
     }
     list(best_k=unbox(as.numeric(ret_names[best_pos])), estimate_cluster_sizes=cluster_count_qualities)
+}
+
+methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start, 
+        max_iter, random_seed, algorithm_name) {
+    if (is.null(n_start))
+        n_start <- 1000
+    if (is.null(max_iter))
+        max_iter <- 1000
+    if (is.null(algorithm_name))
+        algorithm_name <- "Lloyd"
+    values <- matrix[["values"]]
+    #row_names <- matrix[["row_ids"]]
+    row_names <- c(1:length(matrix[["row_ids"]]))-1
+    row.names(values) <- row_names
+    values <- data.matrix(values)
+    #col_ids <- matrix[["col_ids"]]
+    if (!is.null(random_seed))
+        set.seed(random_seed)
+    km <- kmeans(values, k, iter.max = max_iter, nstart=n_start, algorithm=algorithm_name)
+    calc_cluster_props(values, km[["cluster"]], list(cluster_labels=km[["cluster"]]))
 }
 
 methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix, 

@@ -36,7 +36,7 @@ public class ClusterServiceTest {
         cl.setBinDir(new File("bin"));
         try {
             List<Long> clusterLabels = cl.clusterKMeans(
-                    getSampleMatrix(), 3L, null, null, null).getClusterLabels();
+                    getSampleMatrix(), 3L, null, null, null, null).getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
         } catch (ServerException ex) {
@@ -53,13 +53,13 @@ public class ClusterServiceTest {
         cl.setBinDir(new File("bin"));
         FloatMatrix2D matrix = getSampleMatrix();
         try {
-            EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null);
+            EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null, null);
             long k = estK.getBestK();
             System.out.println("Estimated K: " + k);
             System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());
             Assert.assertEquals(3, k);
             Long randomSeed = 403L;
-            ClusterResults cr1 = cl.clusterKMeans(matrix, k, null, null, randomSeed);
+            ClusterResults cr1 = cl.clusterKMeans(matrix, k, null, null, randomSeed, null);
             System.out.println(cr1);
             List<Long> clusterLabels = cr1.getClusterLabels();
             System.out.println(clusterLabels);

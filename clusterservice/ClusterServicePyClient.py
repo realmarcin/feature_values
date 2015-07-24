@@ -170,18 +170,18 @@ class ClusterServicePy(object):
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
  
-    def cluster_k_means(self, matrix, k, n_start, max_iter, random_seed, json_rpc_context = None):
-        if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method cluster_k_means: argument json_rpc_context is not type dict as required.')
-        resp = self._call('ClusterServicePy.cluster_k_means',
-                          [matrix, k, n_start, max_iter, random_seed], json_rpc_context)
-        return resp[0]
-  
-    def estimate_k(self, matrix, min_k, max_k, max_iter, random_seed, json_rpc_context = None):
+    def estimate_k(self, matrix, min_k, max_k, max_iter, random_seed, neighb_size, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method estimate_k: argument json_rpc_context is not type dict as required.')
         resp = self._call('ClusterServicePy.estimate_k',
-                          [matrix, min_k, max_k, max_iter, random_seed], json_rpc_context)
+                          [matrix, min_k, max_k, max_iter, random_seed, neighb_size], json_rpc_context)
+        return resp[0]
+  
+    def cluster_k_means(self, matrix, k, n_start, max_iter, random_seed, algorithm, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method cluster_k_means: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.cluster_k_means',
+                          [matrix, k, n_start, max_iter, random_seed, algorithm], json_rpc_context)
         return resp[0]
   
     def cluster_hierarchical(self, matrix, distance_metric, linkage_criteria, height_cutoff, process_rows, json_rpc_context = None):
