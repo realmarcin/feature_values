@@ -112,13 +112,8 @@ public class JsonLocalClientCaller {
                     ex.getMessage(), ex);
         }
         if ((!outputFile.exists()) || outputFile.length() == 0) {
-            String msg = "Error running service CLI for method '" + method + "' " + 
-                    "with exit code " + exitCode;
-            if (outSb.length() > 0)
-                msg += "\nOutput:\n" + outSb;
-            if (errSb.length() > 0)
-                msg += "\nErrors:\n" + errSb;
-            throw new JsonClientException(msg);
+            throw new JsonClientException(addOutErr("Error running service CLI for method " +
+            		"'" + method + "' with exit code " + exitCode, outSb, errSb));
         }
         // Parse response into json
         JsonTokenStream jts = new JsonTokenStream(outputFile);
@@ -149,22 +144,29 @@ public class JsonLocalClientCaller {
             Map<String, String> retError = resp.get("error").asClassInstance(new TypeReference<Map<String, String>>(){});
             String data = retError.get("data") == null ? retError.get("error") : retError.get("data");
             if (data == null || data.length() == 0) {
-                data = "Error running service CLI for method '" + method + "' " + 
-                        "with exit code " + exitCode;
-                if (outSb.length() > 0)
-                    data += "\nOutput:\n" + outSb;
-                if (errSb.length() > 0)
-                    data += "\nErrors:\n" + errSb;
+                data = addOutErr("Error running service CLI for method '" + method + "' " + 
+                        "with exit code " + exitCode, outSb, errSb);
             }
-            throw new ServerException(retError.get("message"),
-                    new Integer(retError.get("code")), retError.get("name"),
-                    data);
+            throw new ServerException(retError.get("message"), new Integer(retError.get("code")), 
+                    retError.get("name"), data);
         } if (resp.containsKey("result")) {
-            RET res = mapper.readValue(resp.get("result").getPlacedStream(), cls);
-            return res;
+            try {
+                RET res = mapper.readValue(resp.get("result").getPlacedStream(), cls);
+                return res;
+            } catch (Exception ex) {
+                throw new JsonClientException(addOutErr(ex.getMessage(), outSb, errSb), ex);
+            }
         } else {
             throw new ServerException("An unknown server error occured", 0, "Unknown", null);
         }
+    }
+
+    private String addOutErr(String data, StringBuilder outSb, StringBuilder errSb) {
+        if (outSb.length() > 0)
+            data += "\nOutput:\n" + outSb;
+        if (errSb.length() > 0)
+            data += "\nErrors:\n" + errSb;
+        return data;
     }
     
     private static int exec(File workDir, StringBuilder out, StringBuilder err, 

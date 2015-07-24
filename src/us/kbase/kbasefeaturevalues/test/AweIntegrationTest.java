@@ -247,7 +247,7 @@ public class AweIntegrationTest {
         ObjectData res4 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj3Name))).get(0);
         ClusterSet clSet4 = res4.getData().asClassInstance(ClusterSet.class);
-        System.out.println("From dendrogram: " + clSet4.getFeatureClusters());        
+        System.out.println("From dendrogram: " + clSet4.getFeatureClusters());
     }
     
     @Test

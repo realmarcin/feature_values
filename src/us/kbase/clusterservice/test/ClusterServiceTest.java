@@ -47,10 +47,7 @@ public class ClusterServiceTest {
 
     @Test
     public void rTest() throws Exception {
-        File workDir = generateTempDir(rootTempDir, "test_clusterservice_r1_", "");
-        workDir.mkdirs();
-        ClusterServiceRLocalClient cl = new ClusterServiceRLocalClient(workDir);
-        cl.setBinDir(new File("bin"));
+        ClusterServiceRLocalClient cl = getRClient("r1");
         FloatMatrix2D matrix = getSampleMatrix();
         try {
             EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null, null);
@@ -79,6 +76,24 @@ public class ClusterServiceTest {
         }
     }
 
+    private ClusterServiceRLocalClient getRClient(String testType) {
+        File workDir = generateTempDir(rootTempDir, "test_clusterservice_" + testType + "_", "");
+        workDir.mkdirs();
+        ClusterServiceRLocalClient cl = new ClusterServiceRLocalClient(workDir);
+        cl.setBinDir(new File("bin"));
+        return cl;
+    }
+
+    @Test
+    public void rTest2() throws Exception {
+        ClusterServiceRLocalClient cl = getRClient("r2");
+        File inputFile = new File("test/data/upload2/Desulfovibrio_vulgaris_Hildenborough_microarray_log_level_data.tsv");
+        ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
+                null, true, null, null, null);
+        ClusterResults res = cl.clusterKMeans(data.getData(), 100L, 1000L, 1000L, 123L, "Lloyd");
+        System.out.println(res);
+    }
+    
     private static void checkClusterLabels(List<Long> labels) throws Exception {
         String errMsg = "Unexpected labels: " + labels;
         Assert.assertEquals(errMsg, 7, labels.size());
