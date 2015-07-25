@@ -231,7 +231,7 @@ public class KBaseFeatureValuesImpl {
         ObjectData obj = wsCl.getObjectSubset(Arrays.asList(new SubObjectIdentity().withRef(
                 params.getInputData()).withIncluded(Arrays.asList("data/col_ids", "data/row_ids", 
                         "genome_ref", "scale", "type","row_normalization", "col_normalization")))).get(0);
-        Map<String, Object> matrix = obj.getData().asClassInstance(Map.class);
+        BioMatrix matrix = obj.getData().asClassInstance(BioMatrix.class);
         String matrixId = obj.getInfo().getE2();
         String matrixName = obj.getInfo().getE2();
         String matrixDescription = obj.getInfo().getE2();
@@ -239,15 +239,15 @@ public class KBaseFeatureValuesImpl {
         String genomeName = null;
         int rowCount = -1;
         int colCount = -1;
-        String scale = (String)matrix.get("scale");
-        String type = (String)matrix.get("type");
-        String rowNormalization = (String)matrix.get("row_normalization");
-        String colNormalization = (String)matrix.get("col_normalization");
-        Map<String, Object> data = (Map<String, Object>)matrix.get("data");
+        String scale = (String)matrix.getAdditionalProperties().get("scale");
+        String type = (String)matrix.getAdditionalProperties().get("type");
+        String rowNormalization = (String)matrix.getAdditionalProperties().get("row_normalization");
+        String colNormalization = (String)matrix.getAdditionalProperties().get("col_normalization");
+        FloatMatrix2D data = matrix.getData();
         if (data != null) {
-            List<String> rowIds = (List<String>)data.get("row_ids");
+            List<String> rowIds = data.getRowIds();
             rowCount = rowIds.size();
-            List<String> colIds = (List<String>)data.get("col_ids");
+            List<String> colIds = data.getColIds();
             colCount = colIds.size();
         } else {
             Map<String, String> meta = obj.getInfo().getE11();
@@ -256,7 +256,7 @@ public class KBaseFeatureValuesImpl {
             if (meta.containsKey("condition_count"))
                 colCount = Integer.parseInt(meta.get("condition_count"));
         }
-        String genomeRef = (String)matrix.get("genome_ref");
+        String genomeRef = (String)matrix.getGenomeRef();
         if (genomeRef != null) {
             ObjectData genomeObj = wsCl.getObjectSubset(Arrays.asList(new SubObjectIdentity().withRef(
                     genomeRef).withIncluded(Arrays.asList("scientific_name")))).get(0);

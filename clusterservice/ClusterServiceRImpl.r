@@ -6,10 +6,15 @@ library(amap)
 library(ape)
 
 mean_m = function(vec){
-  vec[as.vector(is.nan(vec))] <- NA
-  n <- sum(!is.na(vec))
-  summ <- sum(vec,na.rm=TRUE)
-  summ/n
+    vec[as.vector(is.nan(vec))] <- NA
+    n <- sum(!is.na(vec))
+    summ <- sum(vec,na.rm=TRUE)
+    summ/n
+}
+
+naToNaN = function(x) {
+    x[is.na(x)] <- NaN
+    return(x)
 }
 
 calc_cluster_props = function(logratios_median, cluster, ret) {
@@ -21,6 +26,7 @@ calc_cluster_props = function(logratios_median, cluster, ret) {
         AbCorC <- mean(cors[lower.tri(cors, diag=FALSE)])
         meancor <- c(meancor, AbCorC)
     }
+    meancor <- naToNaN(meancor)
 
     ###MSEC
     MSECs <- c()
@@ -33,10 +39,11 @@ calc_cluster_props = function(logratios_median, cluster, ret) {
         MSEC <- mean_m((sweep(curdata,2,cmeans))^2/MSEall)
         MSECs <- c(MSECs, MSEC)
     }
+    MSECs <- naToNaN(MSECs)
 
     ret[["meancor"]] <- meancor
     ret[["msecs"]] <- MSECs
-    ret
+    return(ret)
 }
 
 clusters_from_dendrogram = function(values, dendrogram, height_cutoff) {
@@ -51,8 +58,8 @@ clusters_from_dendrogram = function(values, dendrogram, height_cutoff) {
         value <- as.integer(groups[pos])
         cluster_labels[name + 1] <- value
     }
-    calc_cluster_props(values, cluster_labels, list(cluster_labels=cluster_labels, 
-        dendrogram=unbox(dendrogram)))
+    return(calc_cluster_props(values, cluster_labels, list(cluster_labels=cluster_labels, 
+        dendrogram=unbox(dendrogram))))
 }
 
 methods <- list()
@@ -87,7 +94,7 @@ methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k,
         quality <- unbox(ret[pos])
         cluster_count_qualities[[cluster_count]] <- quality
     }
-    list(best_k=unbox(as.numeric(ret_names[best_pos])), estimate_cluster_sizes=cluster_count_qualities)
+    return(list(best_k=unbox(as.numeric(ret_names[best_pos])), estimate_cluster_sizes=cluster_count_qualities))
 }
 
 methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start, 
@@ -107,7 +114,7 @@ methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start,
     if (!is.null(random_seed))
         set.seed(random_seed)
     km <- kmeans(values, k, iter.max = max_iter, nstart=n_start, algorithm=algorithm_name)
-    calc_cluster_props(values, km[["cluster"]], list(cluster_labels=km[["cluster"]]))
+    return(calc_cluster_props(values, km[["cluster"]], list(cluster_labels=km[["cluster"]])))
 }
 
 methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix, 
@@ -124,7 +131,7 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
     #print(is.ultrametric(tree))
     #print(is.binary.tree(tree))
     #print(is.rooted(tree))
-    clusters_from_dendrogram(values, newick, height_cutoff)
+    return(clusters_from_dendrogram(values, newick, height_cutoff))
 }
 
 methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(
@@ -133,7 +140,7 @@ methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
     values <- data.matrix(values)
-    clusters_from_dendrogram(values, dendrogram, height_cutoff);
+    return(clusters_from_dendrogram(values, dendrogram, height_cutoff))
 }
 
 tryCatch({

@@ -84,8 +84,9 @@ public class ClusterServiceTest {
         return cl;
     }
 
+    @Ignore
     @Test
-    public void rTest2() throws Exception {
+    public void r2Test() throws Exception {
         ClusterServiceRLocalClient cl = getRClient("r2");
         File inputFile = new File("test/data/upload2/Desulfovibrio_vulgaris_Hildenborough_microarray_log_level_data.tsv");
         ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
