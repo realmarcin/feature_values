@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import us.kbase.auth.AuthToken;
@@ -221,8 +222,55 @@ public class KBaseFeatureValuesImpl {
         throw new IllegalStateException("Not yet implemented");
     }
 
-    public void correctMatrix(CorrectMatrixParams params) throws Exception {
-        throw new IllegalStateException("Not yet implemented");
+    public String correctMatrix(CorrectMatrixParams params) throws Exception {
+        ObjectData objData = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withRef(params.getInputData()))).get(0);
+        String inputType = objData.getInfo().getE3();
+        BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
+        String transType = params.getTransformType();
+        if (transType == null || !transType.equals("missing"))
+            throw new IllegalStateException("Unsupported transformation type: " + transType);
+        MatrixUtil.fillMissingValues(matrix.getData());
+        String outMatrixId = params.getOutMatrixId();
+        if (outMatrixId == null)
+            outMatrixId = objData.getInfo().getE2();
+        List<ProvenanceAction> provenance = Arrays.asList(
+                new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
+                .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
+                .withDescription("Correcting matrix values")
+                .withInputWsObjects(Arrays.asList(params.getInputData()))
+                .withMethod("correct_matrix")
+                .withMethodParams(Arrays.asList(new UObject(params))));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
+                .withObjects(Arrays.asList(new ObjectSaveData()
+                .withType(inputType).withName(outMatrixId)
+                .withData(new UObject(matrix)).withProvenance(provenance))));
+        return params.getOutWorkspace() + "/" + outMatrixId;
+    }
+
+    public String reconnectMatrixToGenome(ReconnectMatrixToGenomeParams params) throws Exception {
+        ObjectData objData = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withRef(params.getInputData()))).get(0);
+        String inputType = objData.getInfo().getE3();
+        BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
+        Map<String, Object> genome = MatrixUtil.loadGenomeFeatures(getWsClient(), params.getGenomeRef());
+        matrix.setFeatureMapping(MatrixUtil.constructFeatureMapping(matrix.getData(), genome));
+        matrix.setGenomeRef(params.getGenomeRef());
+        String outMatrixId = params.getOutMatrixId();
+        if (outMatrixId == null)
+            outMatrixId = objData.getInfo().getE2();
+        List<ProvenanceAction> provenance = Arrays.asList(
+                new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
+                .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
+                .withDescription("Reconnection of matrix rows to genome features")
+                .withInputWsObjects(Arrays.asList(params.getInputData()))
+                .withMethod("reconnect_matrix_to_genome")
+                .withMethodParams(Arrays.asList(new UObject(params))));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
+                .withObjects(Arrays.asList(new ObjectSaveData()
+                .withType(inputType).withName(outMatrixId)
+                .withData(new UObject(matrix)).withProvenance(provenance))));
+        return params.getOutWorkspace() + "/" + outMatrixId;
     }
 
     @SuppressWarnings("unchecked")
@@ -271,6 +319,7 @@ public class KBaseFeatureValuesImpl {
                 .withRowNormalization(rowNormalization).withColNormalization(colNormalization);
     }
     
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class BioMatrix {
         @JsonProperty("genome_ref")
         private java.lang.String genomeRef;

@@ -290,6 +290,23 @@ public class KBaseFeatureValuesClient {
     }
 
     /**
+     * <p>Original spec-file function name: reconnect_matrix_to_genome</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams ReconnectMatrixToGenomeParams}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String reconnectMatrixToGenome(ReconnectMatrixToGenomeParams params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.reconnect_matrix_to_genome", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: get_matrix_item_descriptors</p>
      * <pre>
      * </pre>

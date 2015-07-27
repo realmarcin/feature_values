@@ -301,6 +301,22 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     }
 
     /**
+     * <p>Original spec-file function name: reconnect_matrix_to_genome</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams ReconnectMatrixToGenomeParams}
+     * @return   parameter "job_id" of String
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.reconnect_matrix_to_genome")
+    public String reconnectMatrixToGenome(ReconnectMatrixToGenomeParams params, AuthToken authPart) throws Exception {
+        String returnVal = null;
+        //BEGIN reconnect_matrix_to_genome
+        returnVal = runAweJob(authPart, params);
+        //END reconnect_matrix_to_genome
+        return returnVal;
+    }
+
+    /**
      * <p>Original spec-file function name: get_matrix_item_descriptors</p>
      * <pre>
      * </pre>

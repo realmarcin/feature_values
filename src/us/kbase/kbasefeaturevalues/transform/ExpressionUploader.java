@@ -6,12 +6,9 @@ import java.io.FileReader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.kohsuke.args4j.CmdLineException;
@@ -23,7 +20,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.UObject;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
-import us.kbase.workspace.ObjectIdentity;
+import us.kbase.kbasefeaturevalues.MatrixUtil;
 import us.kbase.workspace.WorkspaceClient;
 
 public class ExpressionUploader {
@@ -31,7 +28,6 @@ public class ExpressionUploader {
     public static final String FORMAT_TYPE_MO = "MO";
     public static final String FORMAT_TYPE_SIMPLE = "Simple";
     
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Args parsedArgs = new Args();
         CmdLineParser parser = new CmdLineParser(parsedArgs);
@@ -95,9 +91,7 @@ public class ExpressionUploader {
         Map<String, Object> genome = null;
         if (goName != null) {
             WorkspaceClient cl = getWsClient(wsUrl, token);
-            UObject genomeObj = cl.getObjects(Arrays.asList(new ObjectIdentity().withRef(
-                    wsName + "/" + goName))).get(0).getData();
-            genome = genomeObj.asClassInstance(Map.class);
+            genome = MatrixUtil.loadGenomeFeatures(cl, wsName + "/" + goName);
         }
         String formatType = fmtType;
         if (formatType == null || formatType.trim().isEmpty())
@@ -115,11 +109,11 @@ public class ExpressionUploader {
         if (dataScale != null && !dataScale.isEmpty())
             matrix.withScale(dataScale);
         if (genome != null) {
-            addFeatureMapping(matrix, genome);
+            matrix.withFeatureMapping(MatrixUtil.constructFeatureMapping(matrix.getData(), genome));
             matrix.withGenomeRef(wsName + "/" + goName);
         }
         if (fillMissingValues)
-            fillMissingValues(matrix);
+            MatrixUtil.fillMissingValues(matrix.getData());
         return matrix;
     }
     
@@ -271,63 +265,6 @@ public class ExpressionUploader {
         return ret;
     }
 
-    @SuppressWarnings("unchecked")
-    private static void addFeatureMapping(ExpressionMatrix matrix, Map<String, Object> genome) {
-        List<String> rowIds = matrix.getData().getRowIds();
-        Map<String, String> featureMapping = null; // map from row_id to feature id in the genome
-        if (genome != null) {
-            Set<String> rowIdSet = new HashSet<String>(rowIds);
-            featureMapping = new LinkedHashMap<String, String>();
-            List<Map<String, Object>> features = (List<Map<String, Object>>)genome.get("features");
-            for (Map<String, Object> feature: features) {
-                String id = (String)feature.get("id");
-                if (rowIdSet.contains(id)) {
-                    featureMapping.put(id, id);
-                    rowIdSet.remove(id);
-                }
-            }
-            if (rowIdSet.size() > 0) {
-                for (Map<String, Object> feature: features) {
-                    String id = (String)feature.get("id");
-                    for (String alias : (List<String>)feature.get("aliases")) {
-                        if (rowIdSet.contains(alias)) {
-                            featureMapping.put(alias, id);
-                            rowIdSet.remove(alias);
-                        }
-                    }
-                }
-            }
-        }
-        matrix.withFeatureMapping(featureMapping);
-    }
-    
-    private static void fillMissingValues(ExpressionMatrix matrix) {
-        List<List<Double>> values = matrix.getData().getValues();
-        double avg = 0;
-        int count = 0;
-        boolean thereAreMissingVals = false;
-        for (List<Double> row : values) {
-            for (Double value : row) {
-                if (value == null) {
-                    thereAreMissingVals = true;
-                } else {
-                    avg += value;
-                    count++;
-                }
-            }
-        }
-        if (thereAreMissingVals) {
-            if (count > 0)
-                avg /= count;
-            for (List<Double> row : values) {
-                for (int pos = 0; pos < row.size(); pos++) {
-                    if (row.get(pos) == null)
-                        row.set(pos, avg);
-                }
-            }
-        }
-    }
-    
     public static class Args {
         @Option(name="-ws", aliases={"--workspace_service_url"}, usage="Workspace service URL", metaVar="<ws-url>")
         String wsUrl;

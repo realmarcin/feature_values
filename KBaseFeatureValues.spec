@@ -321,7 +321,7 @@ module KBaseFeatureValues {
 
     /*
         transform_type - type of matrix change (one of: add, multiply,
-            normalize, fill in empty values, ?).
+            normalize, missing, ?).
         transform_value - optional field defining volume of change if
             it's necessary for chosen transform_type.
     */
@@ -348,7 +348,20 @@ module KBaseFeatureValues {
     } ServiceStatus;
 
     funcdef status() returns (ServiceStatus);
+
+    /*
+        out_matrix_id - optional target matrix object name (if not specified 
+            then target object overwrites input_data).
+    */
+    typedef structure {
+        ws_matrix_id input_data;
+        ws_genome_id genome_ref;
+        string out_workspace;
+        string out_matrix_id;
+    } ReconnectMatrixToGenomeParams;
     
+    funcdef reconnect_matrix_to_genome(ReconnectMatrixToGenomeParams params)
+        returns (string job_id) authentication required;
     
 	/*******************************************
 	* data API: data transfer objects (DTOs) *

@@ -42,6 +42,7 @@ import us.kbase.kbasefeaturevalues.ClusterHierarchicalParams;
 import us.kbase.kbasefeaturevalues.ClusterKMeansParams;
 import us.kbase.kbasefeaturevalues.ClusterSet;
 import us.kbase.kbasefeaturevalues.ClustersFromDendrogramParams;
+import us.kbase.kbasefeaturevalues.CorrectMatrixParams;
 import us.kbase.kbasefeaturevalues.EstimateKParams;
 import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
@@ -50,6 +51,7 @@ import us.kbase.kbasefeaturevalues.GetMatrixDescriptorParams;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
 import us.kbase.kbasefeaturevalues.MatrixDescriptor;
+import us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams;
 import us.kbase.kbasefeaturevalues.ServiceStatus;
 import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 import us.kbase.userandjobstate.UserAndJobStateClient;
@@ -248,6 +250,58 @@ public class AweIntegrationTest {
                 .withName(clustObj3Name))).get(0);
         ClusterSet clSet4 = res4.getData().asClassInstance(ClusterSet.class);
         System.out.println("From dendrogram: " + clSet4.getFeatureClusters());
+    }
+    
+    @Test
+    public void testCorrectMatrix() throws Exception {
+        String sourceMatrixId = "notcorrected_matrix.1";
+        ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
+                .withData(getSampleMatrix());
+        data.getData().getValues().get(0).set(0, null);
+        Assert.assertEquals(1, getNullCount(data.getData()));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(sourceMatrixId).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        String targetMatrixId = "corrected_matrix.1";
+        String jobId = client.correctMatrix(new CorrectMatrixParams().withInputData(
+                testWsName + "/" + sourceMatrixId).withOutWorkspace(testWsName)
+                .withOutMatrixId(targetMatrixId).withTransformType("missing"));
+        waitForJob(jobId);
+        ExpressionMatrix matrix = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withWorkspace(testWsName).withName(targetMatrixId)))
+                .get(0).getData().asClassInstance(ExpressionMatrix.class);
+        Assert.assertEquals(0, getNullCount(matrix.getData()));
+        Assert.assertEquals(0.325, (double)matrix.getData().getValues().get(0).get(0), 1e-10);
+    }
+    
+    @Test
+    public void testReconnectToGenome() throws Exception {
+        String genomeObjName = "Desulfovibrio_vulgaris_Hildenborough.genome";
+        File inputDir = new File("test/data/upload1");
+        File inputFile = new File(inputDir, "Desulfovibrio_vulgaris_Hildenborough_microarray_log_level_data.txt");
+        ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "MO", 
+                null, true, null, null, null);
+        String matrixId = "connected_matrix.1";
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(matrixId).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        String jobId = client.reconnectMatrixToGenome(new ReconnectMatrixToGenomeParams().withInputData(
+                testWsName + "/" + matrixId).withOutWorkspace(testWsName).withGenomeRef(
+                        testWsName + "/" + genomeObjName));
+        waitForJob(jobId);
+        ExpressionMatrix matrix = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withWorkspace(testWsName).withName(matrixId)))
+                .get(0).getData().asClassInstance(ExpressionMatrix.class);
+        Assert.assertEquals(2666, matrix.getFeatureMapping().size());
+    }
+    
+    private static int getNullCount(FloatMatrix2D matrix) {
+        int ret = 0;
+        for (List<Double> row : matrix.getValues())
+            for (Double value : row)
+                if (value == null)
+                    ret++;
+        return ret;
     }
     
     @Test
