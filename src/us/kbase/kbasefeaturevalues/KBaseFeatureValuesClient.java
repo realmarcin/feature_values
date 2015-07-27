@@ -307,7 +307,7 @@ public class KBaseFeatureValuesClient {
     }
 
     /**
-     * <p>Original spec-file function name: get_matrix_items_stat</p>
+     * <p>Original spec-file function name: get_matrix_rows_stat</p>
      * <pre>
      * </pre>
      * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemsStatParams GetMatrixItemsStatParams}
@@ -315,16 +315,33 @@ public class KBaseFeatureValuesClient {
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public List<ItemStat> getMatrixItemsStat(GetMatrixItemsStatParams arg1) throws IOException, JsonClientException {
+    public List<ItemStat> getMatrixRowsStat(GetMatrixItemsStatParams arg1) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(arg1);
         TypeReference<List<List<ItemStat>>> retType = new TypeReference<List<List<ItemStat>>>() {};
-        List<List<ItemStat>> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_items_stat", args, retType, true, true);
+        List<List<ItemStat>> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_rows_stat", args, retType, true, true);
         return res.get(0);
     }
 
     /**
-     * <p>Original spec-file function name: get_matrix_sets_stat</p>
+     * <p>Original spec-file function name: get_matrix_columns_stat</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemsStatParams GetMatrixItemsStatParams}
+     * @return   instance of list of type {@link us.kbase.kbasefeaturevalues.ItemStat ItemStat}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<ItemStat> getMatrixColumnsStat(GetMatrixItemsStatParams arg1) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(arg1);
+        TypeReference<List<List<ItemStat>>> retType = new TypeReference<List<List<ItemStat>>>() {};
+        List<List<ItemStat>> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_columns_stat", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_row_sets_stat</p>
      * <pre>
      * </pre>
      * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixSetsStatParams GetMatrixSetsStatParams}
@@ -332,16 +349,33 @@ public class KBaseFeatureValuesClient {
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public List<SetStat> getMatrixSetsStat(GetMatrixSetsStatParams arg1) throws IOException, JsonClientException {
+    public List<SetStat> getMatrixRowSetsStat(GetMatrixSetsStatParams arg1) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(arg1);
         TypeReference<List<List<SetStat>>> retType = new TypeReference<List<List<SetStat>>>() {};
-        List<List<SetStat>> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_sets_stat", args, retType, true, true);
+        List<List<SetStat>> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_row_sets_stat", args, retType, true, true);
         return res.get(0);
     }
 
     /**
-     * <p>Original spec-file function name: get_matrix_items_correlation</p>
+     * <p>Original spec-file function name: get_matrix_column_sets_stat</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixSetsStatParams GetMatrixSetsStatParams}
+     * @return   instance of list of type {@link us.kbase.kbasefeaturevalues.SetStat SetStat}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<SetStat> getMatrixColumnSetsStat(GetMatrixSetsStatParams arg1) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(arg1);
+        TypeReference<List<List<SetStat>>> retType = new TypeReference<List<List<SetStat>>>() {};
+        List<List<SetStat>> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_column_sets_stat", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_rows_correlation</p>
      * <pre>
      * </pre>
      * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemsCorrelationParams GetMatrixItemsCorrelationParams}
@@ -349,11 +383,28 @@ public class KBaseFeatureValuesClient {
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public PairwiseMatrixStat getMatrixItemsCorrelation(GetMatrixItemsCorrelationParams arg1) throws IOException, JsonClientException {
+    public PairwiseMatrixStat getMatrixRowsCorrelation(GetMatrixItemsCorrelationParams arg1) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(arg1);
         TypeReference<List<PairwiseMatrixStat>> retType = new TypeReference<List<PairwiseMatrixStat>>() {};
-        List<PairwiseMatrixStat> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_items_correlation", args, retType, true, true);
+        List<PairwiseMatrixStat> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_rows_correlation", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_matrix_columns_correlation</p>
+     * <pre>
+     * </pre>
+     * @param   arg1   instance of type {@link us.kbase.kbasefeaturevalues.GetMatrixItemsCorrelationParams GetMatrixItemsCorrelationParams}
+     * @return   instance of type {@link us.kbase.kbasefeaturevalues.PairwiseMatrixStat PairwiseMatrixStat}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public PairwiseMatrixStat getMatrixColumnsCorrelation(GetMatrixItemsCorrelationParams arg1) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(arg1);
+        TypeReference<List<PairwiseMatrixStat>> retType = new TypeReference<List<PairwiseMatrixStat>>() {};
+        List<PairwiseMatrixStat> res = caller.jsonrpcCall("KBaseFeatureValues.get_matrix_columns_correlation", args, retType, true, true);
         return res.get(0);
     }
 

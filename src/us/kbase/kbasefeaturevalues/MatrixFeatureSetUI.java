@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: MatrixFeatureSetUI</p>
  * <pre>
- * [PSN; Jul 22, 2015]
  * All info required for visualization of Matrix (ExpressionMatrix) object in the Matrix Viewer
  * </pre>
  * 
@@ -35,7 +34,6 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * General info about matrix, including genome name that needs to be extracted from the genome object
      * </pre>
      * 
@@ -49,11 +47,9 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: SetStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
      *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.
-     *             
+     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
      *             indeces_for - index of the item in a collection for which all statitics is collected
      *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
      *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
@@ -72,11 +68,9 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: SetStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
      *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.
-     *             
+     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
      *             indeces_for - index of the item in a collection for which all statitics is collected
      *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
      *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
@@ -95,7 +89,6 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: PairwiseMatrixStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * To represent a pairwise matrix with sprecalculated statistics. 
      * It can be used to represent pairwise correlation for a set of genes.
      * </pre>
@@ -108,7 +101,6 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * General info about matrix, including genome name that needs to be extracted from the genome object
      * </pre>
      * 
@@ -121,7 +113,6 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * General info about matrix, including genome name that needs to be extracted from the genome object
      * </pre>
      * 
@@ -169,11 +160,9 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: SetStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
      *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.
-     *             
+     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
      *             indeces_for - index of the item in a collection for which all statitics is collected
      *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
      *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
@@ -195,11 +184,9 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: SetStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
      *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.
-     *             
+     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
      *             indeces_for - index of the item in a collection for which all statitics is collected
      *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
      *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
@@ -226,11 +213,9 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: SetStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
      *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.
-     *             
+     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
      *             indeces_for - index of the item in a collection for which all statitics is collected
      *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
      *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
@@ -252,11 +237,9 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: SetStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
      *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.
-     *             
+     *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
      *             indeces_for - index of the item in a collection for which all statitics is collected
      *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
      *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
@@ -283,7 +266,6 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: PairwiseMatrixStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * To represent a pairwise matrix with sprecalculated statistics. 
      * It can be used to represent pairwise correlation for a set of genes.
      * </pre>
@@ -297,7 +279,6 @@ public class MatrixFeatureSetUI {
     /**
      * <p>Original spec-file type: PairwiseMatrixStat</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * To represent a pairwise matrix with sprecalculated statistics. 
      * It can be used to represent pairwise correlation for a set of genes.
      * </pre>

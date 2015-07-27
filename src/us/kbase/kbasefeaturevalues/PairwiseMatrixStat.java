@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: PairwiseMatrixStat</p>
  * <pre>
- * [PSN; Jul 22, 2015]
  * To represent a pairwise matrix with sprecalculated statistics. 
  * It can be used to represent pairwise correlation for a set of genes.
  * </pre>

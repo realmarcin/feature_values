@@ -15,14 +15,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixItemsCorrelationParams</p>
  * <pre>
- * [PSN; Jul 22, 2015]    
  * Another version of parameters to get statistics for a set of items from the Float2D type of matrices. 
  * This version is more flexible and will be later used to retrieve set of sets (we need to think about optimization).
- *   
- *             To work uniformly with rows and columns, the type of item ('row' or 'column') should be provided.  
- *             
+ *               
  *             input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
- *             item_type_for - type of the items for wich the statistics will be calculated: can be either 'row' or 'column'
  *             item_indeces_for - indeces of items for whch statistics should be calculated 
  *             item_indeces_on - indeces of items on whch statistics should be calculated
  *             fl_indeces_on - defines whether the indeces_on should be populated in SetStat objects. The default value = 0. 
@@ -40,7 +36,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "input_data",
-    "item_type",
     "item_indeces",
     "fl_row_ids",
     "fl_col_ids"
@@ -49,8 +44,6 @@ public class GetMatrixItemsCorrelationParams {
 
     @JsonProperty("input_data")
     private String inputData;
-    @JsonProperty("item_type")
-    private String itemType;
     @JsonProperty("item_indeces")
     private List<Long> itemIndeces;
     @JsonProperty("fl_row_ids")
@@ -71,21 +64,6 @@ public class GetMatrixItemsCorrelationParams {
 
     public GetMatrixItemsCorrelationParams withInputData(String inputData) {
         this.inputData = inputData;
-        return this;
-    }
-
-    @JsonProperty("item_type")
-    public String getItemType() {
-        return itemType;
-    }
-
-    @JsonProperty("item_type")
-    public void setItemType(String itemType) {
-        this.itemType = itemType;
-    }
-
-    public GetMatrixItemsCorrelationParams withItemType(String itemType) {
-        this.itemType = itemType;
         return this;
     }
 
@@ -146,7 +124,7 @@ public class GetMatrixItemsCorrelationParams {
 
     @Override
     public String toString() {
-        return ((((((((((((("GetMatrixItemsCorrelationParams"+" [inputData=")+ inputData)+", itemType=")+ itemType)+", itemIndeces=")+ itemIndeces)+", flRowIds=")+ flRowIds)+", flColIds=")+ flColIds)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("GetMatrixItemsCorrelationParams"+" [inputData=")+ inputData)+", itemIndeces=")+ itemIndeces)+", flRowIds=")+ flRowIds)+", flColIds=")+ flColIds)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

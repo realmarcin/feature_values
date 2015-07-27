@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: MatrixUI</p>
  * <pre>
- * [PSN; Jul 22, 2015]
  * All info required for visualization of Matrix (ExpressionMatrix) object in the Matrix Viewer
  * </pre>
  * 
@@ -34,7 +33,6 @@ public class MatrixUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * General info about matrix, including genome name that needs to be extracted from the genome object
      * </pre>
      * 
@@ -54,7 +52,6 @@ public class MatrixUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * General info about matrix, including genome name that needs to be extracted from the genome object
      * </pre>
      * 
@@ -67,7 +64,6 @@ public class MatrixUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * [PSN; Jul 22, 2015]
      * General info about matrix, including genome name that needs to be extracted from the genome object
      * </pre>
      * 

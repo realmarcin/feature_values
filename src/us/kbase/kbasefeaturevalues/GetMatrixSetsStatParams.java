@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixSetsStatParams</p>
  * <pre>
- * [PSN; Jul 22, 2015]    
  * Parameters to retrieve statistics for set of sets. 
  * In relation to ExpressionMatrix, these parameters can be used to retrive sparklines for several gene clusters generated on the 
  * same ExpressionMatrix in one call.  

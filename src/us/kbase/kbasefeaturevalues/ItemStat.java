@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: ItemStat</p>
  * <pre>
- * [PSN; Jul 22, 2015]
  * Statistics for a given item in a collection (defined by index) , calculated on the associated vector of values. Typical example is 2D matrix: item is a given row, and correposnding values from all columns
  * is an associated vector.   
  *             

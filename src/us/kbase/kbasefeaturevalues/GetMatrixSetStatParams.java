@@ -15,16 +15,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixSetStatParams</p>
  * <pre>
- * [PSN; Jul 22, 2015]    
  * Another version of parameters to get statistics for a set of items from the Float2D type of matrices. 
  * This version is more flexible and will be later used to retrieve set of sets (we need to think about optimization).
  *   
- *             To work uniformly with rows and columns, the type of item ('row' or 'column') should be provided.  
  *             
  *             input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
- *             item_type_for - type of the items for wich the statistics will be calculated: can be either 'row' or 'column'
- *             item_indeces_for - indeces of items for whch statistics should be calculated 
- *             item_indeces_on - indeces of items on whch statistics should be calculated
+ *             item_indeces_for - indeces of items for wich statistics should be calculated 
+ *             item_indeces_on - indeces of items on wich statistics should be calculated
  *             fl_indeces_on - defines whether the indeces_on should be populated in SetStat objects. The default value = 0. 
  *             fl_indeces_for - defines whether the indeces_for should be populated in SetStat objects. The default value = 0.
  *              
@@ -40,7 +37,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "input_data",
-    "item_type_for",
     "item_indeces_for",
     "item_indeces_on",
     "fl_indeces_on",
@@ -55,8 +51,6 @@ public class GetMatrixSetStatParams {
 
     @JsonProperty("input_data")
     private String inputData;
-    @JsonProperty("item_type_for")
-    private String itemTypeFor;
     @JsonProperty("item_indeces_for")
     private List<Long> itemIndecesFor;
     @JsonProperty("item_indeces_on")
@@ -89,21 +83,6 @@ public class GetMatrixSetStatParams {
 
     public GetMatrixSetStatParams withInputData(String inputData) {
         this.inputData = inputData;
-        return this;
-    }
-
-    @JsonProperty("item_type_for")
-    public String getItemTypeFor() {
-        return itemTypeFor;
-    }
-
-    @JsonProperty("item_type_for")
-    public void setItemTypeFor(String itemTypeFor) {
-        this.itemTypeFor = itemTypeFor;
-    }
-
-    public GetMatrixSetStatParams withItemTypeFor(String itemTypeFor) {
-        this.itemTypeFor = itemTypeFor;
         return this;
     }
 
@@ -254,7 +233,7 @@ public class GetMatrixSetStatParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((((((((((("GetMatrixSetStatParams"+" [inputData=")+ inputData)+", itemTypeFor=")+ itemTypeFor)+", itemIndecesFor=")+ itemIndecesFor)+", itemIndecesOn=")+ itemIndecesOn)+", flIndecesOn=")+ flIndecesOn)+", flIndecesFor=")+ flIndecesFor)+", flAvgs=")+ flAvgs)+", flMins=")+ flMins)+", flMaxs=")+ flMaxs)+", flStds=")+ flStds)+", flMissingValues=")+ flMissingValues)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((("GetMatrixSetStatParams"+" [inputData=")+ inputData)+", itemIndecesFor=")+ itemIndecesFor)+", itemIndecesOn=")+ itemIndecesOn)+", flIndecesOn=")+ flIndecesOn)+", flIndecesFor=")+ flIndecesFor)+", flAvgs=")+ flAvgs)+", flMins=")+ flMins)+", flMaxs=")+ flMaxs)+", flStds=")+ flStds)+", flMissingValues=")+ flMissingValues)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

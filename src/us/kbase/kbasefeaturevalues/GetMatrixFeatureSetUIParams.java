@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixFeatureSetUIParams</p>
  * <pre>
- * [PSN; Jul 22, 2015]    
  * Parameters to retrieve FeatureSetUI                
  * Either mtx_id and feature_indeces (or feature_ids), or cluster_set_id and cluster_index should be indicated
  * </pre>

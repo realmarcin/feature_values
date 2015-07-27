@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixUIParams</p>
  * <pre>
- * [PSN; Jul 22, 2015]    
  * Parameters to retrieve MatrixUI
  * </pre>
  * 
