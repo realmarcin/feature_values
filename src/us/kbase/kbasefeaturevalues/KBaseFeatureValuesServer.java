@@ -342,6 +342,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public List<ItemStat> getMatrixRowsStat(GetMatrixItemsStatParams arg1, AuthToken authPart) throws Exception {
         List<ItemStat> returnVal = null;
         //BEGIN get_matrix_rows_stat
+        returnVal = impl(authPart).getMatrixRowsStat(arg1);
         //END get_matrix_rows_stat
         return returnVal;
     }
@@ -357,6 +358,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public List<ItemStat> getMatrixColumnsStat(GetMatrixItemsStatParams arg1, AuthToken authPart) throws Exception {
         List<ItemStat> returnVal = null;
         //BEGIN get_matrix_columns_stat
+        returnVal = impl(authPart).getMatrixColumnsStat(arg1);
         //END get_matrix_columns_stat
         return returnVal;
     }

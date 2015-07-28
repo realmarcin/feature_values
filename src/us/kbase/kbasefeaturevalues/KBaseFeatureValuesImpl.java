@@ -1,6 +1,7 @@
 package us.kbase.kbasefeaturevalues;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
+import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.UObject;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.ObjectData;
@@ -327,11 +329,7 @@ public class KBaseFeatureValuesImpl {
         WorkspaceClient wsClient = getWsClient();
 		
         // Get expression matrix
-		ObjectIdentity mtxIndentity = new ObjectIdentity().withRef(params.getInputData());
-		ObjectData matrixData = wsClient
-        	.getObjects(Arrays.asList(mtxIndentity))
-        	.get(0);
-        	
+		ObjectData matrixData = getExpressionMatrixObject(params.getInputData());
 		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
 			.getData()
 			.asClassInstance(ExpressionMatrix.class);
@@ -424,6 +422,39 @@ public class KBaseFeatureValuesImpl {
 		return descriptors;
 	}
 
+	public  List<ItemStat> getMatrixRowsStat(GetMatrixItemsStatParams params) throws Exception {
+        //TODO can be further optimized by getting subobjects
+		System.out.println("params: " + params);
+        ExpressionMatrix matrix = getExpressionMatrix(params.getInputData());
+		return FloatMatrix2DUtil.getRowsStat(matrix.getData(), params.getItemIndecesFor() , params.getItemIndecesOn(), params.getFlIndecesOn() == 1);
+	}	
+	
+	public  List<ItemStat> getMatrixColumnsStat(GetMatrixItemsStatParams params) throws Exception {
+        //TODO can be further optimized by getting subobjects
+		
+		System.out.println("params: " + params);
+        ExpressionMatrix matrix = getExpressionMatrix(params.getInputData());
+		return FloatMatrix2DUtil.getColumnsStat(matrix.getData(), params.getItemIndecesFor() , params.getItemIndecesOn(), params.getFlIndecesOn() == 1);
+	}	
+	
+	
+	private ExpressionMatrix getExpressionMatrix(String mtxRef) throws Exception{
+		ObjectData matrixData = getExpressionMatrixObject(mtxRef);
+        	
+		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
+			.getData()
+			.asClassInstance(ExpressionMatrix.class);
+		return matrix;
+	}
+	
+	private ObjectData getExpressionMatrixObject(String mtxRef) throws Exception{
+        WorkspaceClient wsClient = getWsClient();
+		ObjectIdentity mtxIndentity = new ObjectIdentity().withRef(mtxRef);
+		return wsClient
+        	.getObjects(Arrays.asList(mtxIndentity))
+        	.get(0);		
+	}
+	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     public static class BioMatrix {
         @JsonProperty("genome_ref")
@@ -475,5 +506,6 @@ public class KBaseFeatureValuesImpl {
         }
 
     }
+
 
 }
