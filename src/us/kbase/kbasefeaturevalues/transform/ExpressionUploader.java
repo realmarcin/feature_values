@@ -1,6 +1,7 @@
 package us.kbase.kbasefeaturevalues.transform;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintStream;
@@ -9,7 +10,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
+
+import javax.management.ObjectName;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -53,23 +57,7 @@ public class ExpressionUploader {
             token = tokenString == null ? AuthService.login(user, pwd).getToken() :
                 new AuthToken(tokenString);
         }
-        File inputFile = null;
-        StringBuilder fileList = new StringBuilder();
-        for (File f : parsedArgs.inDir.listFiles()) {
-            if (!f.isFile())
-                continue;
-            if (f.getName().endsWith(".txt") || f.getName().endsWith(".tsv") || 
-                    f.getName().endsWith(".csv")) {
-                inputFile = f;
-                break;
-            }
-            if (fileList.length() > 0)
-                fileList.append(", ");
-            fileList.append(f.getName());
-        }
-        if (inputFile == null)
-            throw new IllegalStateException("Input file with extention .txt or .tsv was not " +
-            		"found among: " + fileList);
+        File inputFile = findTabFile(parsedArgs.inDir);
         ExpressionMatrix matrix = parse(parsedArgs.wsUrl, parsedArgs.wsName, inputFile, 
                 parsedArgs.fmtType, parsedArgs.goName, parsedArgs.fillMissingValues, 
                 parsedArgs.dataType, parsedArgs.dataScale, token);
@@ -83,6 +71,28 @@ public class ExpressionUploader {
             workDir.mkdirs();
         File outputFile = new File(workDir, outputFileName);
         UObject.getMapper().writeValue(outputFile, matrix);
+    }
+
+    public static File findTabFile(File inputDir) {
+        File inputFile = null;
+        StringBuilder fileList = new StringBuilder();
+        for (File f : inputDir.listFiles()) {
+            if (!f.isFile())
+                continue;
+            String fileName = f.getName().toLowerCase();
+            if (fileName.endsWith(".txt") || fileName.endsWith(".tsv") || 
+                    fileName.endsWith(".csv") || fileName.endsWith(".tab")) {
+                inputFile = f;
+                break;
+            }
+            if (fileList.length() > 0)
+                fileList.append(", ");
+            fileList.append(f.getName());
+        }
+        if (inputFile == null)
+            throw new IllegalStateException("Input file with extention .txt or .tsv was not " +
+            		"found among: " + fileList);
+        return inputFile;
     }
     
     public static ExpressionMatrix parse(String wsUrl, String wsName, File inputFile, 
@@ -230,7 +240,7 @@ public class ExpressionUploader {
             throw new IllegalStateException("No header line found");
         String[] parts = tabDiv.split(line);
         for (int i = 1; i < parts.length; i++)
-            colIds.add(parts[i]);
+            colIds.add(unquote(parts[i]));
         List<String> rowIds = new ArrayList<String>();
         List<List<Double>> values = new ArrayList<List<Double>>();
         for (int pos = 0; ; pos++) {
@@ -246,14 +256,14 @@ public class ExpressionUploader {
                         (colIds.size() + 1) + " cells at line " + (pos + 1) + ": " + line);
             String rowId = parts[0];
             int rowPos = rowIds.size();
-            rowIds.add(rowId);
+            rowIds.add(unquote(rowId));
             if (values.size() != rowPos)
                 throw new IllegalStateException("Internal inconsistency: " + rowPos + " != " + values.size());
             List<Double> row = new ArrayList<Double>();
             values.add(row);
             for (int i = 0; i < colIds.size(); i++) {
                 String exprValueText = parts[1 + i];
-                Double exprVallue = exprValueText.isEmpty() ? null : Double.parseDouble(exprValueText);
+                Double exprVallue = isMissingValue(exprValueText) ? null : Double.parseDouble(exprValueText);
                 row.add(exprVallue);
             }
         }
@@ -265,6 +275,24 @@ public class ExpressionUploader {
         return ret;
     }
 
+    private static boolean isMissingValue(String value) {
+        value = unquote(value);
+        return value.isEmpty() || value.equalsIgnoreCase("NA") || value.equalsIgnoreCase("NULL") ||
+                value.equals("-");
+    }
+
+    private static String unquote(String value) {
+        if (value.length() >= 2 && value.charAt(0) == '\"' && 
+                value.charAt(value.length() - 1) == '\"') {
+            try {
+                value = ObjectName.unquote(value);
+            } catch (Exception ex) {
+                value = value.substring(1, value.length() - 1);
+            }
+        }
+        return value;
+    }
+    
     public static class Args {
         @Option(name="-ws", aliases={"--workspace_service_url"}, usage="Workspace service URL", metaVar="<ws-url>")
         String wsUrl;

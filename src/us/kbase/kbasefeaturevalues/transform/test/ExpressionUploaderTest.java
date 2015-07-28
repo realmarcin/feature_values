@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.ObjectName;
+
 import junit.framework.Assert;
 
 import org.junit.AfterClass;
@@ -24,6 +26,7 @@ import us.kbase.common.service.UObject;
 import us.kbase.common.utils.ProcessHelper;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
+import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 import us.kbase.workspace.CreateWorkspaceParams;
 import us.kbase.workspace.ObjectSaveData;
 import us.kbase.workspace.SaveObjectsParams;
@@ -148,6 +151,29 @@ public class ExpressionUploaderTest {
         Assert.assertEquals("log-ratio2", matrix.getType());
         Assert.assertEquals("2.0", matrix.getScale());
     }
+    
+    @Test
+    public void testUploaderOthers() throws Exception {
+        Exception error = null;
+        for (int i = 3; i <= 6; i++) {
+            File inputDir = new File("test/data/upload" + i);
+            File inputFile = ExpressionUploader.findTabFile(inputDir);
+            try {
+                ExpressionMatrix matrix = ExpressionUploader.parse(null, null, inputFile, "Simple", 
+                        null, false, null, null, null);
+                //System.out.println("Parsing expression matrix in " + inputFile + ":");
+                //System.out.println(matrix);
+                Assert.assertNotNull(matrix.getData().getValues());
+            } catch (Exception ex) {
+                System.err.println("Error parsing expression matrix in " + inputFile + ":");
+                ex.printStackTrace();
+                if (error == null)
+                    error = ex;
+            }
+        }
+        if (error != null)
+            throw error;
+    }    
 
     private static WorkspaceClient getWsClient() throws Exception {
         WorkspaceClient wscl = new WorkspaceClient(new URL(getWsUrl()), token);
