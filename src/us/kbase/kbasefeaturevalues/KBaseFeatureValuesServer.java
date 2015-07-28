@@ -448,6 +448,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public MatrixUI getMatrixUi(GetMatrixUIParams arg1, AuthToken authPart) throws Exception {
         MatrixUI returnVal = null;
         //BEGIN get_matrix_ui
+        returnVal = impl(authPart).getMatrixUi(arg1);
         //END get_matrix_ui
         return returnVal;
     }

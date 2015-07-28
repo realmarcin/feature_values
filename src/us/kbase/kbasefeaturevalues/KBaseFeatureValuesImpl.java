@@ -319,7 +319,112 @@ public class KBaseFeatureValuesImpl {
                 .withRowNormalization(rowNormalization).withColNormalization(colNormalization);
     }
     
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    
+	@SuppressWarnings("unchecked")
+	public MatrixUI getMatrixUi(GetMatrixUIParams params) throws Exception {
+
+        MatrixUI matrixUI = new MatrixUI();
+        WorkspaceClient wsClient = getWsClient();
+		
+        // Get expression matrix
+		ObjectIdentity mtxIndentity = new ObjectIdentity().withRef(params.getInputData());
+		ObjectData matrixData = wsClient
+        	.getObjects(Arrays.asList(mtxIndentity))
+        	.get(0);
+        	
+		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
+			.getData()
+			.asClassInstance(ExpressionMatrix.class);
+        
+        
+        // Get genome features
+        String genomeId = null;
+        String genomeName = null;
+        //List<Object> genomeFeatures;
+        
+        
+        if (matrix.getGenomeRef() != null) {
+        	SubObjectIdentity genomeIndentity = new SubObjectIdentity()
+        		.withRef( matrix.getGenomeRef() )
+        		.withIncluded( Arrays.asList("id", "scientific_name", "features") );
+        	
+            ObjectData genomeData = wsClient
+            	.getObjectSubset(Arrays.asList(genomeIndentity))
+            	.get(0);
+            
+            Map<String, Object> genomeDataMap = (Map<String, Object>) genomeData
+            	.getData()
+            	.asClassInstance(Map.class);
+            
+            genomeId = (String) genomeDataMap.get("id");
+            genomeName = (String) genomeDataMap.get("scientific_name");            
+        }
+        
+        
+        // Build mtx descriptor
+
+        MatrixDescriptor mtxDescriptor = new MatrixDescriptor()
+        	.withColNormalization(matrix.getColNormalization())
+        	.withColumnsCount((long) matrix.getData().getColIds().size())
+        	.withGenomeId(genomeId)
+        	.withGenomeName(genomeName)
+        	.withMatrixDescription(matrix.getDescription())
+        	.withMatrixId(matrixData.getInfo().getE2())
+        	.withMatrixName(matrixData.getInfo().getE2())
+        	.withRowNormalization(matrix.getRowNormalization())
+        	.withRowsCount((long) matrix.getData().getRowIds().size())
+        	.withScale(matrix.getScale())
+        	.withType(matrix.getType());
+        
+        matrixUI.setMtxDescriptor(mtxDescriptor);
+        
+        // Build row and descriptors
+        
+        matrixUI.setRowDescriptors(buildRowDescriptors(matrix));
+        matrixUI.setRowDescriptors(buildColumnDescriptors(matrix));        
+        
+        // Collect statistics
+        matrixUI.setRowStats(FloatMatrix2DUtil.getRowsStat(matrix.getData(), null, null, false));
+        matrixUI.setRowStats(FloatMatrix2DUtil.getColumnsStat(matrix.getData(), null, null, false));
+
+		return matrixUI;
+	}    
+    
+    private List<ItemDescriptor> buildColumnDescriptors(ExpressionMatrix matrix) {
+    	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
+    	
+    	// We do not have condition mapping now, so we will use just colIds...
+    	List<String> colIds = matrix.getData().getColIds();
+    	for(int i = 0; i < colIds.size(); i++){
+    		ItemDescriptor desc = new ItemDescriptor()
+    			.withDescription("")
+    			.withId(colIds.get(i))
+    			.withIndex((long)i)
+    			.withName(colIds.get(i));
+    		descriptors.add(desc);
+    	}
+    	
+		return descriptors;
+	}
+
+	private List<ItemDescriptor> buildRowDescriptors(ExpressionMatrix matrix) {
+    	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
+    	
+    	//TODO needs to be improved: get data from the genome, like function...
+    	List<String> rowIds = matrix.getData().getRowIds();
+    	for(int i = 0; i < rowIds.size(); i++){
+    		ItemDescriptor desc = new ItemDescriptor()
+    			.withDescription("")
+    			.withId(rowIds.get(i))
+    			.withIndex((long)i)
+    			.withName(rowIds.get(i));
+    		descriptors.add(desc);
+    	}
+    	
+		return descriptors;
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     public static class BioMatrix {
         @JsonProperty("genome_ref")
         private java.lang.String genomeRef;
@@ -370,4 +475,5 @@ public class KBaseFeatureValuesImpl {
         }
 
     }
+
 }
