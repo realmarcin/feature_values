@@ -1,6 +1,7 @@
 package us.kbase.kbasefeaturevalues;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
+import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.UObject;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.ObjectData;
@@ -319,7 +321,141 @@ public class KBaseFeatureValuesImpl {
                 .withRowNormalization(rowNormalization).withColNormalization(colNormalization);
     }
     
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    
+	@SuppressWarnings("unchecked")
+	public MatrixUI getMatrixUi(GetMatrixUIParams params) throws Exception {
+
+        MatrixUI matrixUI = new MatrixUI();
+        WorkspaceClient wsClient = getWsClient();
+		
+        // Get expression matrix
+		ObjectData matrixData = getExpressionMatrixObject(params.getInputData());
+		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
+			.getData()
+			.asClassInstance(ExpressionMatrix.class);
+        
+        
+        // Get genome features
+        String genomeId = null;
+        String genomeName = null;
+        //List<Object> genomeFeatures;
+        
+        
+        if (matrix.getGenomeRef() != null) {
+        	SubObjectIdentity genomeIndentity = new SubObjectIdentity()
+        		.withRef( matrix.getGenomeRef() )
+        		.withIncluded( Arrays.asList("id", "scientific_name", "features") );
+        	
+            ObjectData genomeData = wsClient
+            	.getObjectSubset(Arrays.asList(genomeIndentity))
+            	.get(0);
+            
+            Map<String, Object> genomeDataMap = (Map<String, Object>) genomeData
+            	.getData()
+            	.asClassInstance(Map.class);
+            
+            genomeId = (String) genomeDataMap.get("id");
+            genomeName = (String) genomeDataMap.get("scientific_name");            
+        }
+        
+        
+        // Build mtx descriptor
+
+        MatrixDescriptor mtxDescriptor = new MatrixDescriptor()
+        	.withColNormalization(matrix.getColNormalization())
+        	.withColumnsCount((long) matrix.getData().getColIds().size())
+        	.withGenomeId(genomeId)
+        	.withGenomeName(genomeName)
+        	.withMatrixDescription(matrix.getDescription())
+        	.withMatrixId(matrixData.getInfo().getE2())
+        	.withMatrixName(matrixData.getInfo().getE2())
+        	.withRowNormalization(matrix.getRowNormalization())
+        	.withRowsCount((long) matrix.getData().getRowIds().size())
+        	.withScale(matrix.getScale())
+        	.withType(matrix.getType());
+        
+        matrixUI.setMtxDescriptor(mtxDescriptor);
+        
+        // Build row and descriptors
+        
+        matrixUI.setRowDescriptors(buildRowDescriptors(matrix));
+        matrixUI.setRowDescriptors(buildColumnDescriptors(matrix));        
+        
+        // Collect statistics
+        matrixUI.setRowStats(FloatMatrix2DUtil.getRowsStat(matrix.getData(), null, null, false));
+        matrixUI.setRowStats(FloatMatrix2DUtil.getColumnsStat(matrix.getData(), null, null, false));
+
+		return matrixUI;
+	}    
+    
+    private List<ItemDescriptor> buildColumnDescriptors(ExpressionMatrix matrix) {
+    	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
+    	
+    	// We do not have condition mapping now, so we will use just colIds...
+    	List<String> colIds = matrix.getData().getColIds();
+    	for(int i = 0; i < colIds.size(); i++){
+    		ItemDescriptor desc = new ItemDescriptor()
+    			.withDescription("")
+    			.withId(colIds.get(i))
+    			.withIndex((long)i)
+    			.withName(colIds.get(i));
+    		descriptors.add(desc);
+    	}
+    	
+		return descriptors;
+	}
+
+	private List<ItemDescriptor> buildRowDescriptors(ExpressionMatrix matrix) {
+    	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
+    	
+    	//TODO needs to be improved: get data from the genome, like function...
+    	List<String> rowIds = matrix.getData().getRowIds();
+    	for(int i = 0; i < rowIds.size(); i++){
+    		ItemDescriptor desc = new ItemDescriptor()
+    			.withDescription("")
+    			.withId(rowIds.get(i))
+    			.withIndex((long)i)
+    			.withName(rowIds.get(i));
+    		descriptors.add(desc);
+    	}
+    	
+		return descriptors;
+	}
+
+	public  List<ItemStat> getMatrixRowsStat(GetMatrixItemsStatParams params) throws Exception {
+        //TODO can be further optimized by getting subobjects
+		System.out.println("params: " + params);
+        ExpressionMatrix matrix = getExpressionMatrix(params.getInputData());
+		return FloatMatrix2DUtil.getRowsStat(matrix.getData(), params.getItemIndecesFor() , params.getItemIndecesOn(), params.getFlIndecesOn() == 1);
+	}	
+	
+	public  List<ItemStat> getMatrixColumnsStat(GetMatrixItemsStatParams params) throws Exception {
+        //TODO can be further optimized by getting subobjects
+		
+		System.out.println("params: " + params);
+        ExpressionMatrix matrix = getExpressionMatrix(params.getInputData());
+		return FloatMatrix2DUtil.getColumnsStat(matrix.getData(), params.getItemIndecesFor() , params.getItemIndecesOn(), params.getFlIndecesOn() == 1);
+	}	
+	
+	
+	private ExpressionMatrix getExpressionMatrix(String mtxRef) throws Exception{
+		ObjectData matrixData = getExpressionMatrixObject(mtxRef);
+        	
+		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
+			.getData()
+			.asClassInstance(ExpressionMatrix.class);
+		return matrix;
+	}
+	
+	private ObjectData getExpressionMatrixObject(String mtxRef) throws Exception{
+        WorkspaceClient wsClient = getWsClient();
+		ObjectIdentity mtxIndentity = new ObjectIdentity().withRef(mtxRef);
+		return wsClient
+        	.getObjects(Arrays.asList(mtxIndentity))
+        	.get(0);		
+	}
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
     public static class BioMatrix {
         @JsonProperty("genome_ref")
         private java.lang.String genomeRef;
@@ -370,4 +506,6 @@ public class KBaseFeatureValuesImpl {
         }
 
     }
+
+
 }
