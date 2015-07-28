@@ -35,7 +35,7 @@ public class FloatMatrix2DUtil {
 					goodCount++;
 					avg += dval;
 					min = Double.isNaN(min) || dval < min ? dval : min; 
-					min = Double.isNaN(min) || dval > max ? dval : max;
+					max = Double.isNaN(max) || dval > max ? dval : max;
 				} else{
 					badCount++;
 				}
@@ -101,7 +101,7 @@ public class FloatMatrix2DUtil {
 					goodCount++;
 					avg += dval;
 					min = Double.isNaN(min) || dval < min ? dval : min; 
-					min = Double.isNaN(min) || dval > max ? dval : max;
+					max = Double.isNaN(max) || dval > max ? dval : max;
 				} else{
 					badCount++;
 				}
@@ -138,6 +138,4 @@ public class FloatMatrix2DUtil {
 		return stats;		
 	} 
 
-	
-	
 }
