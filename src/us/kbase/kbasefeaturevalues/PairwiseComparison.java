@@ -13,10 +13,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: PairwiseMatrixStat</p>
+ * <p>Original spec-file type: PairwiseComparison</p>
  * <pre>
- * To represent a pairwise matrix with sprecalculated statistics. 
- * It can be used to represent pairwise correlation for a set of genes.
+ * To represent a pairwise comparison of several elements defined by 'indeces'.  
+ * This data type can be used to model represent pairwise correlation of expression profiles for a set of genes.                 
+ * indeces - indeces of elements to be compared
+ * comparison_values - values representing a parituclar type of comparison between elements. 
+ *         Expected to be symmetric: comparison_values[i][j] = comparison_values[j][i].
+ *         Diagonal values: comparison_values[i][i] = 0
+ *         
+ * avgs - mean of comparison_values for each element        
+ * mins - min of comparison_values for each element
+ * maxs - max of comparison_values for each element
+ * stds - std of comparison_values for each element
  * </pre>
  * 
  */
@@ -24,22 +33,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "indeces",
-    "size",
-    "values",
+    "comparison_values",
     "avgs",
     "mins",
     "maxs",
-    "stds",
-    "missing_values"
+    "stds"
 })
-public class PairwiseMatrixStat {
+public class PairwiseComparison {
 
     @JsonProperty("indeces")
     private List<Long> indeces;
-    @JsonProperty("size")
-    private java.lang.Long size;
-    @JsonProperty("values")
-    private List<List<Double>> values;
+    @JsonProperty("comparison_values")
+    private List<List<Double>> comparisonValues;
     @JsonProperty("avgs")
     private List<Double> avgs;
     @JsonProperty("mins")
@@ -48,8 +53,6 @@ public class PairwiseMatrixStat {
     private List<Double> maxs;
     @JsonProperty("stds")
     private List<Double> stds;
-    @JsonProperty("missing_values")
-    private List<Long> missingValues;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("indeces")
@@ -62,38 +65,23 @@ public class PairwiseMatrixStat {
         this.indeces = indeces;
     }
 
-    public PairwiseMatrixStat withIndeces(List<Long> indeces) {
+    public PairwiseComparison withIndeces(List<Long> indeces) {
         this.indeces = indeces;
         return this;
     }
 
-    @JsonProperty("size")
-    public java.lang.Long getSize() {
-        return size;
+    @JsonProperty("comparison_values")
+    public List<List<Double>> getComparisonValues() {
+        return comparisonValues;
     }
 
-    @JsonProperty("size")
-    public void setSize(java.lang.Long size) {
-        this.size = size;
+    @JsonProperty("comparison_values")
+    public void setComparisonValues(List<List<Double>> comparisonValues) {
+        this.comparisonValues = comparisonValues;
     }
 
-    public PairwiseMatrixStat withSize(java.lang.Long size) {
-        this.size = size;
-        return this;
-    }
-
-    @JsonProperty("values")
-    public List<List<Double>> getValues() {
-        return values;
-    }
-
-    @JsonProperty("values")
-    public void setValues(List<List<Double>> values) {
-        this.values = values;
-    }
-
-    public PairwiseMatrixStat withValues(List<List<Double>> values) {
-        this.values = values;
+    public PairwiseComparison withComparisonValues(List<List<Double>> comparisonValues) {
+        this.comparisonValues = comparisonValues;
         return this;
     }
 
@@ -107,7 +95,7 @@ public class PairwiseMatrixStat {
         this.avgs = avgs;
     }
 
-    public PairwiseMatrixStat withAvgs(List<Double> avgs) {
+    public PairwiseComparison withAvgs(List<Double> avgs) {
         this.avgs = avgs;
         return this;
     }
@@ -122,7 +110,7 @@ public class PairwiseMatrixStat {
         this.mins = mins;
     }
 
-    public PairwiseMatrixStat withMins(List<Double> mins) {
+    public PairwiseComparison withMins(List<Double> mins) {
         this.mins = mins;
         return this;
     }
@@ -137,7 +125,7 @@ public class PairwiseMatrixStat {
         this.maxs = maxs;
     }
 
-    public PairwiseMatrixStat withMaxs(List<Double> maxs) {
+    public PairwiseComparison withMaxs(List<Double> maxs) {
         this.maxs = maxs;
         return this;
     }
@@ -152,23 +140,8 @@ public class PairwiseMatrixStat {
         this.stds = stds;
     }
 
-    public PairwiseMatrixStat withStds(List<Double> stds) {
+    public PairwiseComparison withStds(List<Double> stds) {
         this.stds = stds;
-        return this;
-    }
-
-    @JsonProperty("missing_values")
-    public List<Long> getMissingValues() {
-        return missingValues;
-    }
-
-    @JsonProperty("missing_values")
-    public void setMissingValues(List<Long> missingValues) {
-        this.missingValues = missingValues;
-    }
-
-    public PairwiseMatrixStat withMissingValues(List<Long> missingValues) {
-        this.missingValues = missingValues;
         return this;
     }
 
@@ -184,7 +157,7 @@ public class PairwiseMatrixStat {
 
     @Override
     public String toString() {
-        return ((((((((((((((((((("PairwiseMatrixStat"+" [indeces=")+ indeces)+", size=")+ size)+", values=")+ values)+", avgs=")+ avgs)+", mins=")+ mins)+", maxs=")+ maxs)+", stds=")+ stds)+", missingValues=")+ missingValues)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("PairwiseComparison"+" [indeces=")+ indeces)+", comparisonValues=")+ comparisonValues)+", avgs=")+ avgs)+", mins=")+ mins)+", maxs=")+ maxs)+", stds=")+ stds)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: CorrectMatrixParams</p>
  * <pre>
  * transform_type - type of matrix change (one of: add, multiply,
- *     normalize, fill in empty values, ?).
+ *     normalize, missing, ?).
  * transform_value - optional field defining volume of change if
  *     it's necessary for chosen transform_type.
  * </pre>

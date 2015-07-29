@@ -12,9 +12,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: GetMatrixUIParams</p>
+ * <p>Original spec-file type: GetMatrixStatParams</p>
  * <pre>
- * Parameters to retrieve MatrixUI
+ * Parameters to retrieve MatrixStat
  * </pre>
  * 
  */
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "input_data"
 })
-public class GetMatrixUIParams {
+public class GetMatrixStatParams {
 
     @JsonProperty("input_data")
     private String inputData;
@@ -39,7 +39,7 @@ public class GetMatrixUIParams {
         this.inputData = inputData;
     }
 
-    public GetMatrixUIParams withInputData(String inputData) {
+    public GetMatrixStatParams withInputData(String inputData) {
         this.inputData = inputData;
         return this;
     }
@@ -56,7 +56,7 @@ public class GetMatrixUIParams {
 
     @Override
     public String toString() {
-        return ((((("GetMatrixUIParams"+" [inputData=")+ inputData)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((("GetMatrixStatParams"+" [inputData=")+ inputData)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

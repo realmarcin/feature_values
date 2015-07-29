@@ -15,16 +15,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixSetStatParams</p>
  * <pre>
- * Another version of parameters to get statistics for a set of items from the Float2D type of matrices. 
- * This version is more flexible and will be later used to retrieve set of sets (we need to think about optimization).
- *   
+ * Parameters to get statistics for a set of items from the Float2D type of matrices in a form of ItemSetStat. 
+ * This version is more flexible and will be later used to retrieve set of sets of elements.                  
  *             
  *             input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
- *             item_indeces_for - indeces of items for wich statistics should be calculated 
- *             item_indeces_on - indeces of items on wich statistics should be calculated
+ *             item_indeces_for - indeces of items FOR wich statistics should be calculated 
+ *             item_indeces_on - indeces of items ON wich statistics should be calculated
  *             fl_indeces_on - defines whether the indeces_on should be populated in SetStat objects. The default value = 0. 
- *             fl_indeces_for - defines whether the indeces_for should be populated in SetStat objects. The default value = 0.
- *              
+ *             fl_indeces_for - defines whether the indeces_for should be populated in SetStat objects. The default value = 0.             
  *             fl_avgs - defines whether the avgs should be populated in SetStat objects. The default value = 0. 
  *             fl_mins - defines whether the mins should be populated in SetStat objects. The default value = 0. 
  *             fl_maxs - defines whether the maxs should be populated in SetStat objects. The default value = 0. 

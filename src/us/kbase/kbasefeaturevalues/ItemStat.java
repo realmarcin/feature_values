@@ -15,22 +15,21 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: ItemStat</p>
  * <pre>
- * Statistics for a given item in a collection (defined by index) , calculated on the associated vector of values. Typical example is 2D matrix: item is a given row, and correposnding values from all columns
- * is an associated vector.   
+ * Statistics for a given item in a collection (defined by index) , calculated on the associated vector of values. 
+ * Typical example is 2D matrix: item is a given row, and correposnding values from all columns is an associated vector.   
  *             
- *             In relation to ExpressionMatrix we can think about a gene (defined by row index in Float2DMatrix) and a vector of expression values across all (or a subset of) conditions. In this case, index_for - index 
- *             of a row representing a gene in the Float2DMatrix,  indeces_on - indeces of columns represnting a set of conditions on which we want to calculate statistics. 
+ *             In relation to ExpressionMatrix we can think about a gene (defined by row index in Float2DMatrix) and a vector of expression 
+ *             values across all (or a subset of) conditions. In this case, index_for - index of a row representing a gene in the Float2DMatrix,  
+ *             indeces_on - indeces of columns represnting a set of conditions on which we want to calculate statistics. 
  *              
- *             index_for - index of the item in a collection for which all statitics is collected
- *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
+ *             index_for - index of the item in a collection FOR which all statitics is collected
+ *             indeces_on - indeces of items in the associated vector ON which the statistics is calculated
  *             size - number of elements in the associated vector
  *             avg - mean value for a given item across all elements in the associated vector 
  *             min - min value for a given item across all elements in the associated vector 
  *             max - max value for a given item across all elements in the associated vector 
  *             std - std value for a given item across all elements in the associated vector 
- *             missing_values - number of missing values for a given item across all elements in the associated vector 
- *             
- * $$ DTO $$
+ *             missing_values - number of missing values for a given item across all elements in the associated vector
  * </pre>
  * 
  */

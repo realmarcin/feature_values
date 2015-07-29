@@ -13,21 +13,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: SetStat</p>
+ * <p>Original spec-file type: ItemSetStat</p>
  * <pre>
- * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
- *             In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
- *             In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.            
- *             indeces_for - index of the item in a collection for which all statitics is collected
- *             indeces_on - indeces of items in the associated vector on which the statistics is calculated
+ * Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but this way we can optimize data transfer in two ways:
+ *  1. In parameters we can specify that we need a subset of properties, e.g. only "avgs". 
+ *  2. No field names in json (avg, min, max, etc) for each element in the list
+ *             indeces_for - indeces of items in a collection FOR which all statitics is collected
+ *             indeces_on - indeces of items in the associated vector ON which the statistics is calculated
  *             size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
  *             avgs - mean values for each item defined by indeces_for across all elements defined by indeces_on 
  *             mins - min values for each item defined by indeces_for across all elements defined by indeces_on 
  *             maxs - max values for each item defined by indeces_for across all elements defined by indeces_on 
  *             stds - std values for each item defined by indeces_for across all elements defined by indeces_on 
- *             missing_values - number of missing values for each item defined by indeces_for across all elements defined by indeces_on 
- *             
- * $$ DTO $$
+ *             missing_values - number of missing values for each item defined by indeces_for across all elements defined by indeces_on
  * </pre>
  * 
  */
@@ -43,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "stds",
     "missing_values"
 })
-public class SetStat {
+public class ItemSetStat {
 
     @JsonProperty("indeces_for")
     private List<Long> indecesFor;
@@ -73,7 +71,7 @@ public class SetStat {
         this.indecesFor = indecesFor;
     }
 
-    public SetStat withIndecesFor(List<Long> indecesFor) {
+    public ItemSetStat withIndecesFor(List<Long> indecesFor) {
         this.indecesFor = indecesFor;
         return this;
     }
@@ -88,7 +86,7 @@ public class SetStat {
         this.indecesOn = indecesOn;
     }
 
-    public SetStat withIndecesOn(List<Long> indecesOn) {
+    public ItemSetStat withIndecesOn(List<Long> indecesOn) {
         this.indecesOn = indecesOn;
         return this;
     }
@@ -103,7 +101,7 @@ public class SetStat {
         this.size = size;
     }
 
-    public SetStat withSize(java.lang.Long size) {
+    public ItemSetStat withSize(java.lang.Long size) {
         this.size = size;
         return this;
     }
@@ -118,7 +116,7 @@ public class SetStat {
         this.avgs = avgs;
     }
 
-    public SetStat withAvgs(List<Double> avgs) {
+    public ItemSetStat withAvgs(List<Double> avgs) {
         this.avgs = avgs;
         return this;
     }
@@ -133,7 +131,7 @@ public class SetStat {
         this.mins = mins;
     }
 
-    public SetStat withMins(List<Double> mins) {
+    public ItemSetStat withMins(List<Double> mins) {
         this.mins = mins;
         return this;
     }
@@ -148,7 +146,7 @@ public class SetStat {
         this.maxs = maxs;
     }
 
-    public SetStat withMaxs(List<Double> maxs) {
+    public ItemSetStat withMaxs(List<Double> maxs) {
         this.maxs = maxs;
         return this;
     }
@@ -163,7 +161,7 @@ public class SetStat {
         this.stds = stds;
     }
 
-    public SetStat withStds(List<Double> stds) {
+    public ItemSetStat withStds(List<Double> stds) {
         this.stds = stds;
         return this;
     }
@@ -178,7 +176,7 @@ public class SetStat {
         this.missingValues = missingValues;
     }
 
-    public SetStat withMissingValues(List<Long> missingValues) {
+    public ItemSetStat withMissingValues(List<Long> missingValues) {
         this.missingValues = missingValues;
         return this;
     }
@@ -195,7 +193,7 @@ public class SetStat {
 
     @Override
     public String toString() {
-        return ((((((((((((((((((("SetStat"+" [indecesFor=")+ indecesFor)+", indecesOn=")+ indecesOn)+", size=")+ size)+", avgs=")+ avgs)+", mins=")+ mins)+", maxs=")+ maxs)+", stds=")+ stds)+", missingValues=")+ missingValues)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((("ItemSetStat"+" [indecesFor=")+ indecesFor)+", indecesOn=")+ indecesOn)+", size=")+ size)+", avgs=")+ avgs)+", mins=")+ mins)+", maxs=")+ maxs)+", stds=")+ stds)+", missingValues=")+ missingValues)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

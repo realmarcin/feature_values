@@ -13,9 +13,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: MatrixUI</p>
+ * <p>Original spec-file type: MatrixStat</p>
  * <pre>
- * All info required for visualization of Matrix (ExpressionMatrix) object in the Matrix Viewer
+ * Data type for bulk queries. It provides all necessary data to visulize basic properties of ExpressionMatrix 
+ * mtx_descriptor - decriptor of the matrix as a whole
+ * row_descriptors - descriptor for each row in the matrix (provides basic properties of the features)
+ * column_descriptors - descriptor for each column in the matrix (provides basic properties of the conditions)
+ * row_stats - basic statistics for each row (feature) in the matrix, like mean, min, max, etc acorss all columns (conditions)
+ * column_stats - basic statistics for each row (feature) in the matrix, like mean, min, max, etc across all rows (features)
  * </pre>
  * 
  */
@@ -28,12 +33,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "row_stats",
     "column_stats"
 })
-public class MatrixUI {
+public class MatrixStat {
 
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * General info about matrix, including genome name that needs to be extracted from the genome object
+     * ******************************************
+     * 	* data API: data transfer objects (DTOs) *
+     * 	*****************************************
      * </pre>
      * 
      */
@@ -52,7 +59,9 @@ public class MatrixUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * General info about matrix, including genome name that needs to be extracted from the genome object
+     * ******************************************
+     * 	* data API: data transfer objects (DTOs) *
+     * 	*****************************************
      * </pre>
      * 
      */
@@ -64,7 +73,9 @@ public class MatrixUI {
     /**
      * <p>Original spec-file type: MatrixDescriptor</p>
      * <pre>
-     * General info about matrix, including genome name that needs to be extracted from the genome object
+     * ******************************************
+     * 	* data API: data transfer objects (DTOs) *
+     * 	*****************************************
      * </pre>
      * 
      */
@@ -73,7 +84,7 @@ public class MatrixUI {
         this.mtxDescriptor = mtxDescriptor;
     }
 
-    public MatrixUI withMtxDescriptor(MatrixDescriptor mtxDescriptor) {
+    public MatrixStat withMtxDescriptor(MatrixDescriptor mtxDescriptor) {
         this.mtxDescriptor = mtxDescriptor;
         return this;
     }
@@ -88,7 +99,7 @@ public class MatrixUI {
         this.rowDescriptors = rowDescriptors;
     }
 
-    public MatrixUI withRowDescriptors(List<us.kbase.kbasefeaturevalues.ItemDescriptor> rowDescriptors) {
+    public MatrixStat withRowDescriptors(List<us.kbase.kbasefeaturevalues.ItemDescriptor> rowDescriptors) {
         this.rowDescriptors = rowDescriptors;
         return this;
     }
@@ -103,7 +114,7 @@ public class MatrixUI {
         this.columnDescriptors = columnDescriptors;
     }
 
-    public MatrixUI withColumnDescriptors(List<us.kbase.kbasefeaturevalues.ItemDescriptor> columnDescriptors) {
+    public MatrixStat withColumnDescriptors(List<us.kbase.kbasefeaturevalues.ItemDescriptor> columnDescriptors) {
         this.columnDescriptors = columnDescriptors;
         return this;
     }
@@ -118,7 +129,7 @@ public class MatrixUI {
         this.rowStats = rowStats;
     }
 
-    public MatrixUI withRowStats(List<us.kbase.kbasefeaturevalues.ItemStat> rowStats) {
+    public MatrixStat withRowStats(List<us.kbase.kbasefeaturevalues.ItemStat> rowStats) {
         this.rowStats = rowStats;
         return this;
     }
@@ -133,7 +144,7 @@ public class MatrixUI {
         this.columnStats = columnStats;
     }
 
-    public MatrixUI withColumnStats(List<us.kbase.kbasefeaturevalues.ItemStat> columnStats) {
+    public MatrixStat withColumnStats(List<us.kbase.kbasefeaturevalues.ItemStat> columnStats) {
         this.columnStats = columnStats;
         return this;
     }
@@ -150,7 +161,7 @@ public class MatrixUI {
 
     @Override
     public String toString() {
-        return ((((((((((((("MatrixUI"+" [mtxDescriptor=")+ mtxDescriptor)+", rowDescriptors=")+ rowDescriptors)+", columnDescriptors=")+ columnDescriptors)+", rowStats=")+ rowStats)+", columnStats=")+ columnStats)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("MatrixStat"+" [mtxDescriptor=")+ mtxDescriptor)+", rowDescriptors=")+ rowDescriptors)+", columnDescriptors=")+ columnDescriptors)+", rowStats=")+ rowStats)+", columnStats=")+ columnStats)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

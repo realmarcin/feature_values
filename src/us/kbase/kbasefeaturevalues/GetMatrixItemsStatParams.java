@@ -17,8 +17,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * Parameters to get statics for a set of items from the Float2D type of matrices. 
  * input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
- * item_indeces_for - indeces of items for whch statistics should be calculated 
- * item_indeces_on - indeces of items on whch statistics should be calculated
+ * item_indeces_for - indeces of items FOR whch statistics should be calculated 
+ * item_indeces_on - indeces of items ON whch statistics should be calculated
  * fl_indeces_on - defines whether the indeces_on should be populated in ItemStat objects. The default value = 0.
  * </pre>
  * 

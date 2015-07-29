@@ -1,26 +1,21 @@
 package us.kbase.kbasefeaturevalues;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
-import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.UObject;
+import us.kbase.kbasegenomes.Feature;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.ObjectData;
 import us.kbase.workspace.ObjectIdentity;
@@ -29,6 +24,12 @@ import us.kbase.workspace.ProvenanceAction;
 import us.kbase.workspace.SaveObjectsParams;
 import us.kbase.workspace.SubObjectIdentity;
 import us.kbase.workspace.WorkspaceClient;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 public class KBaseFeatureValuesImpl {
     private String jobId;
@@ -323,9 +324,9 @@ public class KBaseFeatureValuesImpl {
     
     
 	@SuppressWarnings("unchecked")
-	public MatrixUI getMatrixUi(GetMatrixUIParams params) throws Exception {
+	public MatrixStat getMatrixStat(GetMatrixStatParams params) throws Exception {
 
-        MatrixUI matrixUI = new MatrixUI();
+		MatrixStat matrixUI = new MatrixStat();
         WorkspaceClient wsClient = getWsClient();
 		
         // Get expression matrix
@@ -333,14 +334,12 @@ public class KBaseFeatureValuesImpl {
 		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
 			.getData()
 			.asClassInstance(ExpressionMatrix.class);
-        
-        
-        // Get genome features
+                
+        // Get genome properties
         String genomeId = null;
         String genomeName = null;
-        //List<Object> genomeFeatures;
-        
-        
+        Hashtable<String,Feature> featureId2Feature = null;
+                
         if (matrix.getGenomeRef() != null) {
         	SubObjectIdentity genomeIndentity = new SubObjectIdentity()
         		.withRef( matrix.getGenomeRef() )
@@ -355,12 +354,15 @@ public class KBaseFeatureValuesImpl {
             	.asClassInstance(Map.class);
             
             genomeId = (String) genomeDataMap.get("id");
-            genomeName = (String) genomeDataMap.get("scientific_name");            
+            genomeName = (String) genomeDataMap.get("scientific_name");  
+//            List<Feature> features = UObject.transformObjectToObject(genomeDataMap.get("features"), new TypeReference<List<Feature>>() {}); 
+// 				Gives: java.lang.TypeNotPresentException: Type us.kbase.common.service.Tuple3 not present            
+            List<Feature> features = new ArrayList<Feature>();  
+            featureId2Feature = buildFeatureId2FeatureHash(features);            
         }
         
         
         // Build mtx descriptor
-
         MatrixDescriptor mtxDescriptor = new MatrixDescriptor()
         	.withColNormalization(matrix.getColNormalization())
         	.withColumnsCount((long) matrix.getData().getColIds().size())
@@ -378,17 +380,26 @@ public class KBaseFeatureValuesImpl {
         
         // Build row and descriptors
         
-        matrixUI.setRowDescriptors(buildRowDescriptors(matrix));
-        matrixUI.setRowDescriptors(buildColumnDescriptors(matrix));        
+        matrixUI.setRowDescriptors(buildRowDescriptors(matrix, featureId2Feature));
+        matrixUI.setColumnDescriptors(buildColumnDescriptors(matrix));        
         
         // Collect statistics
         matrixUI.setRowStats(FloatMatrix2DUtil.getRowsStat(matrix.getData(), null, null, false));
-        matrixUI.setRowStats(FloatMatrix2DUtil.getColumnsStat(matrix.getData(), null, null, false));
+        matrixUI.setColumnStats(FloatMatrix2DUtil.getColumnsStat(matrix.getData(), null, null, false));
 
 		return matrixUI;
 	}    
     
-    private List<ItemDescriptor> buildColumnDescriptors(ExpressionMatrix matrix) {
+    private Hashtable<String, Feature> buildFeatureId2FeatureHash(
+			List<Feature> features) {
+    	Hashtable<String, Feature> featureId2Feature = new Hashtable<String, Feature>();
+    	for(Feature f: features){
+    		featureId2Feature.put(f.getId(), f);    		
+    	}    	
+		return featureId2Feature;
+	}
+
+	private List<ItemDescriptor> buildColumnDescriptors(ExpressionMatrix matrix) {
     	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
     	
     	// We do not have condition mapping now, so we will use just colIds...
@@ -405,17 +416,27 @@ public class KBaseFeatureValuesImpl {
 		return descriptors;
 	}
 
-	private List<ItemDescriptor> buildRowDescriptors(ExpressionMatrix matrix) {
+	private List<ItemDescriptor> buildRowDescriptors(ExpressionMatrix matrix, Hashtable<String, Feature> featureId2Feature) {
     	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
     	
-    	//TODO needs to be improved: get data from the genome, like function...
     	List<String> rowIds = matrix.getData().getRowIds();
     	for(int i = 0; i < rowIds.size(); i++){
+    		
+    		//TODO implement general approach to extract required properties. For now just function
+    		Feature feature = featureId2Feature.get(rowIds.get(i));
+    		
+    		Hashtable<String,String> props = new Hashtable<String,String>();
+    		if(feature != null){
+        		String function = feature.getFunction();
+	        	props.put("function", function != null ? function : "");	
+    		}
+    		    		
     		ItemDescriptor desc = new ItemDescriptor()
     			.withDescription("")
     			.withId(rowIds.get(i))
     			.withIndex((long)i)
-    			.withName(rowIds.get(i));
+    			.withName(rowIds.get(i))
+    			.withProperties(props);
     		descriptors.add(desc);
     	}
     	
@@ -437,7 +458,40 @@ public class KBaseFeatureValuesImpl {
 		return FloatMatrix2DUtil.getColumnsStat(matrix.getData(), params.getItemIndecesFor() , params.getItemIndecesOn(), params.getFlIndecesOn() == 1);
 	}	
 	
+	public List<ItemSetStat> getMatrixRowSetsStat(GetMatrixSetsStatParams params) throws Exception {
+		List<ItemSetStat> setStats = new ArrayList<ItemSetStat>();
+		
+		ExpressionMatrix matrix;
+		String matrixRef = "";
+		for(GetMatrixSetStatParams setStatParam: params.getParams()){
+			if(!matrixRef.equals(setStatParam.getInputData())){
+				matrixRef = setStatParam.getInputData();
+				matrix = getExpressionMatrix(matrixRef);
+				
+				ItemSetStat setStat = FloatMatrix2DUtil.getRowsSetStat(matrix.getData(), setStatParam);
+				setStats.add(setStat);
+			}
+		}		
+		return setStats;
+	}
 	
+	public List<ItemSetStat> getMatrixColumnSetsStat(GetMatrixSetsStatParams params) throws Exception {
+		List<ItemSetStat> setStats = new ArrayList<ItemSetStat>();
+		
+		ExpressionMatrix matrix;
+		String matrixRef = "";
+		for(GetMatrixSetStatParams setStatParam: params.getParams()){
+			if(!matrixRef.equals(setStatParam.getInputData())){
+				matrixRef = setStatParam.getInputData();
+				matrix = getExpressionMatrix(matrixRef);
+				
+				ItemSetStat setStat = FloatMatrix2DUtil.getColumnsSetStat(matrix.getData(), setStatParam);
+				setStats.add(setStat);
+			}
+		}		
+		return setStats;
+	}
+
 	private ExpressionMatrix getExpressionMatrix(String mtxRef) throws Exception{
 		ObjectData matrixData = getExpressionMatrixObject(mtxRef);
         	
@@ -453,7 +507,7 @@ public class KBaseFeatureValuesImpl {
 		return wsClient
         	.getObjects(Arrays.asList(mtxIndentity))
         	.get(0);		
-	}
+	}	
 	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     public static class BioMatrix {
@@ -506,6 +560,5 @@ public class KBaseFeatureValuesImpl {
         }
 
     }
-
 
 }

@@ -14,9 +14,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: ItemDescriptor</p>
  * <pre>
- * ******************************************
- * 	* data API: data transfer objects (DTOs) *
- * 	*****************************************
+ * Basic information about a particular item in a collection. 
+ *             index - index of the item
+ *             id - id of the item
+ *             name - name of the item
+ *             description - description of the item                        
+ *             properties - additinal proerties: key - property type, value - value. For instance, if item represents a feature, the property type can be a type of feature annotation in a genome, e.g. 'function', 'strand', etc
  * </pre>
  * 
  */

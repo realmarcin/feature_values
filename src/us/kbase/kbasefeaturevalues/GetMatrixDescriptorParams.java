@@ -14,7 +14,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetMatrixDescriptorParams</p>
  * <pre>
- * Parameters to retrieve MatrixDescriptor
+ * ******************************************
+ * 	* data API: parameters and functions      *
+ * 	*****************************************
  * </pre>
  * 
  */
