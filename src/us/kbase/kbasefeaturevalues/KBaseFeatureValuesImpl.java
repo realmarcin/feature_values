@@ -1,14 +1,19 @@
 package us.kbase.kbasefeaturevalues;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -16,9 +21,11 @@ import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
+import us.kbase.common.service.Tuple11;
 import us.kbase.common.service.UObject;
 import us.kbase.kbasegenomes.Feature;
 import us.kbase.userandjobstate.UserAndJobStateClient;
+import us.kbase.workspace.GetObjectInfoNewParams;
 import us.kbase.workspace.ObjectData;
 import us.kbase.workspace.ObjectIdentity;
 import us.kbase.workspace.ObjectSaveData;
@@ -278,6 +285,90 @@ public class KBaseFeatureValuesImpl {
         return params.getOutWorkspace() + "/" + outMatrixId;
     }
 
+    @SuppressWarnings("unchecked")
+    public String buildFeatureSet(BuildFeatureSetParams params) throws Exception {
+        /*
+            Here is definition of KBaseCollections.FeatureSet type:
+            typedef structure {
+                string description;
+                mapping<feature_id, list<genome_ref>> elements;
+            } FeatureSet; 
+        */
+        Map<String, List<String>> elements = new LinkedHashMap<String, List<String>>();
+        if (params.getBaseFeatureSet() != null) {
+            Map<String, Object> baseMap = getWsClient().getObjects(Arrays.asList(
+                    new ObjectIdentity().withRef(params.getBaseFeatureSet()))).get(0)
+                    .getData().asClassInstance(Map.class);
+            Map<String, List<String>> baseElements = (Map<String, List<String>>)baseMap.get("elements");           
+            if (baseElements != null)
+                elements.putAll(baseElements);
+        }
+        ObjectData genomeObj = getWsClient().getObjectSubset(Arrays.asList(
+                new SubObjectIdentity().withRef(params.getGenome()).withIncluded(
+                        Arrays.asList("features/[*]/id")))).get(0);
+        Tuple11<Long, String, String, String, Long, String, Long, String, String, Long, Map<String,String>> info = 
+                genomeObj.getInfo();
+        String genomeRef = info.getE7() + "/" + info.getE1() + "/" + info.getE5();
+        Map<String, Object> genomeMap = genomeObj.getData().asClassInstance(Map.class);
+        List<Map<String, Object>> featureList = (List<Map<String, Object>>)genomeMap.get("features");
+        Set<String> featureIdSet = new HashSet<String>();
+        for (Map<String, Object> feature : featureList) {
+            String featureId = (String)feature.get("id");
+            featureIdSet.add(featureId);
+        }
+        List<String> lostFeatureIds = new ArrayList<String>();
+        BufferedReader br = new BufferedReader(new StringReader(params.getFeatureIds()));
+        while (true) {
+            String l = br.readLine();
+            if (l == null)
+                break;
+            String[] parts = l.split(Pattern.quote(","));
+            for (String part : parts) {
+                String featureId = part.trim();
+                if (featureId != null) {
+                    if (!featureIdSet.contains(featureId)) {
+                        lostFeatureIds.add(featureId);
+                    } else {
+                        List<String> genomes = elements.get(featureId);
+                        if (genomes == null) {
+                            genomes = new ArrayList<String>();
+                            elements.put(featureId, genomes);
+                        }
+                        addToListOnce(genomes, genomeRef);
+                    }
+                }
+            }
+        }
+        br.close();
+        if (lostFeatureIds.size() > 0)
+            throw new IllegalStateException("Some features are not found: " + lostFeatureIds);
+        List<String> provRefs = new ArrayList<String>();
+        for (List<String> genomeRefs : elements.values())
+            for (String aGenomeRef : genomeRefs)
+                addToListOnce(provRefs, aGenomeRef);
+        Map<String, Object> featureSet = new LinkedHashMap<String, Object>();
+        featureSet.put("description", params.getDescription());
+        featureSet.put("elements", elements);
+        if (params.getBaseFeatureSet() != null)
+            provRefs.add(params.getBaseFeatureSet());
+        List<ProvenanceAction> provenance = Arrays.asList(
+                new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
+                .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
+                .withDescription("Reconnection of matrix rows to genome features")
+                .withInputWsObjects(provRefs).withMethod("reconnect_matrix_to_genome")
+                .withMethodParams(Arrays.asList(new UObject(params))));
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
+                .withObjects(Arrays.asList(new ObjectSaveData()
+                .withType("KBaseCollections.FeatureSet").withName(params.getOutputFeatureSet())
+                .withData(new UObject(featureSet)).withProvenance(provenance))));
+        return params.getOutWorkspace() + "/" + params.getOutputFeatureSet();
+    }
+    
+    private static void addToListOnce(List<String> list, String item) {
+        if (!list.contains(item))
+            list.add(item);
+    }
+    
     @SuppressWarnings("unchecked")
     public MatrixDescriptor getMatrixDescriptor(GetMatrixDescriptorParams params) throws Exception {
         WorkspaceClient wsCl = getWsClient();

@@ -307,6 +307,23 @@ public class KBaseFeatureValuesClient {
     }
 
     /**
+     * <p>Original spec-file function name: build_feature_set</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.BuildFeatureSetParams BuildFeatureSetParams}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String buildFeatureSet(BuildFeatureSetParams params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.build_feature_set", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: get_matrix_descriptor</p>
      * <pre>
      * </pre>
