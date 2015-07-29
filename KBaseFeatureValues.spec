@@ -368,25 +368,44 @@ module KBaseFeatureValues {
 	******************************************/    
 	
 	/*
-		[PSN; Jul 22, 2015]
 		Introduction:
 		
 		Data transfer objects (DTO) are needed to package data to readliy vizualize data by UI widgets.
 		The methods bellow are aimed to operate on expression matrices, but later we should have similar methods
-		to work with fitness data, etc. Thus, methods can be data specific, but output cna be designed in generic way,
-		since approcahes to visualize thes types of data are similar. In the very end all of them are based on Float2DMatrix.
+		to work with fitness data, etc. Thus, methods can be data specific, but output can be designed in a generic way,
+		since approcahes to visualize these types of data are similar. In the very end all of them are based on Float2DMatrix.
 		
 		But we probably can think more broadly... Float2DMatrix is jsut another complex subtype of a Collection. So, speaking about 
-		output data, let us think in terms of Collections, Items, etc...  
+		output data, let us think in terms of Items, Sets, etc...  
 		
 		On the other hand,  functions and params should be data specific, since we do not support polymorphism. Thus functions and params 
 		will have "Matrix" in their names. 
 	
-		In relation to the ExpressionMatrix and Float2DMatrix, Item can be either row (feature) or column (condtion).	
-	
+		In relation to the ExpressionMatrix and Float2DMatrix, Item can be either row (feature) or column (condtion).
+		
+		We will first define several atomic datatypes that can be queried individually. Then we will define several types for bulk queires 
+		(typically required for UI widgets) taht may comprise several individaul data types to optimmize data preparation and transfer. 		
 	*/
 	
-	
+
+ 	 /*
+		General info about matrix, including genome name that needs to be extracted from the genome object
+		
+	*/	
+  	
+	typedef structure{
+		string matrix_id;
+		string matrix_name;
+		string matrix_description;
+		string genome_id;
+		string genome_name;
+		int rows_count;
+		int columns_count;
+		string scale;
+		string type;
+		string row_normalization;
+		string col_normalization;
+	} MatrixDescriptor;	
 	
 	
 	/*
@@ -396,9 +415,7 @@ module KBaseFeatureValues {
     	id - id of the item
     	name - name of the item
     	description - description of the item			
-    	properties - additinal proerties: key - property type, value - value. For instance, if item represents a feature, the property type can be a type feature annotation in a genome, like 'function', 'strand', etc	
-		
-		$$ DTO $$
+    	properties - additinal proerties: key - property type, value - value. For instance, if item represents a feature, the property type can be a type of feature annotation in a genome, e.g. 'function', 'strand', etc	
 	*/
 	
 	typedef structure{
@@ -410,22 +427,22 @@ module KBaseFeatureValues {
 	} ItemDescriptor;
 		
     /*
-		Statistics for a given item in a collection (defined by index) , calculated on the associated vector of values. Typical example is 2D matrix: item is a given row, and correposnding values from all columns
-		is an associated vector.   
+		Statistics for a given item in a collection (defined by index) , calculated on the associated vector of values. 
+		Typical example is 2D matrix: item is a given row, and correposnding values from all columns is an associated vector.   
     	
-    	In relation to ExpressionMatrix we can think about a gene (defined by row index in Float2DMatrix) and a vector of expression values across all (or a subset of) conditions. In this case, index_for - index 
-    	of a row representing a gene in the Float2DMatrix,  indeces_on - indeces of columns represnting a set of conditions on which we want to calculate statistics. 
+    	In relation to ExpressionMatrix we can think about a gene (defined by row index in Float2DMatrix) and a vector of expression 
+    	values across all (or a subset of) conditions. In this case, index_for - index of a row representing a gene in the Float2DMatrix,  
+    	indeces_on - indeces of columns represnting a set of conditions on which we want to calculate statistics. 
     	 
-    	index_for - index of the item in a collection for which all statitics is collected
-    	indeces_on - indeces of items in the associated vector on which the statistics is calculated
+    	index_for - index of the item in a collection FOR which all statitics is collected
+    	indeces_on - indeces of items in the associated vector ON which the statistics is calculated
     	size - number of elements in the associated vector
     	avg - mean value for a given item across all elements in the associated vector 
     	min - min value for a given item across all elements in the associated vector 
     	max - max value for a given item across all elements in the associated vector 
     	std - std value for a given item across all elements in the associated vector 
     	missing_values - number of missing values for a given item across all elements in the associated vector 
-    	
-		$$ DTO $$
+
     */
     typedef structure{
     	int index_for;
@@ -441,21 +458,19 @@ module KBaseFeatureValues {
 
 	
     /*
-		Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but sometimes we might need set of sets, and it becomes complicated...
+		Same as ItemStat, but for a set of Items. Actually it can be modeled as a list<ItemStat>, but this way we can optimize data transfer in two ways:
+		1. In parameters we can specify that we need a subset of properties, e.g. only "avgs". 
+		2. No field names in json (avg, min, max, etc) for each element in the list
 		
-    	In relation to ExpressionMatrix, this type can be used to build a sparklines acorss all conditions for a collection of genes. 
-    	In this case: indeces_for - indeces of columns representing all (or a subset of) conditions,  indeces_on - indeces of rows representing genes.    	
-
-    	indeces_for - index of the item in a collection for which all statitics is collected
-    	indeces_on - indeces of items in the associated vector on which the statistics is calculated
+		
+    	indeces_for - indeces of items in a collection FOR which all statitics is collected
+    	indeces_on - indeces of items in the associated vector ON which the statistics is calculated
     	size - number of elements defined by indeces_on (expected to be the same for all items defined by indeces_for)
     	avgs - mean values for each item defined by indeces_for across all elements defined by indeces_on 
     	mins - min values for each item defined by indeces_for across all elements defined by indeces_on 
     	maxs - max values for each item defined by indeces_for across all elements defined by indeces_on 
     	stds - std values for each item defined by indeces_for across all elements defined by indeces_on 
     	missing_values - number of missing values for each item defined by indeces_for across all elements defined by indeces_on 
-    	
-		$$ DTO $$
     */	
     typedef structure{
     	list<int> indeces_for;
@@ -467,68 +482,88 @@ module KBaseFeatureValues {
 		list<float> maxs;
 		list<float> stds;
 		list<int>	missing_values;
-    } SetStat;
+    } ItemSetStat;
 
 	
  	 /*
-		To represent a pairwise matrix with sprecalculated statistics. 
-		It can be used to represent pairwise correlation for a set of genes. 
+		To represent a pairwise comparison of several elements defined by 'indeces'.  
+		This data type can be used to model represent pairwise correlation of expression profiles for a set of genes.		 
+		
+		indeces - indeces of elements to be compared
+		comparison_values - values representing a parituclar type of comparison between elements. 
+			Expected to be symmetric: comparison_values[i][j] = comparison_values[j][i].
+			Diagonal values: comparison_values[i][i] = 0
+			
+		avgs - mean of comparison_values for each element	
+		mins - min of comparison_values for each element
+		maxs - max of comparison_values for each element
+		stds - std of comparison_values for each element
 	*/		
 	typedef structure{
 		list<int> indeces;
-		int size;
-		list<list<float>> values;
+		list<list<float>> comparison_values;
 		list<float> avgs;	
 		list<float> mins;	
 		list<float> maxs;
 		list<float> stds;
-		list<int>	missing_values;
-		
-	} PairwiseMatrixStat;
+	} PairwiseComparison;
 	
- 	 /*
-		General info about matrix, including genome name that needs to be extracted from the genome object
-	*/	
-  	
-	typedef structure{
-		string matrix_id;
-		string matrix_name;
-		string matrix_description;
-		string genome_id;
-		string genome_name;
-		int rows_count;
-		int columns_count;
-		string scale;
-		string type;
-		string row_normalization;
-		string col_normalization;
-	} MatrixDescriptor;
 	
  	/*
-		All info required for visualization of Matrix (ExpressionMatrix) object in the Matrix Viewer
+		Data type for bulk queries. It provides all necessary data to visulize basic properties of ExpressionMatrix 
+		
+		mtx_descriptor - decriptor of the matrix as a whole
+		row_descriptors - descriptor for each row in the matrix (provides basic properties of the features)
+		column_descriptors - descriptor for each column in the matrix (provides basic properties of the conditions)
+		row_stats - basic statistics for each row (feature) in the matrix, like mean, min, max, etc acorss all columns (conditions)
+		column_stats - basic statistics for each row (feature) in the matrix, like mean, min, max, etc across all rows (features)	
 	*/		
 	typedef structure{
 		MatrixDescriptor mtx_descriptor;
 		list<ItemDescriptor> row_descriptors;
 		list<ItemDescriptor> column_descriptors;
 		list<ItemStat> row_stats;
-		list<ItemStat> column_stats;
-	} MatrixUI;
+		list<ItemStat> column_stats;		
+	} MatrixStat;
 	
 	
  	/*
-		All info required for visualization of Matrix (ExpressionMatrix) object in the Matrix Viewer
-	*/		
-	typedef structure{
-	
-		MatrixDescriptor mtx_descriptor;
-		list<ItemDescriptor> feature_set_descriptors;
-		list<ItemDescriptor> condition_descriptors;
+		Data type for bulk queries. It provides various statistics calculated on sub-matrix. The sub-matrix is defined by a subset of rows and columns via parameters.
+		Parameters will also define the required types of statics.
+				
+		mtx_descriptor - basic properties of the source matrix
 		
-		SetStat feature_set_stat;
-		SetStat mtx_set_stat;
-		PairwiseMatrixStat feature_set_correlation;
-	} MatrixFeatureSetUI;
+		row_descriptors - descriptor for each row in a subset defined in the parameters
+		column_descriptors - descriptor for each column in a subset defined in the parameters
+		
+		row_set_stats - basic statistics for a subset of rows calculated on a subset of columns 
+		column_set_stat - basic statistics for a subset of columns calculated on a subset of rows
+		
+		mtx_row_set_stat - basic statistics for a subset of rows calculated on ALL columns in the matrix (can be used as a backgound in comparison with row_set_stats)
+		mtx_column_set_stat - basic statistics for a subset of columns calculated on ALL rows in the matrix (can be used as a backgound in comparison with column_set_stat)
+		
+		row_pairwise_correlation - pariwise perason correlation for a subset of rows (features)  
+		column_pairwise_correlation - pariwise perason correlation for a subset of columns (conditions)
+		
+		values - sub-matrix representing actual values for a given subset of rows and a subset of columns														
+	*/		
+	typedef structure{	
+		MatrixDescriptor mtx_descriptor;
+		
+		list<ItemDescriptor> row_descriptors;
+		list<ItemDescriptor> column_descriptors;
+		
+		ItemSetStat row_set_stats;
+		ItemSetStat column_set_stat;
+		
+		ItemSetStat mtx_row_set_stat;
+		ItemSetStat mtx_column_set_stat;
+		
+		PairwiseComparison row_pairwise_correlation;
+		PairwiseComparison column_pairwise_correlation;
+		
+		list<list<float>> values;						
+	} SubmatrixStat;
 	
 	
 	
@@ -536,36 +571,45 @@ module KBaseFeatureValues {
 	* data API: parameters and functions      *
 	******************************************/    
 	
+   /*
+		Parameters to retrieve MatrixDescriptor		
+	*/        
+    typedef structure{
+        ws_matrix_id input_data;        
+    } GetMatrixDescriptorParams;  
+      
+    funcdef get_matrix_descriptor(GetMatrixDescriptorParams)
+    	returns (MatrixDescriptor) authentication required;
+    	    	
 	
     /*
     	Parameters to get basic properties for items from the Float2D type of matrices. 
-    	To work uniformly with rows and columns, the type of item ('row' or 'column') should be provided.
     	
     	input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
-    	item_type - type of the items: can be either 'row' or 'column'
     	item_indeces - indeces of items for whch descriptors should be built. Either item_indeces or item_ids should be provided. If both are provided, item_indeces will be used.
     	item_ids - ids of items for whch descriptors should be built. Either item_indeces or item_ids should be provided. If both are provided, item_indeces will be used.
     	requested_property_types - list of property types to be populated for each item. Currently supported property types are: 'function'      	
     */  	
 	typedef structure{
         ws_matrix_id input_data;        
-    	string item_type;
     	list<int> item_indeces;
     	list<string> item_ids;
     	list<string> requested_property_types;
 	} GetMatrixItemDescriptorsParams;
 	
 	
-    funcdef get_matrix_item_descriptors(GetMatrixItemDescriptorsParams) 
+    funcdef get_matrix_row_descriptors(GetMatrixItemDescriptorsParams) 
     	returns (list<ItemDescriptor>) authentication required;
     		
+    funcdef get_matrix_column_descriptors(GetMatrixItemDescriptorsParams) 
+    	returns (list<ItemDescriptor>) authentication required;
 	
     /*
     	Parameters to get statics for a set of items from the Float2D type of matrices. 
     	
     	input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
-    	item_indeces_for - indeces of items for whch statistics should be calculated 
-    	item_indeces_on - indeces of items on whch statistics should be calculated
+    	item_indeces_for - indeces of items FOR whch statistics should be calculated 
+    	item_indeces_on - indeces of items ON whch statistics should be calculated
     	fl_indeces_on - defines whether the indeces_on should be populated in ItemStat objects. The default value = 0. 
     	    	
     */       
@@ -583,16 +627,14 @@ module KBaseFeatureValues {
     	returns (list<ItemStat>) authentication required;
     
     /*
-		Another version of parameters to get statistics for a set of items from the Float2D type of matrices. 
-		This version is more flexible and will be later used to retrieve set of sets (we need to think about optimization).
-		  
+		Parameters to get statistics for a set of items from the Float2D type of matrices in a form of ItemSetStat. 
+		This version is more flexible and will be later used to retrieve set of sets of elements.		  
     	
     	input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
-    	item_indeces_for - indeces of items for wich statistics should be calculated 
-    	item_indeces_on - indeces of items on wich statistics should be calculated
+    	item_indeces_for - indeces of items FOR wich statistics should be calculated 
+    	item_indeces_on - indeces of items ON wich statistics should be calculated
     	fl_indeces_on - defines whether the indeces_on should be populated in SetStat objects. The default value = 0. 
-    	fl_indeces_for - defines whether the indeces_for should be populated in SetStat objects. The default value = 0.
-    	 
+    	fl_indeces_for - defines whether the indeces_for should be populated in SetStat objects. The default value = 0.    	 
     	fl_avgs - defines whether the avgs should be populated in SetStat objects. The default value = 0. 
     	fl_mins - defines whether the mins should be populated in SetStat objects. The default value = 0. 
     	fl_maxs - defines whether the maxs should be populated in SetStat objects. The default value = 0. 
@@ -616,7 +658,7 @@ module KBaseFeatureValues {
     } GetMatrixSetStatParams;
 
     /*
-		Parameters to retrieve statistics for set of sets. 
+		Parameters to retrieve statistics for set of sets of elements. 
 		
 		In relation to ExpressionMatrix, these parameters can be used to retrive sparklines for several gene clusters generated on the 
 		same ExpressionMatrix in one call.  
@@ -629,77 +671,63 @@ module KBaseFeatureValues {
 
     
     funcdef get_matrix_row_sets_stat(GetMatrixSetsStatParams)
-    	returns (list<SetStat>) authentication required;
+    	returns (list<ItemSetStat>) authentication required;
     
     funcdef get_matrix_column_sets_stat(GetMatrixSetsStatParams)
-    	returns (list<SetStat>) authentication required;
+    	returns (list<ItemSetStat>) authentication required;
 
-
-    /*
-		Another version of parameters to get statistics for a set of items from the Float2D type of matrices. 
-		This version is more flexible and will be later used to retrieve set of sets (we need to think about optimization).
-		      	
-    	input_data - worskapce reference to the ExpressionMatrix object (later we should allow to work with other Float2DMatrix-like matrices, e.g. fitness)
-    	item_indeces_for - indeces of items for whch statistics should be calculated 
-    	item_indeces_on - indeces of items on whch statistics should be calculated
-    	fl_indeces_on - defines whether the indeces_on should be populated in SetStat objects. The default value = 0. 
-    	fl_indeces_for - defines whether the indeces_for should be populated in SetStat objects. The default value = 0.
-    	 
-    	fl_avgs - defines whether the avgs should be populated in SetStat objects. The default value = 0. 
-    	fl_mins - defines whether the mins should be populated in SetStat objects. The default value = 0. 
-    	fl_maxs - defines whether the maxs should be populated in SetStat objects. The default value = 0. 
-    	fl_stds - defines whether the stds should be populated in SetStat objects. The default value = 0. 
-    	fl_missing_values - defines whether the missing_values should be populated in SetStat objects. The default value = 0. 
-    */        
+    	    
+   /*
+		Parameters to retrieve MatrixStat		
+	*/        
     typedef structure{
-        ws_matrix_id input_data;
-    	list<int> item_indeces;
-        boolean fl_row_ids;
-        boolean fl_col_ids;
+        ws_matrix_id input_data;        
+    } GetMatrixStatParams;  
+      
+    funcdef get_matrix_stat(GetMatrixStatParams)
+    	returns (MatrixStat) authentication required;
+
+
+   /*
+		Parameters to retrieve SubmatrixStat	
+		input_data - reference to the source matrix        
+        row_indeces - indeces defining a subset of matrix rows. Either row_indeces (highest priorery) or row_ids should be provided.
+        row_ids - ids defining a subset of matrix rows. Either row_indeces (highest priorery) or row_ids should be provided.
         
-    } GetMatrixItemsCorrelationParams;
-    
-    funcdef get_matrix_rows_correlation(GetMatrixItemsCorrelationParams)
-    	returns (PairwiseMatrixStat) authentication required;
-
-    funcdef get_matrix_columns_correlation(GetMatrixItemsCorrelationParams)
-    	returns (PairwiseMatrixStat) authentication required;
-
-   /*
-		Parameters to retrieve MatrixDescriptor		
+        column_indeces - indeces defining a subset of matrix columns. Either column_indeces (highest priorery) or column_ids should be provided.
+        column_ids - ids defining a subset of matrix columns. Either column_indeces (highest priorery) or column_ids should be provided.
+        
+        fl_row_set_stats - defines whether row_set_stats should be calculated in include in the SubmatrixStat. Default value = 0
+        fl_column_set_stat - defines whether column_set_stat should be calculated in include in the SubmatrixStat. Default value = 0
+        
+		fl_mtx_row_set_stat - defines whether mtx_row_set_stat should be calculated in include in the SubmatrixStat. Default value = 0
+		fl_mtx_column_set_stat - defines whether mtx_column_set_stat should be calculated in include in the SubmatrixStat. Default value = 0
+		
+		fl_row_pairwise_correlation - defines whether row_pairwise_correlation should be calculated in include in the SubmatrixStat. Default value = 0        
+		fl_column_pairwise_correlation - defines whether column_pairwise_correlation should be calculated in include in the SubmatrixStat. Default value = 0
+		fl_values - defines whether values should be calculated in include in the SubmatrixStat. Default value = 0	
 	*/        
     typedef structure{
         ws_matrix_id input_data;        
-    } GetMatrixDescriptorParams;    
-    funcdef get_matrix_descriptor(GetMatrixDescriptorParams)
-    	returns (MatrixDescriptor) authentication required;
-    	    
-    	    
-   /*
-		Parameters to retrieve MatrixUI		
-	*/        
-    typedef structure{
-        ws_matrix_id input_data;        
-    } GetMatrixUIParams;    
-    funcdef get_matrix_ui(GetMatrixUIParams)
-    	returns (MatrixUI) authentication required;
-
-
-   /*
-		Parameters to retrieve FeatureSetUI		
-		Either mtx_id and feature_indeces (or feature_ids), or cluster_set_id and cluster_index should be indicated
-	*/        
-    typedef structure{
-        ws_matrix_id mtx_id;        
-        list<int> feature_indeces;
-        list<string> feature_ids;
-
-        ws_clusterset_id cluster_set_id;
-        int cluster_index;        
-    } GetMatrixFeatureSetUIParams;    
-    funcdef get_matrix_featureset_ui(GetMatrixFeatureSetUIParams)
-    	returns (MatrixFeatureSetUI) authentication required;
-
-
+        list<int> row_indeces;
+        list<string> row_ids;
+        
+        list<int> column_indeces;
+        list<string> column_ids;
+        
+        boolean fl_row_set_stats;
+        boolean fl_column_set_stat;
+        
+		boolean fl_mtx_row_set_stat;
+		boolean fl_mtx_column_set_stat;
+		
+		boolean fl_row_pairwise_correlation;        
+		boolean fl_column_pairwise_correlation;
+		boolean fl_values;		        
+        
+    } GetSubmatrixStatParams;   
+     
+    funcdef get_submatrix_stat(GetSubmatrixStatParams)
+    	returns (SubmatrixStat) authentication required;
 };
 
