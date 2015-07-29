@@ -453,6 +453,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public SubmatrixStat getSubmatrixStat(GetSubmatrixStatParams arg1, AuthToken authPart) throws Exception {
         SubmatrixStat returnVal = null;
         //BEGIN get_submatrix_stat
+        returnVal = impl(authPart).getSubmatrixStat(arg1);
         //END get_submatrix_stat
         return returnVal;
     }

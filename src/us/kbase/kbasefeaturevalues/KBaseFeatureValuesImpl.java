@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
@@ -323,73 +325,161 @@ public class KBaseFeatureValuesImpl {
     }
     
     
-	@SuppressWarnings("unchecked")
-	public MatrixStat getMatrixStat(GetMatrixStatParams params) throws Exception {
-
-		MatrixStat matrixUI = new MatrixStat();
-        WorkspaceClient wsClient = getWsClient();
-		
-        // Get expression matrix
-		ObjectData matrixData = getExpressionMatrixObject(params.getInputData());
-		ExpressionMatrix matrix = (ExpressionMatrix)  matrixData
-			.getData()
-			.asClassInstance(ExpressionMatrix.class);
-                
-        // Get genome properties
+    class MatrixGenomeLoader{
+    	ObjectData matrixData;
+    	ExpressionMatrix matrix;
         String genomeId = null;
         String genomeName = null;
         Hashtable<String,Feature> featureId2Feature = null;
+    	
+    	
+    	@SuppressWarnings("unchecked")
+		public void load(String mtxRef) throws Exception{
+            WorkspaceClient wsClient = getWsClient();
+
+            // Get expression matrix
+    		matrixData = getExpressionMatrixObject(mtxRef);
+    		matrix = (ExpressionMatrix)  matrixData
+    			.getData()
+    			.asClassInstance(ExpressionMatrix.class);
+                                        
+            if (matrix.getGenomeRef() != null) {
+            	SubObjectIdentity genomeIndentity = new SubObjectIdentity()
+            		.withRef( matrix.getGenomeRef() )
+            		.withIncluded( Arrays.asList("id", "scientific_name", "features") );
+            	
+                ObjectData genomeData = wsClient
+                	.getObjectSubset(Arrays.asList(genomeIndentity))
+                	.get(0);
                 
-        if (matrix.getGenomeRef() != null) {
-        	SubObjectIdentity genomeIndentity = new SubObjectIdentity()
-        		.withRef( matrix.getGenomeRef() )
-        		.withIncluded( Arrays.asList("id", "scientific_name", "features") );
-        	
-            ObjectData genomeData = wsClient
-            	.getObjectSubset(Arrays.asList(genomeIndentity))
-            	.get(0);
-            
-            Map<String, Object> genomeDataMap = (Map<String, Object>) genomeData
-            	.getData()
-            	.asClassInstance(Map.class);
-            
-            genomeId = (String) genomeDataMap.get("id");
-            genomeName = (String) genomeDataMap.get("scientific_name");  
-//            List<Feature> features = UObject.transformObjectToObject(genomeDataMap.get("features"), new TypeReference<List<Feature>>() {}); 
-// 				Gives: java.lang.TypeNotPresentException: Type us.kbase.common.service.Tuple3 not present            
-            List<Feature> features = new ArrayList<Feature>();  
-            featureId2Feature = buildFeatureId2FeatureHash(features);            
-        }
+                Map<String, Object> genomeDataMap = (Map<String, Object>) genomeData
+                	.getData()
+                	.asClassInstance(Map.class);
+                
+                genomeId = (String) genomeDataMap.get("id");
+                genomeName = (String) genomeDataMap.get("scientific_name");  
+//                List<Feature> features = UObject.transformObjectToObject(genomeDataMap.get("features"), new TypeReference<List<Feature>>() {}); 
+//     				Gives: java.lang.TypeNotPresentException: Type us.kbase.common.service.Tuple3 not present            
+                List<Feature> features = new ArrayList<Feature>();  
+                featureId2Feature = buildFeatureId2FeatureHash(features);            
+            }    		
+    	}
+
+    }
+    
+	public MatrixStat getMatrixStat(GetMatrixStatParams params) throws Exception {
+
+		MatrixStat matrixStat = new MatrixStat();
+		
+		// Load matrix and genome data
+		MatrixGenomeLoader mgl = new MatrixGenomeLoader();
+		mgl.load(params.getInputData());
+
+		// Build matrix descriptor		
+        matrixStat.setMtxDescriptor(buildMatrixDescriptor(mgl));
         
+		int[] rowIndeces = buildIndeces(null, null, mgl.matrix.getData().getRowIds());
+		int[] colIndeces = buildIndeces(null, null, mgl.matrix.getData().getColIds());
         
-        // Build mtx descriptor
-        MatrixDescriptor mtxDescriptor = new MatrixDescriptor()
-        	.withColNormalization(matrix.getColNormalization())
-        	.withColumnsCount((long) matrix.getData().getColIds().size())
-        	.withGenomeId(genomeId)
-        	.withGenomeName(genomeName)
-        	.withMatrixDescription(matrix.getDescription())
-        	.withMatrixId(matrixData.getInfo().getE2())
-        	.withMatrixName(matrixData.getInfo().getE2())
-        	.withRowNormalization(matrix.getRowNormalization())
-        	.withRowsCount((long) matrix.getData().getRowIds().size())
-        	.withScale(matrix.getScale())
-        	.withType(matrix.getType());
-        
-        matrixUI.setMtxDescriptor(mtxDescriptor);
-        
-        // Build row and descriptors
-        
-        matrixUI.setRowDescriptors(buildRowDescriptors(matrix, featureId2Feature));
-        matrixUI.setColumnDescriptors(buildColumnDescriptors(matrix));        
+        // Build row and descriptors        
+        matrixStat.setRowDescriptors(buildRowDescriptors(mgl, rowIndeces ));
+        matrixStat.setColumnDescriptors(buildColumnDescriptors(mgl, colIndeces));        
         
         // Collect statistics
-        matrixUI.setRowStats(FloatMatrix2DUtil.getRowsStat(matrix.getData(), null, null, false));
-        matrixUI.setColumnStats(FloatMatrix2DUtil.getColumnsStat(matrix.getData(), null, null, false));
+        matrixStat.setRowStats(FloatMatrix2DUtil.getRowsStat(mgl.matrix.getData(), null, null, false));
+        matrixStat.setColumnStats(FloatMatrix2DUtil.getColumnsStat(mgl.matrix.getData(), null, null, false));
 
-		return matrixUI;
+		return matrixStat;
 	}    
     
+
+	public SubmatrixStat getSubmatrixStat(GetSubmatrixStatParams params) throws Exception {
+		SubmatrixStat submatrixStat = new SubmatrixStat();
+
+		// Load matrix and genome data
+		MatrixGenomeLoader mgl = new MatrixGenomeLoader();
+		mgl.load(params.getInputData());
+
+		// Build matrix descriptor		
+		submatrixStat.setMtxDescriptor(buildMatrixDescriptor(mgl));
+        
+		int[] rowIndeces = buildIndeces(params.getRowIndeces(), params.getRowIds(), mgl.matrix.getData().getRowIds());
+		int[] colIndeces = buildIndeces(params.getColumnIndeces(), params.getColumnIds(), mgl.matrix.getData().getColIds());
+		
+        // Build row and descriptors        
+		submatrixStat.setRowDescriptors(buildRowDescriptors(mgl, rowIndeces));
+		submatrixStat.setColumnDescriptors(buildColumnDescriptors(mgl, colIndeces));        
+		
+		
+        // Stub for parameters		
+		GetMatrixSetStatParams matrixSetStatParams = new GetMatrixSetStatParams()
+			.withFlAvgs(1L)
+			.withFlMaxs(1L)
+			.withFlMins(1L)
+			.withFlMaxs(1L)
+			.withFlStds(1L)
+			.withFlMissingValues(1L);
+		
+        // row and column set stats		
+		if( toBoolean(params.getFlRowSetStats()) ) {
+			matrixSetStatParams
+				.withItemIndecesFor(toListLong(rowIndeces))
+				.withItemIndecesOn(toListLong(colIndeces));			
+			submatrixStat.setRowSetStats(FloatMatrix2DUtil.getRowsSetStat(mgl.matrix.getData(), matrixSetStatParams));	
+		}
+		
+		if( toBoolean(params.getFlColumnSetStat()) ) {
+			matrixSetStatParams
+				.withItemIndecesFor(toListLong(colIndeces))
+				.withItemIndecesOn(toListLong(rowIndeces));			
+			submatrixStat.setColumnSetStat(FloatMatrix2DUtil.getColumnsSetStat(mgl.matrix.getData(), matrixSetStatParams));
+		}
+		
+        // mtx row and column set stats		
+		if( toBoolean(params.getFlMtxRowSetStat()) ) {
+			int[] mtxColIndeces = buildIndeces(null, null, mgl.matrix.getData().getColIds());
+			matrixSetStatParams
+				.withItemIndecesFor( toListLong(rowIndeces) )
+				.withItemIndecesOn( toListLong(mtxColIndeces));			
+			submatrixStat.setMtxRowSetStat(FloatMatrix2DUtil.getRowsSetStat(mgl.matrix.getData(), matrixSetStatParams));				
+		}
+		if( toBoolean(params.getFlMtxColumnSetStat()) ) {
+			int[] mtxRowIndeces = buildIndeces(null, null, mgl.matrix.getData().getColIds());
+			matrixSetStatParams
+				.withItemIndecesFor( toListLong(colIndeces))
+				.withItemIndecesOn( toListLong(mtxRowIndeces));			
+			submatrixStat.setMtxColumnSetStat(FloatMatrix2DUtil.getColumnsSetStat(mgl.matrix.getData(), matrixSetStatParams));				
+		}
+		
+        // values		
+		if( toBoolean(params.getFlValues()) ) {
+			submatrixStat.setValues(FloatMatrix2DUtil.getSubmatrixValues(mgl.matrix.getData(), rowIndeces, colIndeces ));
+		}
+		
+		return submatrixStat;  	
+	}
+
+	private boolean toBoolean(Long value) {
+		return value != null && value == 1;
+	}
+
+
+	private MatrixDescriptor buildMatrixDescriptor(MatrixGenomeLoader mgl){
+        
+        return new MatrixDescriptor()
+        	.withColNormalization(mgl.matrix.getColNormalization())
+        	.withColumnsCount((long) mgl.matrix.getData().getColIds().size())
+        	.withGenomeId(mgl.genomeId)
+        	.withGenomeName(mgl.genomeName)
+        	.withMatrixDescription(mgl.matrix.getDescription())
+        	.withMatrixId(mgl.matrixData.getInfo().getE2())
+        	.withMatrixName(mgl.matrixData.getInfo().getE2())
+        	.withRowNormalization(mgl.matrix.getRowNormalization())
+        	.withRowsCount((long) mgl.matrix.getData().getRowIds().size())
+        	.withScale(mgl.matrix.getScale())
+        	.withType(mgl.matrix.getType());    
+	}
+	
     private Hashtable<String, Feature> buildFeatureId2FeatureHash(
 			List<Feature> features) {
     	Hashtable<String, Feature> featureId2Feature = new Hashtable<String, Feature>();
@@ -399,48 +489,94 @@ public class KBaseFeatureValuesImpl {
 		return featureId2Feature;
 	}
 
-	private List<ItemDescriptor> buildColumnDescriptors(ExpressionMatrix matrix) {
+	private List<ItemDescriptor> buildColumnDescriptors(MatrixGenomeLoader mgl, int[] colIndeces) {
     	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
     	
+		List<String> mtxColIds = mgl.matrix.getData().getColIds();
+    	
+    	
     	// We do not have condition mapping now, so we will use just colIds...
-    	List<String> colIds = matrix.getData().getColIds();
-    	for(int i = 0; i < colIds.size(); i++){
+
+    	for(int ci = 0 ; ci < colIndeces.length; ci++){
+    		int cIndex = colIndeces[ci];
+    		String cId = mtxColIds.get(cIndex);
+    		String name = cId;
     		ItemDescriptor desc = new ItemDescriptor()
     			.withDescription("")
-    			.withId(colIds.get(i))
-    			.withIndex((long)i)
-    			.withName(colIds.get(i));
+    			.withId(cId)
+    			.withIndex((long)cIndex)
+    			.withName(name);
     		descriptors.add(desc);
     	}
     	
 		return descriptors;
 	}
 
-	private List<ItemDescriptor> buildRowDescriptors(ExpressionMatrix matrix, Hashtable<String, Feature> featureId2Feature) {
+	private List<ItemDescriptor> buildRowDescriptors(MatrixGenomeLoader mgl, int[] rowIndeces) {
     	List<ItemDescriptor> descriptors = new ArrayList<ItemDescriptor>();
-    	
-    	List<String> rowIds = matrix.getData().getRowIds();
-    	for(int i = 0; i < rowIds.size(); i++){
+		
+		List<String> mtxRowIds = mgl.matrix.getData().getRowIds();    	
+    	for(int ri = 0 ; ri < rowIndeces.length; ri++){
+    		int rIndex = rowIndeces[ri];
+    		String rId = mtxRowIds.get(rIndex);
+    		
+    		String function = "";
+    		String name = "";
     		
     		//TODO implement general approach to extract required properties. For now just function
-    		Feature feature = featureId2Feature.get(rowIds.get(i));
+    		Feature feature = mgl.featureId2Feature.get(rId);
     		
     		Hashtable<String,String> props = new Hashtable<String,String>();
     		if(feature != null){
-        		String function = feature.getFunction();
-	        	props.put("function", function != null ? function : "");	
+        		function = feature.getFunction();
+	        	props.put("function", function != null ? function : "");
+	        	name = feature.getAliases() != null? StringUtils.join(feature.getAliases(), "; ") : "";
     		}
     		    		
     		ItemDescriptor desc = new ItemDescriptor()
     			.withDescription("")
-    			.withId(rowIds.get(i))
-    			.withIndex((long)i)
-    			.withName(rowIds.get(i))
+    			.withId(rId)
+    			.withIndex((long)rIndex)
+    			.withName(name)
     			.withProperties(props);
-    		descriptors.add(desc);
+    		descriptors.add(desc);    		
     	}
-    	
-		return descriptors;
+    	return descriptors;
+	}
+
+	private List<Long> toListLong(int[] values){
+		List<Long> ll = new ArrayList<Long>(values.length);
+		for(int val: values){
+			ll.add((long) val);
+		}
+		return ll;
+	}
+	
+	private int[] buildIndeces(List<Long> rowIndeces, List<String> rowIds, List<String> mtxRowIds) {		
+		int[] indeces = null;
+		if(rowIndeces != null && rowIndeces.size() > 0){
+			indeces = new int[rowIndeces.size()];
+			for(int i = 0; i < rowIndeces.size(); i++){
+				indeces[i] = rowIndeces.get(i).intValue();
+			}
+		} else if(rowIds != null && rowIds.size() > 0){
+			Hashtable<String,Integer> id2index = new Hashtable<String,Integer>();
+			for(int i = 0 ; i < mtxRowIds.size(); i++){
+				id2index.put(mtxRowIds.get(i), i);
+			}
+			indeces = new int[rowIds.size()];
+			for(int i = 0; i < rowIds.size(); i++){
+				indeces[i] = id2index.get(rowIds.get(i)).intValue();
+			}
+		} else{
+			indeces = new int[mtxRowIds.size()];
+			for(int i = 0 ; i < indeces.length; i++){
+				indeces[i] = i;
+			}
+		}
+		
+		
+		return indeces;
 	}
 
 	public  List<ItemStat> getMatrixRowsStat(GetMatrixItemsStatParams params) throws Exception {

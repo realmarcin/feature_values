@@ -10,13 +10,13 @@ public class FloatMatrix2DUtil {
 	public static List<ItemStat> getRowsStat(FloatMatrix2D matrix, List<Long> indecesFor, List<Long> indecesOn, boolean populateIndecesOn ){
 		RowIterator itFor = new RowIterator(matrix, indecesFor); 
 		ColumnIterator itOn = new ColumnIterator(matrix, indecesOn); 		
-		return getItemsStat(itOn, itFor, populateIndecesOn);
+		return getItemsStat(itFor, itOn, populateIndecesOn);
 	}
 
 	public static List<ItemStat> getColumnsStat(FloatMatrix2D matrix, List<Long> indecesFor, List<Long> indecesOn, boolean populateIndecesOn ){
 		ColumnIterator itFor = new ColumnIterator(matrix, indecesFor); 
 		RowIterator itOn = new RowIterator(matrix, indecesOn); 		
-		return getItemsStat(itOn, itFor, populateIndecesOn);
+		return getItemsStat(itFor, itOn, populateIndecesOn);
 	}	
 	
 	public static ItemSetStat getRowsSetStat(FloatMatrix2D matrix,
@@ -34,7 +34,7 @@ public class FloatMatrix2DUtil {
 	}
 	
 	
-	private static List<ItemStat> getItemsStat(ItemIterator itOn, ItemIterator itFor, boolean populateIndecesOn ){
+	private static List<ItemStat> getItemsStat(ItemIterator itFor, ItemIterator itOn, boolean populateIndecesOn ){
 		List<ItemStat> stats = new ArrayList<ItemStat>();
 		
 		for(itFor.init(); itFor.next();){
@@ -90,7 +90,7 @@ public class FloatMatrix2DUtil {
 	
 	
 	
-	private static ItemSetStat getItemsSetStat(ItemIterator itOn, ItemIterator itFor,
+	private static ItemSetStat getItemsSetStat(ItemIterator itFor, ItemIterator itOn,
 			GetMatrixSetStatParams params) {
 		
 		boolean flIndecesFor = toBoolean( params.getFlIndecesFor() );
@@ -102,12 +102,12 @@ public class FloatMatrix2DUtil {
 		boolean flMissingValues = toBoolean( params.getFlMissingValues() );
 				
 		// For simplicity we will calculate all, but later will include in the output only requested stat
-		double[] avgs = new double[itOn.size()];
-		double[] maxs = new double[itOn.size()];
-		double[] mins = new double[itOn.size()];
-		double[] stds = new double[itOn.size()];
-		long[] goodCounts = new long[itOn.size()];
-		long[] badCounts = new long[itOn.size()];
+		double[] avgs = new double[itFor.size()];
+		double[] maxs = new double[itFor.size()];
+		double[] mins = new double[itFor.size()];
+		double[] stds = new double[itFor.size()];
+		long[] goodCounts = new long[itFor.size()];
+		long[] badCounts = new long[itFor.size()];
 		
 		itFor.init();
 		for(int i = 0; itFor.next(); i++){
@@ -153,7 +153,7 @@ public class FloatMatrix2DUtil {
 			.withMaxs(flMaxs ? Arrays.asList(ArrayUtils.toObject(maxs)) : null)
 			.withMins(flMins ? Arrays.asList(ArrayUtils.toObject(mins)) : null)
 			.withMissingValues(flMissingValues ? Arrays.asList(ArrayUtils.toObject(badCounts)) : null)
-			.withSize((long) itOn.size())
+			.withSize((long) itFor.size())
 			.withStds(flStds ? Arrays.asList(ArrayUtils.toObject(stds)) : null);
 	} 
 	
@@ -229,6 +229,22 @@ public class FloatMatrix2DUtil {
 	
 	private static  boolean toBoolean(Long value){
 		return value != null && value == 1;
+	}
+
+	public static List<List<Double>> getSubmatrixValues(FloatMatrix2D matrix, int[] rowIndeces, int[] colIndeces) {
+		List<List<Double>> values = new ArrayList<List<Double>>(rowIndeces.length);
+		List<List<Double>> mtxValues = matrix.getValues();
+		
+		for(int i = 0 ; i < rowIndeces.length; i++){
+			List<Double> rowValues = new ArrayList<Double>(colIndeces.length);
+			List<Double> mtxRowValues = mtxValues.get(rowIndeces[i]);
+			for(int j = 0 ; j < colIndeces.length; j++){
+				rowValues.add( mtxRowValues.get(colIndeces[j]) );
+			}
+			values.add(rowValues);
+		}
+		
+		return values;
 	}
 
 }
