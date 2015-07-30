@@ -317,6 +317,22 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     }
 
     /**
+     * <p>Original spec-file function name: build_feature_set</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.BuildFeatureSetParams BuildFeatureSetParams}
+     * @return   parameter "job_id" of String
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.build_feature_set")
+    public String buildFeatureSet(BuildFeatureSetParams params, AuthToken authPart) throws Exception {
+        String returnVal = null;
+        //BEGIN build_feature_set
+        returnVal = runAweJob(authPart, params);
+        //END build_feature_set
+        return returnVal;
+    }
+
+    /**
      * <p>Original spec-file function name: get_matrix_descriptor</p>
      * <pre>
      * </pre>

@@ -22,23 +22,33 @@ calc_cluster_props = function(logratios_median, cluster, ret) {
     meancor <- c()
     for(i in 1:max(cluster)) {
         clust_ind <- which(cluster == i)
-        cors <- cor(t(logratios_median[clust_ind,]), use="pairwise.complete.obs",method="pearson")
-        AbCorC <- mean(cors[lower.tri(cors, diag=FALSE)])
-        meancor <- c(meancor, AbCorC)
+        if (length(clust_ind) == 1) {
+            meancor <- c(meancor, NA)
+        } else {
+            cors <- cor(t(logratios_median[clust_ind,]), use="pairwise.complete.obs",method="pearson")
+            AbCorC <- mean(cors[lower.tri(cors, diag=FALSE)])
+            meancor <- c(meancor, AbCorC)
+        }
     }
+    #print(meancor)
     meancor <- naToNaN(meancor)
 
     ###MSEC
     MSECs <- c()
     for(i in 1:max(cluster)) {
         clust_ind <- which(cluster == i)
-        curdata <- logratios_median[clust_ind,]
-        MSEall <- mean_m((curdata-mean_m(curdata))^2)
-        cmeans <- colMeans(curdata,na.rm=TRUE)
-        csds <- apply(curdata,2,sd,na.rm=TRUE)
-        MSEC <- mean_m((sweep(curdata,2,cmeans))^2/MSEall)
-        MSECs <- c(MSECs, MSEC)
+        if (length(clust_ind) == 1) {
+            MSECs <- c(MSECs, NA)
+        } else {
+            curdata <- logratios_median[clust_ind,]
+            MSEall <- mean_m((curdata-mean_m(curdata))^2)
+            cmeans <- colMeans(curdata,na.rm=TRUE)
+            csds <- apply(curdata,2,sd,na.rm=TRUE)
+            MSEC <- mean_m((sweep(curdata,2,cmeans))^2/MSEall)
+            MSECs <- c(MSECs, MSEC)
+        }
     }
+    #print(MSECs)
     MSECs <- naToNaN(MSECs)
 
     ret[["meancor"]] <- meancor
@@ -141,6 +151,15 @@ methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(
     row.names(values) <- row_names
     values <- data.matrix(values)
     return(clusters_from_dendrogram(values, dendrogram, height_cutoff))
+}
+
+methods[["ClusterServiceR.calc_cluster_qualities"]] <- function(
+        matrix, cluster_labels) {
+    values <- matrix[["values"]]
+    row_names <- c(1:length(matrix[["row_ids"]]))-1
+    row.names(values) <- row_names
+    values <- data.matrix(values)
+    return(calc_cluster_props(values, cluster_labels, list(cluster_labels=cluster_labels)))
 }
 
 tryCatch({

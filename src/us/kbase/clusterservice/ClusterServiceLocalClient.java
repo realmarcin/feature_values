@@ -1,6 +1,7 @@
 package us.kbase.clusterservice;
 
 import java.io.IOException;
+import java.util.List;
 
 import us.kbase.common.service.JsonClientException;
 import us.kbase.kbasefeaturevalues.EstimateKResult;
@@ -15,4 +16,6 @@ public interface ClusterServiceLocalClient {
     public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows) throws IOException, JsonClientException;
     
     public ClusterResults clustersFromDendrogram(FloatMatrix2D matrix, String dendrogram, Double heightCutoff) throws IOException, JsonClientException;
+
+    public ClusterResults calcClusterQualities(FloatMatrix2D matrix, List<Long> clusterLabels) throws IOException, JsonClientException;
 }

@@ -197,4 +197,11 @@ class ClusterServicePy(object):
         resp = self._call('ClusterServicePy.clusters_from_dendrogram',
                           [matrix, dendrogram, height_cutoff], json_rpc_context)
         return resp[0]
+  
+    def calc_cluster_qualities(self, cluster_labels, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method calc_cluster_qualities: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.calc_cluster_qualities',
+                          [cluster_labels], json_rpc_context)
+        return resp[0]
  

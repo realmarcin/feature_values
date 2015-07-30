@@ -38,6 +38,7 @@ import us.kbase.common.service.Tuple7;
 import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
 import us.kbase.common.utils.ProcessHelper;
+import us.kbase.kbasefeaturevalues.BuildFeatureSetParams;
 import us.kbase.kbasefeaturevalues.ClusterHierarchicalParams;
 import us.kbase.kbasefeaturevalues.ClusterKMeansParams;
 import us.kbase.kbasefeaturevalues.ClusterSet;
@@ -63,6 +64,7 @@ import us.kbase.workspace.SaveObjectsParams;
 import us.kbase.workspace.WorkspaceClient;
 import us.kbase.workspace.WorkspaceIdentity;
 
+@SuppressWarnings("unchecked")
 public class AweIntegrationTest {
     private static AuthToken token = null;
     private static KBaseFeatureValuesClient client = null;
@@ -142,7 +144,6 @@ public class AweIntegrationTest {
         wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
                 new ObjectSaveData().withName(contigsetObjName).withType("KBaseGenomes.ContigSet")
                 .withData(new UObject(contigsetData)))));
-        @SuppressWarnings("unchecked")
         Map<String, Object> genomeData = UObject.getMapper().readValue(new File(inputDir,
                 "Desulfovibrio_vulgaris_Hildenborough_reduced_genome.json"), Map.class);
         genomeData.put("contigset_ref", testWsName + "/" + contigsetObjName);
@@ -253,6 +254,28 @@ public class AweIntegrationTest {
     }
     
     @Test
+    public void testPyScikitKMeans() throws Exception {
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("mac"))
+            return;
+        String exprObjName = "py_expression1";
+        String clustObj1Name = "py_clusters1";
+        ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
+                .withData(getSampleMatrix());
+        WorkspaceClient wscl = getWsClient();
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(exprObjName).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        String jobId = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
+                exprObjName).withK(3L).withOutWorkspace(testWsName).withOutClustersetId(clustObj1Name));
+        waitForJob(jobId);
+        ObjectData res = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObj1Name))).get(0);
+        ClusterSet clSet = res.getData().asClassInstance(ClusterSet.class);
+        System.out.println("Python Scikit K-means: " + clSet.getFeatureClusters());
+    }
+    
+    @Test
     public void testCorrectMatrix() throws Exception {
         String sourceMatrixId = "notcorrected_matrix.1";
         ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
@@ -311,6 +334,43 @@ public class AweIntegrationTest {
         System.out.println(md1);
     }
     
+    @Test
+    public void testBuildFeatureSet() throws Exception {
+        String genomeObjName = "Desulfovibrio_vulgaris_Hildenborough.genome";
+        String featureIdsText = " DVUA0001 \nDVUA0075, DVUA0112";
+        String outFeatureSetObj1 = "featureset.1";
+        String jobId1 = client.buildFeatureSet(new BuildFeatureSetParams().withDescription("Testing...")
+                .withFeatureIds(featureIdsText).withGenome(testWsName + "/" + genomeObjName)
+                .withOutWorkspace(testWsName).withOutputFeatureSet(outFeatureSetObj1));
+        waitForJob(jobId1);
+        Map<String, Object> fs1 = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withWorkspace(testWsName).withName(outFeatureSetObj1)))
+                .get(0).getData().asClassInstance(Map.class);
+        Map<String, List<String>> elements1 = (Map<String, List<String>>)fs1.get("elements");
+        Assert.assertEquals(3, elements1.size());
+        String outFeatureSetObj2 = "featureset.2";
+        try {
+            String jobId2 = client.buildFeatureSet(new BuildFeatureSetParams().withDescription("Testing...")
+                    .withBaseFeatureSet(testWsName + "/" + outFeatureSetObj1)
+                    .withFeatureIds("DVUA1000").withGenome(testWsName + "/" + genomeObjName)
+                    .withOutWorkspace(testWsName).withOutputFeatureSet(outFeatureSetObj2));
+            waitForJob(jobId2);
+            Assert.fail("Method should fail");
+        } catch (Exception ex) {
+            Assert.assertTrue(ex.getMessage(), ex.getMessage().contains("Some features are not found: "));
+        }
+        String jobId3 = client.buildFeatureSet(new BuildFeatureSetParams().withDescription("Testing...")
+                .withBaseFeatureSet(testWsName + "/" + outFeatureSetObj1)
+                .withFeatureIds("DVU1000").withGenome(testWsName + "/" + genomeObjName)
+                .withOutWorkspace(testWsName).withOutputFeatureSet(outFeatureSetObj2));
+        waitForJob(jobId3);
+        Map<String, Object> fs2 = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withWorkspace(testWsName).withName(outFeatureSetObj2)))
+                .get(0).getData().asClassInstance(Map.class);
+        Map<String, List<String>> elements2 = (Map<String, List<String>>)fs2.get("elements");
+        Assert.assertEquals(4, elements2.size());
+    }
+    
     private static FloatMatrix2D getSampleMatrix() {
         List<List<Double>> values = new ArrayList<List<Double>>();
         values.add(Arrays.asList(13.0, 2.0, 3.0));
@@ -331,19 +391,6 @@ public class AweIntegrationTest {
         wscl.setAuthAllowedForHttp(true);
         return wscl;
     }
-
-    /*@Test
-    public void testBadCall() throws Exception {
-        String notNumber = "abc_xyz";
-        String jobId = client.runJob(new RunJobParams().withMethod("SmallTest.parseInt").withParams(Arrays.asList(new UObject(notNumber))));
-        try {
-            waitForJob(client, jobId, new TypeReference<List<Integer>>() {});
-            Assert.fail("Method is expected to produce an error");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex.getMessage(), ex.getMessage().contains("NumberFormatException") &&
-                    ex.getMessage().contains(notNumber));
-        }
-    }*/
 
     private static String getWsUrl() {
         return systemGetProperty("test." + KBaseFeatureValuesServer.CONFIG_PARAM_WS_URL);
@@ -567,7 +614,6 @@ public class AweIntegrationTest {
             try {
                 InputStream is = new URL("http://localhost:" + port + "/job/").openStream();
                 ObjectMapper mapper = new ObjectMapper();
-                @SuppressWarnings("unchecked")
                 Map<String, Object> ret = mapper.readValue(is, Map.class);
                 if (ret.containsKey("limit") && ret.containsKey("total_count")) {
                     err = null;
@@ -592,7 +638,6 @@ public class AweIntegrationTest {
         return port;
     }
 
-    @SuppressWarnings("unchecked")
     private static int startupAweClient(String aweClientExePath, File dir, int aweServerPort, 
             File binDir) throws Exception {
         if (aweClientExePath == null) {

@@ -362,7 +362,29 @@ module KBaseFeatureValues {
     
     funcdef reconnect_matrix_to_genome(ReconnectMatrixToGenomeParams params)
         returns (string job_id) authentication required;
-    
+
+    /* 
+        The workspace ID of a FeatureSet data object.
+        @id ws KBaseCollections.FeatureSet
+    */
+    typedef string ws_featureset_id;
+
+    /*
+        base_feature_set - optional field,
+        description - optional field.
+    */
+    typedef structure {
+        ws_genome_id genome;
+        string feature_ids;
+        ws_featureset_id base_feature_set;
+        string description;
+        string out_workspace;
+        string output_feature_set;
+    } BuildFeatureSetParams;
+
+    funcdef build_feature_set(BuildFeatureSetParams params) returns (string job_id) authentication required;
+
+
 	/*******************************************
 	* data API: data transfer objects (DTOs) *
 	******************************************/    

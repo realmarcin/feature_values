@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -27,18 +26,29 @@ import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 public class ClusterServiceTest {
     private static File rootTempDir = null;
 
-    @Ignore
     @Test
     public void pyTest() throws Exception {
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("mac"))
+            return;
         File workDir = generateTempDir(rootTempDir, "test_clusterservice_py1_", "");
         workDir.mkdirs();
         ClusterServicePyLocalClient cl = new ClusterServicePyLocalClient(workDir);
         cl.setBinDir(new File("bin"));
+        ClusterServiceRLocalClient cl2 = new ClusterServiceRLocalClient(workDir);
+        cl2.setBinDir(new File("bin"));
         try {
+            FloatMatrix2D matrix = getSampleMatrix();
             List<Long> clusterLabels = cl.clusterKMeans(
-                    getSampleMatrix(), 3L, null, null, null, null).getClusterLabels();
+                    matrix, 3L, null, null, null, null).getClusterLabels();
+            for (int pos = 0; pos < clusterLabels.size(); pos++)
+                clusterLabels.set(pos, 1 + (long)clusterLabels.get(pos));
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
+            ClusterResults cr2 = cl2.calcClusterQualities(matrix, clusterLabels);
+            System.out.println("Python+R: " + cr2);
+            Assert.assertEquals(3, cr2.getMeancor().size());
+            Assert.assertEquals(3, cr2.getMsecs().size());
         } catch (ServerException ex) {
             System.out.println(ex.getData());
             throw ex;
@@ -70,6 +80,10 @@ public class ClusterServiceTest {
             List<Long> clusterLabels2 = cr3.getClusterLabels();
             System.out.println(clusterLabels2);
             checkClusterLabels(clusterLabels2);
+            ClusterResults cr4 = cl.calcClusterQualities(matrix, clusterLabels);
+            //System.out.println(cr4);
+            Assert.assertEquals(3, cr4.getMeancor().size());
+            Assert.assertEquals(3, cr4.getMsecs().size());
         } catch (ServerException ex) {
             System.out.println(ex.getData());
             throw ex;
@@ -94,7 +108,24 @@ public class ClusterServiceTest {
         ClusterResults res = cl.clusterKMeans(data.getData(), 100L, 1000L, 1000L, 123L, "Lloyd");
         System.out.println(res);
     }
-    
+
+    @Ignore
+    @Test
+    public void r3Test() throws Exception {
+        ClusterServiceRLocalClient cl = getRClient("r3");
+        File inputFile = new File("test/data/upload2/Desulfovibrio_vulgaris_Hildenborough_microarray_log_level_data.tsv");
+        ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
+                null, true, null, null, null);
+        FloatMatrix2D matrix = data.getData();
+        try {
+            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, 1L);
+            System.out.println(res);
+        } catch (ServerException ex) {
+            System.out.println(ex.getData());
+            throw ex;
+        }
+    }
+
     private static void checkClusterLabels(List<Long> labels) throws Exception {
         String errMsg = "Unexpected labels: " + labels;
         Assert.assertEquals(errMsg, 7, labels.size());
@@ -183,11 +214,6 @@ public class ClusterServiceTest {
             for (File f : fileOrDir.listFiles()) 
                 deleteRecursively(f);
         fileOrDir.delete();
-    }
-
-    public static void main(String[] args) throws Exception {
-        String json = "{\"type\":\"list\"}";
-        System.out.println(UObject.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(UObject.getMapper().readValue(json, Map.class)));
     }
 }
 
