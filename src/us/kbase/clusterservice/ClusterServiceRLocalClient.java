@@ -63,11 +63,12 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
      * @param   maxIter   instance of Long
      * @param   randomSeed   instance of Long
      * @param   neighbSize   instance of Long
+     * @param   maxItems   instance of Long
      * @return   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKResult EstimateKResult}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed, Long neighbSize) throws IOException, JsonClientException {
+    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed, Long neighbSize, Long maxItems) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
         args.add(minK);
@@ -75,6 +76,7 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
         args.add(maxIter);
         args.add(randomSeed);
         args.add(neighbSize);
+        args.add(maxItems);
         TypeReference<List<EstimateKResult>> retType = new TypeReference<List<EstimateKResult>>() {};
         List<EstimateKResult> res = jsonrpcCall("ClusterServiceR.estimate_k", args, retType, true, false);
         return res.get(0);

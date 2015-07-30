@@ -9,7 +9,7 @@ import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 
 public interface ClusterServiceLocalClient {
     
-    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed, Long neighbSize) throws IOException, JsonClientException;
+    public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed, Long neighbSize, Long maxItems) throws IOException, JsonClientException;
 
     public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k, Long nStart, Long maxIter, Long randomSeed, String algorithm) throws IOException, JsonClientException;
 

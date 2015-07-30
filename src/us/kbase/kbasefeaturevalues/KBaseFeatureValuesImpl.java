@@ -26,7 +26,6 @@ import us.kbase.common.service.Tuple11;
 import us.kbase.common.service.UObject;
 import us.kbase.kbasegenomes.Feature;
 import us.kbase.userandjobstate.UserAndJobStateClient;
-import us.kbase.workspace.GetObjectInfoNewParams;
 import us.kbase.workspace.ObjectData;
 import us.kbase.workspace.ObjectIdentity;
 import us.kbase.workspace.ObjectSaveData;
@@ -107,7 +106,7 @@ public class KBaseFeatureValuesImpl {
         ClusterServiceLocalClient mathClient = getMathClient();
         EstimateKResult toSave = mathClient.estimateK(matrix.getData(), params.getMinK(), 
                 params.getMaxK(), params.getMaxIter(), params.getRandomSeed(),
-                params.getNeighbSize());
+                params.getNeighbSize(), params.getMaxItems());
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
                 .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)

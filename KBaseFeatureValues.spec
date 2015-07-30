@@ -217,7 +217,7 @@ module KBaseFeatureValues {
     /* note: this needs review from Marcin */
     typedef structure {
         int best_k;
-        mapping <int,float> estimate_cluster_sizes;
+        list<tuple<int,float>> estimate_cluster_sizes;
     } EstimateKResult;
 
     typedef structure {
@@ -227,6 +227,7 @@ module KBaseFeatureValues {
         int max_iter;
         int random_seed;
         int neighb_size;
+        int max_items;
         string out_workspace;
         string out_estimate_result;
     } EstimateKParams;

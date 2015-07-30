@@ -61,7 +61,7 @@ public class ClusterServiceTest {
         ClusterServiceRLocalClient cl = getRClient("r1");
         FloatMatrix2D matrix = getSampleMatrix();
         try {
-            EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null, null);
+            EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null, null, null);
             long k = estK.getBestK();
             System.out.println("Estimated K: " + k);
             System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());

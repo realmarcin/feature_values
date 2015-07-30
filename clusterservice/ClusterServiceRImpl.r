@@ -75,7 +75,7 @@ clusters_from_dendrogram = function(values, dendrogram, height_cutoff) {
 methods <- list()
 
 methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k, 
-        max_iter, random_seed, neighb_size) {
+        max_iter, random_seed, neighb_size, max_items) {
     if (is.null(min_k))
         min_k <- 2
     if (is.null(max_k))
@@ -92,17 +92,21 @@ methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k,
     max_clust_num = min(c(max_k,nrow(values)-1))
     if (!is.null(random_seed))
         set.seed(random_seed)
-    valid <- clValid(values, nClust=c(min_k:max_clust_num), maxitems=nrow(values), 
+    if (is.null(max_items))
+        max_items <- 15000
+    if (max_items > nrow(values))
+        max_items <- nrow(values)
+    valid <- clValid(values, nClust=c(min_k:max_clust_num), maxitems=max_items, 
         clMethods=c("kmeans"),validation=c("internal"), iter.max=max_iter,
         neighbSize=neighb_size)
     ret <- measures(valid, "Silhouette")[1,,1]
     ret_names <- names(ret)
     best_pos <- which.max(ret)
-    cluster_count_qualities<-list()
+    cluster_count_qualities <- list()
     for (pos in 1:length(ret)) {
         cluster_count <- unbox(ret_names[pos])
         quality <- unbox(ret[pos])
-        cluster_count_qualities[[cluster_count]] <- quality
+        cluster_count_qualities <- rbind(cluster_count_qualities, list(cluster_count, quality))
     }
     return(list(best_k=unbox(as.numeric(ret_names[best_pos])), estimate_cluster_sizes=cluster_count_qualities))
 }
