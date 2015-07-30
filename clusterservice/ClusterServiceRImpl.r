@@ -76,6 +76,8 @@ methods <- list()
 
 methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k, 
         max_iter, random_seed, neighb_size, max_items) {
+    if (!is.null(random_seed))
+        set.seed(random_seed)
     if (is.null(min_k))
         min_k <- 2
     if (is.null(max_k))
@@ -89,14 +91,12 @@ methods[["ClusterServiceR.estimate_k"]] <- function(matrix, min_k, max_k,
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
     values <- data.matrix(values)
+    if ((!is.null(max_items)) && (max_items < nrow(values))) {
+        row_nums <- sample(1:nrow(values), max_items, replace=FALSE)
+        values <- values[row_nums,]
+    }
     max_clust_num = min(c(max_k,nrow(values)-1))
-    if (!is.null(random_seed))
-        set.seed(random_seed)
-    if (is.null(max_items))
-        max_items <- 15000
-    if (max_items > nrow(values))
-        max_items <- nrow(values)
-    valid <- clValid(values, nClust=c(min_k:max_clust_num), maxitems=max_items, 
+    valid <- clValid(values, nClust=c(min_k:max_clust_num), maxitems=nrow(values), 
         clMethods=c("kmeans"),validation=c("internal"), iter.max=max_iter,
         neighbSize=neighb_size)
     ret <- measures(valid, "Silhouette")[1,,1]
