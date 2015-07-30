@@ -277,6 +277,9 @@ class Application(object):
         self.rpc_service.add(impl_ClusterServicePy.clusters_from_dendrogram,
                              name='ClusterServicePy.clusters_from_dendrogram',
                              types=[dict, basestring, float])
+        self.rpc_service.add(impl_ClusterServicePy.calc_cluster_qualities,
+                             name='ClusterServicePy.calc_cluster_qualities',
+                             types=[list])
 
     def __call__(self, environ, start_response):
         # Context object, equivalent to the perl impl CallContext

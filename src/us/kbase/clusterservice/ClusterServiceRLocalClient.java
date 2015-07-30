@@ -129,4 +129,23 @@ public class ClusterServiceRLocalClient extends JsonLocalClientCaller implements
         List<ClusterResults> res = jsonrpcCall("ClusterServiceR.clusters_from_dendrogram", args, retType, true, false);
         return res.get(0);
     }
+
+    /**
+     * <p>Original spec-file function name: calc_cluster_qualities</p>
+     * <pre>
+     * </pre>
+     * @param   matrix   instance of type {@link us.kbase.kbasefeaturevalues.FloatMatrix2D FloatMatrix2D}
+     * @param   clusterLabels   instance of list of Long
+     * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ClusterResults calcClusterQualities(FloatMatrix2D matrix, List<Long> clusterLabels) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(matrix);
+        args.add(clusterLabels);
+        TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
+        List<ClusterResults> res = jsonrpcCall("ClusterServiceR.calc_cluster_qualities", args, retType, true, false);
+        return res.get(0);
+    }
 }

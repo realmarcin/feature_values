@@ -19,6 +19,7 @@ SERVICE_PORT = 8082
 MAX_MEMORY_MB = 4000
 CLIENT_MAX_MEMORY_MB = 3000
 KB_PYTHON_PATH ?= $(shell find $(KB_TOP)/modules -maxdepth 2 -name lib -type d | xargs | sed -e 's/ /:/g')
+UNAME_S := $(shell uname -s)
 
 all: compile
 
@@ -77,6 +78,12 @@ deploy-service: deploy-scripts
 deploy-scripts:
 	echo "Checking dependencies..."
 	R_LIBS=$(TARGET)/lib bash $(DIR)/deps/r_lang.sh
+ifeq ($(UNAME_S),Linux)
+	PYTHONUSERBASE=$(TARGET)/lib bash $(DIR)/deps/scikit_nosudo.sh
+endif
+ifeq ($(UNAME_S),Darwin)
+	#PYTHONUSERBASE=$(TARGET)/lib bash $(DIR)/deps/scikit_macosx.sh
+endif
 	mkdir -p $(SERVICE_DIR)
 	cp -r $(SUB_SERVICE_LOCAL_DIR) $(SERVICE_DIR)/
 	echo '#!/bin/bash' > $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
@@ -89,7 +96,7 @@ deploy-scripts:
 	chmod a+x $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
 	echo '#!/bin/bash' > $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export KB_TOP=$(TARGET)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
-	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(BIN)/$(SUB1_ASYNC_JOB_SCRIPT_FILE)
+	echo 'export KB_RUNTIME=$(KB_RUNTIME)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export PATH=$$KB_RUNTIME/bin:$$KB_TOP/bin:$$PATH' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'export R_LIB=$(TARGET)/lib' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
 	echo 'cd $(SUB_SERVICE_DIR)' >> $(BIN)/$(SUB2_ASYNC_JOB_SCRIPT_FILE)
@@ -108,6 +115,12 @@ test-service:
 test-scripts:
 	echo "Checking dependencies..."
 	bash $(DIR)/deps/r_lang.sh
+ifeq ($(UNAME_S),Linux)
+	bash $(DIR)/deps/scikit_nosudo.sh
+endif
+ifeq ($(UNAME_S),Darwin)
+	#bash $(DIR)/deps/scikit_macosx.sh
+endif
 	test/cfg_to_runner.py $(TESTCFG) ""
 	test/run_tests.sh
 

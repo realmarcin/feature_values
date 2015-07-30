@@ -254,6 +254,28 @@ public class AweIntegrationTest {
     }
     
     @Test
+    public void testPyScikitKMeans() throws Exception {
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("mac"))
+            return;
+        String exprObjName = "py_expression1";
+        String clustObj1Name = "py_clusters1";
+        ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")
+                .withData(getSampleMatrix());
+        WorkspaceClient wscl = getWsClient();
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(exprObjName).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        String jobId = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
+                exprObjName).withK(3L).withOutWorkspace(testWsName).withOutClustersetId(clustObj1Name));
+        waitForJob(jobId);
+        ObjectData res = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObj1Name))).get(0);
+        ClusterSet clSet = res.getData().asClassInstance(ClusterSet.class);
+        System.out.println("Python Scikit K-means: " + clSet.getFeatureClusters());
+    }
+    
+    @Test
     public void testCorrectMatrix() throws Exception {
         String sourceMatrixId = "notcorrected_matrix.1";
         ExpressionMatrix data = new ExpressionMatrix().withType("log-ratio").withScale("1.0")

@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import us.kbase.auth.AuthToken;
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServiceLocalClient;
+import us.kbase.clusterservice.ClusterServicePyLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
 import us.kbase.common.service.Tuple11;
 import us.kbase.common.service.UObject;
@@ -126,9 +127,22 @@ public class KBaseFeatureValuesImpl {
                 new ObjectIdentity().withRef(params.getInputData()))).get(0);
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
-        ClusterResults res = mathClient.clusterKMeans(matrix.getData(), params.getK(), 
-                params.getNStart(), params.getMaxIter(), params.getRandomSeed(),
-                params.getAlgorithm());
+        ClusterResults res = null;
+        if (params.getAlgorithm() != null && params.getAlgorithm().equals("Python Scikit-learn")) {
+            ClusterServicePyLocalClient pyClient = new ClusterServicePyLocalClient(workDir);
+            String binPath = config.get(KBaseFeatureValuesServer.CONFIG_PARAM_CLIENT_BIN_DIR);
+            if (binPath != null)
+                pyClient.setBinDir(new File(binPath));
+            res = pyClient.clusterKMeans(matrix.getData(), params.getK(), null, null, null, null);
+            List<Long> clusterLabels = res.getClusterLabels();
+            for (int pos = 0; pos < clusterLabels.size(); pos++)
+                clusterLabels.set(pos, 1 + (long)clusterLabels.get(pos));
+            res = mathClient.calcClusterQualities(matrix.getData(), clusterLabels);
+        } else {
+            res = mathClient.clusterKMeans(matrix.getData(), params.getK(), 
+                    params.getNStart(), params.getMaxIter(), params.getRandomSeed(),
+                    params.getAlgorithm());
+        }
         ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData());
         toSave.withFeatureClusters(clustersFromLabels(matrix, res));
         List<ProvenanceAction> provenance = Arrays.asList(

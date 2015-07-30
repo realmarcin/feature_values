@@ -56,4 +56,6 @@ module ClusterServicePy {
     funcdef clusters_from_dendrogram(KBaseFeatureValues.FloatMatrix2D matrix, 
         string dendrogram, float height_cutoff) returns (ClusterResults);
 
+    funcdef calc_cluster_qualities(list<int> cluster_labels) returns (ClusterResults);
+
 };

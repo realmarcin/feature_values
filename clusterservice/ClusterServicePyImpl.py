@@ -84,3 +84,16 @@ class ClusterServicePy:
                              'returnVal is not type dict as required.')
         # return the results
         return [returnVal]
+
+    def calc_cluster_qualities(self, ctx, cluster_labels):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN calc_cluster_qualities
+        #END calc_cluster_qualities
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method calc_cluster_qualities return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
