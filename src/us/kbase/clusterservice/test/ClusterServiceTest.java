@@ -26,6 +26,7 @@ import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 public class ClusterServiceTest {
     private static File rootTempDir = null;
 
+    @Ignore
     @Test
     public void pyTest() throws Exception {
         String osName = System.getProperty("os.name");
