@@ -79,7 +79,7 @@ deploy-scripts:
 	echo "Checking dependencies..."
 	R_LIBS=$(TARGET)/lib bash $(DIR)/deps/r_lang.sh
 ifeq ($(UNAME_S),Linux)
-	PYTHONUSERBASE=$(TARGET)/lib bash $(DIR)/deps/scikit_nosudo.sh
+	#PYTHONUSERBASE=$(TARGET)/lib bash $(DIR)/deps/scikit_nosudo.sh
 endif
 ifeq ($(UNAME_S),Darwin)
 	#PYTHONUSERBASE=$(TARGET)/lib bash $(DIR)/deps/scikit_macosx.sh
@@ -116,7 +116,7 @@ test-scripts:
 	echo "Checking dependencies..."
 	bash $(DIR)/deps/r_lang.sh
 ifeq ($(UNAME_S),Linux)
-	bash $(DIR)/deps/scikit_nosudo.sh
+	#bash $(DIR)/deps/scikit_nosudo.sh
 endif
 ifeq ($(UNAME_S),Darwin)
 	#bash $(DIR)/deps/scikit_macosx.sh
