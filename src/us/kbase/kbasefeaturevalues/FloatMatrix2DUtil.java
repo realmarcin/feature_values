@@ -4,8 +4,52 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.math.linear.RealMatrix;
+import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math.stat.StatUtils;
+
 
 public class FloatMatrix2DUtil {
+	
+	public static PairwiseComparison geRowstPairwiseComparison(FloatMatrix2D matrix, int[] rowIndeces, int[] columnIndeces){
+		double[][] submatrix = new double[rowIndeces.length][columnIndeces.length];
+		for(int i = 0 ; i < rowIndeces.length; i++){
+			for(int j = 0; j < columnIndeces.length; j++){
+				submatrix[i][j] = matrix.getValues().get(rowIndeces[i]).get(columnIndeces[j]);
+			}
+		}
+		PearsonsCorrelation pc = new PearsonsCorrelation();
+		RealMatrix corMatrix = pc.computeCorrelationMatrix(submatrix);
+		
+//		Double[] avgs = new Double[rowIndeces.length];
+//		Double[] mins = new Double[rowIndeces.length];
+//		Double[] maxs = new Double[rowIndeces.length];
+//		Double[] stds = new Double[rowIndeces.length];
+//		
+//		for(int i = 0 ; i < rowIndeces.length; i++){
+//			double[] row = corMatrix.getRow(i);
+//			avgs[i] = StatUtils.mean(row);
+//			mins[i] = StatUtils.min(row);
+//			maxs[i] = StatUtils.max(row);
+//			stds[i] = StatUtils.variance(row);
+//		}
+		
+		List<List<Double>> comparisonValues = new ArrayList<List<Double>>(rowIndeces.length);
+		for(int i = 0 ; i < rowIndeces.length; i++){
+			List<Double> rowComparisonValues = new ArrayList<Double>(rowIndeces.length);
+			for(int j = 0; j < rowIndeces.length; j++){
+				rowComparisonValues.add(corMatrix.getEntry(i, j));				
+			}
+			comparisonValues.add(rowComparisonValues);
+		}
+		
+		PairwiseComparison pwComparison = new PairwiseComparison()
+			.withComparisonValues(comparisonValues);
+//			.withAvgs(Arrays.asList(avgs))
+//			.withAvgs(Arrays.asList(avgs))
+				
+		return pwComparison;		
+	}
 	
 	public static List<ItemStat> getRowsStat(FloatMatrix2D matrix, List<Long> indecesFor, List<Long> indecesOn, boolean populateIndecesOn ){
 		RowIterator itFor = new RowIterator(matrix, indecesFor); 

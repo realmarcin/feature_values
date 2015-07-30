@@ -358,9 +358,9 @@ public class KBaseFeatureValuesImpl {
                 
                 genomeId = (String) genomeDataMap.get("id");
                 genomeName = (String) genomeDataMap.get("scientific_name");  
-//                List<Feature> features = UObject.transformObjectToObject(genomeDataMap.get("features"), new TypeReference<List<Feature>>() {}); 
+                List<Feature> features = UObject.transformObjectToObject(genomeDataMap.get("features"), new TypeReference<List<Feature>>() {}); 
 //     				Gives: java.lang.TypeNotPresentException: Type us.kbase.common.service.Tuple3 not present            
-                List<Feature> features = new ArrayList<Feature>();  
+//                List<Feature> features = new ArrayList<Feature>();  
                 featureId2Feature = buildFeatureId2FeatureHash(features);            
             }    		
     	}
@@ -450,6 +450,13 @@ public class KBaseFeatureValuesImpl {
 				.withItemIndecesOn( toListLong(mtxRowIndeces));			
 			submatrixStat.setMtxColumnSetStat(FloatMatrix2DUtil.getColumnsSetStat(mgl.matrix.getData(), matrixSetStatParams));				
 		}
+				
+		// Pairwise comparison
+		if( toBoolean(params.getFlRowPairwiseCorrelation()) ){
+			int[] mtxColIndeces = buildIndeces(null, null, mgl.matrix.getData().getColIds());
+			submatrixStat.setRowPairwiseCorrelation(FloatMatrix2DUtil.geRowstPairwiseComparison(mgl.matrix.getData(), rowIndeces, mtxColIndeces));
+		}
+		
 		
         // values		
 		if( toBoolean(params.getFlValues()) ) {
