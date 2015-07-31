@@ -8,10 +8,15 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.apporiented.algorithm.clustering.Cluster;
+import com.apporiented.algorithm.clustering.ClusteringAlgorithm;
+import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
 
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServicePyLocalClient;
@@ -91,6 +96,28 @@ public class ClusterServiceTest {
         }
     }
 
+    /*@Test
+    public void rCorrTest() throws Exception {
+        ClusterServiceRLocalClient cl = getRClient("r_corr");
+        File inputFile = new File("test/data/upload6/E_coli_v4_Build_6_subdata.tsv");
+        ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
+                null, true, null, null, null);
+        FloatMatrix2D matrix = data.getData();
+        int size = matrix.getRowIds().size();
+        double[][] transposed = new double[matrix.getColIds().size()][size];
+        for (int rpos = 0; rpos < size; rpos++) {
+            List<Double> row = matrix.getValues().get(rpos);
+            for (int cpos = 0; cpos < row.size(); cpos++)
+                transposed[cpos][rpos] = row.get(cpos);
+        }
+        double[][] corr = new PearsonsCorrelation().computeCorrelationMatrix(transposed).getData();
+        System.out.println(corr.length + " * " + corr[0].length);
+        //ClusterResults cr = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
+        ClusteringAlgorithm alg = new DefaultClusteringAlgorithm();
+        Cluster cluster = alg.performClustering(distances, names,
+                new AverageLinkageStrategy());
+    }*/
+    
     private ClusterServiceRLocalClient getRClient(String testType) {
         File workDir = generateTempDir(rootTempDir, "test_clusterservice_" + testType + "_", "");
         workDir.mkdirs();

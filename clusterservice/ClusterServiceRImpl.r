@@ -4,6 +4,7 @@ library(clValid)
 library(amap)
 #library(sp)
 library(ape)
+library(flashClust)
 
 mean_m = function(vec){
     vec[as.vector(is.nan(vec))] <- NA
@@ -139,7 +140,10 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
     row.names(values) <- row_names
     values <- data.matrix(values)
     cor_mat <- cor(t(values))
-    hcout <- hcluster(cor_mat, method="correlation")
+    #hcout <- hcluster(cor_mat, method="correlation")
+    dd <- dist(abs(cor_mat))
+    hcout <- flashClust::hclust(dd)
+    print(hcout)
     phylo <- as.phylo(hcout)
     newick <- write.tree(phylo, file = "")
     #print(is.ultrametric(tree))
