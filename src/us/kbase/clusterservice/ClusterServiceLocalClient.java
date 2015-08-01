@@ -13,7 +13,7 @@ public interface ClusterServiceLocalClient {
 
     public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k, Long nStart, Long maxIter, Long randomSeed, String algorithm) throws IOException, JsonClientException;
 
-    public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows) throws IOException, JsonClientException;
+    public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows, String algorithm) throws IOException, JsonClientException;
     
     public ClusterResults clustersFromDendrogram(FloatMatrix2D matrix, String dendrogram, Double heightCutoff) throws IOException, JsonClientException;
 

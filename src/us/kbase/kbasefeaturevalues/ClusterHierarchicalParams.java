@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "feature_height_cutoff",
     "condition_height_cutoff",
     "input_data",
+    "algorithm",
     "out_workspace",
     "out_clusterset_id"
 })
@@ -39,6 +40,8 @@ public class ClusterHierarchicalParams {
     private Double conditionHeightCutoff;
     @JsonProperty("input_data")
     private String inputData;
+    @JsonProperty("algorithm")
+    private String algorithm;
     @JsonProperty("out_workspace")
     private String outWorkspace;
     @JsonProperty("out_clusterset_id")
@@ -120,6 +123,21 @@ public class ClusterHierarchicalParams {
         return this;
     }
 
+    @JsonProperty("algorithm")
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    @JsonProperty("algorithm")
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public ClusterHierarchicalParams withAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+        return this;
+    }
+
     @JsonProperty("out_workspace")
     public String getOutWorkspace() {
         return outWorkspace;
@@ -162,7 +180,7 @@ public class ClusterHierarchicalParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("ClusterHierarchicalParams"+" [distanceMetric=")+ distanceMetric)+", linkageCriteria=")+ linkageCriteria)+", featureHeightCutoff=")+ featureHeightCutoff)+", conditionHeightCutoff=")+ conditionHeightCutoff)+", inputData=")+ inputData)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((("ClusterHierarchicalParams"+" [distanceMetric=")+ distanceMetric)+", linkageCriteria=")+ linkageCriteria)+", featureHeightCutoff=")+ featureHeightCutoff)+", conditionHeightCutoff=")+ conditionHeightCutoff)+", inputData=")+ inputData)+", algorithm=")+ algorithm)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

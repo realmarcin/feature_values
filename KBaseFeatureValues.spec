@@ -265,6 +265,7 @@ module KBaseFeatureValues {
         float feature_height_cutoff;
         float condition_height_cutoff;
         ws_matrix_id input_data;
+        string algorithm;
         string out_workspace;
         string out_clusterset_id;
     } ClusterHierarchicalParams;

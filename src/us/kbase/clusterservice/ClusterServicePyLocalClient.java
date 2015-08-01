@@ -92,17 +92,19 @@ public class ClusterServicePyLocalClient extends JsonLocalClientCaller implement
      * @param   linkageCriteria   instance of String
      * @param   heightCutoff   instance of Double
      * @param   processRows   instance of original type "boolean" (Indicates true or false values, false = 0, true = 1 @range [0,1])
+     * @param   algorithm   instance of String
      * @return   instance of type {@link us.kbase.clusterservice.ClusterResults ClusterResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows) throws IOException, JsonClientException {
+    public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows, String algorithm) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(matrix);
         args.add(distanceMetric);
         args.add(linkageCriteria);
         args.add(heightCutoff);
         args.add(processRows);
+        args.add(algorithm);
         TypeReference<List<ClusterResults>> retType = new TypeReference<List<ClusterResults>>() {};
         List<ClusterResults> res = jsonrpcCall("ClusterServicePy.cluster_hierarchical", args, retType, true, false);
         return res.get(0);

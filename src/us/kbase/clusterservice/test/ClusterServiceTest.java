@@ -8,15 +8,10 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import com.apporiented.algorithm.clustering.Cluster;
-import com.apporiented.algorithm.clustering.ClusteringAlgorithm;
-import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
 
 import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServicePyLocalClient;
@@ -77,7 +72,7 @@ public class ClusterServiceTest {
             List<Long> clusterLabels = cr1.getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
-            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
+            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, 1L, null);
             //System.out.println(cr2);
             String dendrogram = cr2.getDendrogram();
             System.out.println(dendrogram);
@@ -96,27 +91,17 @@ public class ClusterServiceTest {
         }
     }
 
-    /*@Test
+    @Ignore
+    @Test
     public void rCorrTest() throws Exception {
         ClusterServiceRLocalClient cl = getRClient("r_corr");
         File inputFile = new File("test/data/upload6/E_coli_v4_Build_6_subdata.tsv");
         ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
                 null, true, null, null, null);
         FloatMatrix2D matrix = data.getData();
-        int size = matrix.getRowIds().size();
-        double[][] transposed = new double[matrix.getColIds().size()][size];
-        for (int rpos = 0; rpos < size; rpos++) {
-            List<Double> row = matrix.getValues().get(rpos);
-            for (int cpos = 0; cpos < row.size(); cpos++)
-                transposed[cpos][rpos] = row.get(cpos);
-        }
-        double[][] corr = new PearsonsCorrelation().computeCorrelationMatrix(transposed).getData();
-        System.out.println(corr.length + " * " + corr[0].length);
-        //ClusterResults cr = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
-        ClusteringAlgorithm alg = new DefaultClusteringAlgorithm();
-        Cluster cluster = alg.performClustering(distances, names,
-                new AverageLinkageStrategy());
-    }*/
+        ClusterResults cr = cl.clusterHierarchical(matrix, "", "", 0.5, 1L, "flashClust");
+        System.out.println(cr);
+    }
     
     private ClusterServiceRLocalClient getRClient(String testType) {
         File workDir = generateTempDir(rootTempDir, "test_clusterservice_" + testType + "_", "");
@@ -146,7 +131,7 @@ public class ClusterServiceTest {
                 null, true, null, null, null);
         FloatMatrix2D matrix = data.getData();
         try {
-            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, 1L);
+            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, 1L, null);
             System.out.println(res);
         } catch (ServerException ex) {
             System.out.println(ex.getData());
