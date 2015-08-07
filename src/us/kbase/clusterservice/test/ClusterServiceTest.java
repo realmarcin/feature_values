@@ -72,7 +72,7 @@ public class ClusterServiceTest {
             List<Long> clusterLabels = cr1.getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
-            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, 1L);
+            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, 1L, null);
             //System.out.println(cr2);
             String dendrogram = cr2.getDendrogram();
             System.out.println(dendrogram);
@@ -91,6 +91,18 @@ public class ClusterServiceTest {
         }
     }
 
+    @Ignore
+    @Test
+    public void rCorrTest() throws Exception {
+        ClusterServiceRLocalClient cl = getRClient("r_corr");
+        File inputFile = new File("test/data/upload6/E_coli_v4_Build_6_subdata.tsv");
+        ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
+                null, true, null, null, null);
+        FloatMatrix2D matrix = data.getData();
+        ClusterResults cr = cl.clusterHierarchical(matrix, "", "", 0.5, 1L, "flashClust");
+        System.out.println(cr);
+    }
+    
     private ClusterServiceRLocalClient getRClient(String testType) {
         File workDir = generateTempDir(rootTempDir, "test_clusterservice_" + testType + "_", "");
         workDir.mkdirs();
@@ -119,7 +131,7 @@ public class ClusterServiceTest {
                 null, true, null, null, null);
         FloatMatrix2D matrix = data.getData();
         try {
-            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, 1L);
+            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, 1L, null);
             System.out.println(res);
         } catch (ServerException ex) {
             System.out.println(ex.getData());
