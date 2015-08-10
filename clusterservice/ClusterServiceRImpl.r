@@ -121,7 +121,7 @@ methods[["ClusterServiceR.estimate_k_new"]] <- function(matrix, min_k, max_k,
         min_k <- 2
     if (is.null(max_k))
         max_k <- 200
-    if (is.null(criterion))
+    if (is.null(crit))
         crit <- "asw"
     if (is.null(usepam))
         usepam <- FALSE
@@ -132,13 +132,13 @@ methods[["ClusterServiceR.estimate_k_new"]] <- function(matrix, min_k, max_k,
     values <- data.matrix(values)
     max_clust_num = min(c(max_k,nrow(values)-1))
     pk<- pamk(values,krange=c(min_k:max_clust_num),criterion=crit,
-        usepam=usepam,ns=2)
+        usepam=usepam,ns=10)
     ret_names <- c(min_k,max_clust_num)
     best_pos <- pk$nc
     cluster_count_qualities <- list()
     for (pos in 1:length(ret_names)) {
 	cluster_count = ret_names[pos]
-        quality <- pk$crit[pos]
+        quality <- pk$crit[pos+1]
         cluster_count_qualities <- rbind(cluster_count_qualities, list(cluster_count, quality))
     }
     return(list(best_k=as.numeric(best_pos), estimate_cluster_sizes=cluster_count_qualities))
