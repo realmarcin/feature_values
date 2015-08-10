@@ -34,6 +34,7 @@ import us.kbase.auth.AuthService;
 import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.ServerException;
+import us.kbase.common.service.Tuple2;
 import us.kbase.common.service.Tuple7;
 import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
@@ -45,6 +46,7 @@ import us.kbase.kbasefeaturevalues.ClusterSet;
 import us.kbase.kbasefeaturevalues.ClustersFromDendrogramParams;
 import us.kbase.kbasefeaturevalues.CorrectMatrixParams;
 import us.kbase.kbasefeaturevalues.EstimateKParams;
+import us.kbase.kbasefeaturevalues.EstimateKParamsNew;
 import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
@@ -208,6 +210,7 @@ public class AweIntegrationTest {
         WorkspaceClient wscl = getWsClient();
         String exprObjName = "expression1";
         String estimObjName = "estimate1";
+        String estimNewObjName = "estimate2";
         String clustObj1Name = "clusters1";
         String clustObj2Name = "clusters2";
         String clustObj3Name = "clusters3";
@@ -226,6 +229,23 @@ public class AweIntegrationTest {
         long k = estKRes.getBestK();
         System.out.println("Best K: " + k);
         System.out.println("Cluster count qualities: " + estKRes.getEstimateClusterSizes());
+        String jobId1new = client.estimateKNew(new EstimateKParamsNew().withInputMatrix(testWsName + "/" + 
+                exprObjName).withOutWorkspace(testWsName).withOutEstimateResult(estimNewObjName));
+        waitForJob(jobId1new);
+        ObjectData res1new = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(estimNewObjName))).get(0);
+        EstimateKResult estKResNew = res1new.getData().asClassInstance(EstimateKResult.class);
+        long kNew = estKResNew.getBestK();
+        System.out.println("Best K new: " + kNew);
+        Assert.assertEquals(k, kNew);
+        //System.out.println("Cluster count qualities: " + estKResNew.getEstimateClusterSizes());
+        Assert.assertEquals(estKRes.getEstimateClusterSizes().size(), estKResNew.getEstimateClusterSizes().size());
+        for (int i = 0; i < estKResNew.getEstimateClusterSizes().size(); i++) {
+            Tuple2<Long, Double> entry = estKRes.getEstimateClusterSizes().get(i);
+            Tuple2<Long, Double> entryNew = estKResNew.getEstimateClusterSizes().get(i);
+            Assert.assertEquals((long)entry.getE1(), (long)entryNew.getE1());
+            Assert.assertEquals((double)entry.getE2(), (double)entryNew.getE2(), 1e-10);
+        }
         /////////////// K-means /////////////////
         String jobId2 = client.clusterKMeans(new ClusterKMeansParams().withInputData(testWsName + "/" + 
                 exprObjName).withK(k).withOutWorkspace(testWsName).withOutClustersetId(clustObj1Name));

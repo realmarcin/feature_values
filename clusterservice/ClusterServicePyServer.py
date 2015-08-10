@@ -268,6 +268,9 @@ class Application(object):
         self.rpc_service.add(impl_ClusterServicePy.estimate_k,
                              name='ClusterServicePy.estimate_k',
                              types=[dict, int, int, int, int, int])
+        self.rpc_service.add(impl_ClusterServicePy.estimate_k_new,
+                             name='ClusterServicePy.estimate_k_new',
+                             types=[dict, int, int, basestring, int, float, int, int])
         self.rpc_service.add(impl_ClusterServicePy.cluster_k_means,
                              name='ClusterServicePy.cluster_k_means',
                              types=[dict, int, int, int, int, basestring])

@@ -137,6 +137,24 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     }
 
     /**
+     * <p>Original spec-file function name: estimate_k_new</p>
+     * <pre>
+     * Used as an analysis step before generating clusters using K-means clustering, this method
+     * provides an estimate of K by [...]
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKParamsNew EstimateKParamsNew}
+     * @return   parameter "job_id" of String
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.estimate_k_new")
+    public String estimateKNew(EstimateKParamsNew params, AuthToken authPart) throws Exception {
+        String returnVal = null;
+        //BEGIN estimate_k_new
+        returnVal = runAweJob(authPart, params);
+        //END estimate_k_new
+        return returnVal;
+    }
+
+    /**
      * <p>Original spec-file function name: cluster_k_means</p>
      * <pre>
      * Clusters features by K-means clustering.
