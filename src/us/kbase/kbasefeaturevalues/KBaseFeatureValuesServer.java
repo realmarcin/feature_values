@@ -93,9 +93,10 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         }
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         UserAndJobStateClient ujsClient = getUjsClient(authPart);
-        String jobId = ujsClient.createAndStartJob(authPart.toString(), "queued", 
-                "AWE job for " + SERVICE_NAME + "." + methodName, 
-                new InitProgress().withPtype("none"), null);
+        //String jobId = ujsClient.createAndStartJob(authPart.toString(), "queued", 
+        //        "AWE job for " + SERVICE_NAME + "." + methodName, 
+        //        new InitProgress().withPtype("none"), null);
+        String jobId = ujsClient.createJob();
         args.put("method", methodName);
         args.put("params", Arrays.asList(params));
         args.put("config", config);

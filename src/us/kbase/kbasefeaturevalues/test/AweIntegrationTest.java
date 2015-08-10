@@ -425,12 +425,11 @@ public class AweIntegrationTest {
         jscl.setAllSSLCertificatesTrusted(true);
         jscl.setIsInsecureHttpConnectionAllowed(true);
         for (int i = 0; i < fvJobWaitSeconds; i++) {
-            Thread.sleep(1000);
             Tuple7<String, String, String, Long, String, Long, Long> data = jscl.getJobStatus(jobId);
             //System.out.println("Job status: " + data);
             Long complete = data.getE6();
             Long wasError = data.getE7();
-            if (complete == 1L) {
+            if (complete != null && complete == 1L) {
                 if (wasError == 0L) {
                     return;
                 } else {
@@ -438,6 +437,7 @@ public class AweIntegrationTest {
                     throw new IllegalStateException(error);
                 }
             }
+            Thread.sleep(1000);
         }
         throw new IllegalStateException("Job wasn't finished in " + fvJobWaitSeconds + " seconds");
     }
