@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
@@ -56,6 +59,7 @@ import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
 import us.kbase.kbasefeaturevalues.MatrixDescriptor;
 import us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams;
 import us.kbase.kbasefeaturevalues.ServiceStatus;
+import us.kbase.kbasefeaturevalues.transform.ClusterSetDownloader;
 import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.CreateWorkspaceParams;
@@ -206,7 +210,7 @@ public class AweIntegrationTest {
     }
     
     @Test
-    public void testClusterKMeans() throws Exception {
+    public void testMainPipeline() throws Exception {
         WorkspaceClient wscl = getWsClient();
         String exprObjName = "expression1";
         String estimObjName = "estimate1";
@@ -271,6 +275,19 @@ public class AweIntegrationTest {
                 .withName(clustObj3Name))).get(0);
         ClusterSet clSet4 = res4.getData().asClassInstance(ClusterSet.class);
         System.out.println("From dendrogram: " + clSet4.getFeatureClusters());
+        /////////////// Clusters download ///////////////
+        File tsvTempFile = new File(fvServiceDir, "clusters.tsv");
+        ClusterSetDownloader.generate(getWsUrl(), testWsName, clustObj1Name, 1, "TSV", token,
+                new PrintWriter(tsvTempFile));
+        List<String> lines = readFileLines(tsvTempFile);
+        Assert.assertEquals(7, lines.size());
+        Set<String> clusterCodes = new TreeSet<String>();
+        for (String l : lines) {
+            String[] parts = l.split(Pattern.quote("\t"));
+            Assert.assertEquals(2, parts.length);
+            clusterCodes.add(parts[1]);
+        }
+        Assert.assertEquals("[0, 1, 2]", clusterCodes.toString());
     }
     
     @Test
