@@ -204,14 +204,14 @@ module KBaseFeatureValues {
         string condition_dendrogram;
         ws_matrix_id original_data;
         AnalysisReport report;
-    } ClusterSet;
+    } FeatureClusters;
 
 
     /* 
-        The workspace ID of a ClusterSet data object.
-        @id ws KBaseFeatureValues.ExpressionMatrix KBaseFeatureValues.SingleKnockoutFitnessMatrix
+        The workspace ID of a FeatureClusters data object.
+        @id ws KBaseFeatureValues.FeatureClusters
     */
-    typedef string ws_clusterset_id;
+    typedef string ws_featureclusters_id;
 
 
     /* note: this needs review from Marcin */
@@ -300,13 +300,13 @@ module KBaseFeatureValues {
     typedef structure {
         float feature_height_cutoff;
         float condition_height_cutoff;
-        ws_clusterset_id input_data;
+        ws_featureclusters_id input_data;
         string out_workspace;
         string out_clusterset_id;
     } ClustersFromDendrogramParams;
 
     /*
-        Given a ClusterSet with a dendogram built from a hierarchical clustering
+        Given a FeatureClusters with a dendogram built from a hierarchical clustering
         method, this function creates new clusters by cutting the dendogram at
         a specific hieght or by some other approach.
     */
@@ -315,13 +315,13 @@ module KBaseFeatureValues {
 
 
     typedef structure {
-        ws_clusterset_id input_clusterset;
+        ws_featureclusters_id input_clusterset;
         string out_workspace;
         string out_report_id;
     } EvaluateClustersetQualityParams;
 
     /*
-        Given a ClusterSet with a dendogram built from a hierarchical clustering
+        Given a FeatureClusters with a dendogram built from a hierarchical clustering
         method, this function creates new clusters by cutting the dendogram at
         a specific hieght or by some other approach.
     */

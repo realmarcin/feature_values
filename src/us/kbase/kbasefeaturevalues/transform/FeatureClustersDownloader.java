@@ -12,12 +12,12 @@ import org.kohsuke.args4j.Option;
 
 import us.kbase.auth.AuthService;
 import us.kbase.auth.AuthToken;
-import us.kbase.kbasefeaturevalues.ClusterSet;
+import us.kbase.kbasefeaturevalues.FeatureClusters;
 import us.kbase.kbasefeaturevalues.LabeledCluster;
 import us.kbase.workspace.ObjectIdentity;
 import us.kbase.workspace.WorkspaceClient;
 
-public class ClusterSetDownloader {
+public class FeatureClustersDownloader {
     
     public static void main(String[] args) throws Exception {
         Args parsedArgs = new Args();
@@ -67,8 +67,8 @@ public class ClusterSetDownloader {
             String ref = wsName + "/" + objName;
             if (version != null)
                 ref += "/" + version;
-            ClusterSet data = client.getObjects(Arrays.asList(new ObjectIdentity().withRef(ref)))
-                    .get(0).getData().asClassInstance(ClusterSet.class);
+            FeatureClusters data = client.getObjects(Arrays.asList(new ObjectIdentity().withRef(ref)))
+                    .get(0).getData().asClassInstance(FeatureClusters.class);
             for (int clustPos = 0; clustPos < data.getFeatureClusters().size(); clustPos++) {
                 LabeledCluster cluster = data.getFeatureClusters().get(clustPos);
                 for (String featureId : cluster.getIdToPos().keySet()) {

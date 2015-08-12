@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: ClusterSet</p>
+ * <p>Original spec-file type: FeatureClusters</p>
  * <pre>
  * A set of clusters, typically generated for a Float2DMatrix wrapper, such as Expression
  * data or single feature knockout fitness data.
@@ -42,7 +42,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "original_data",
     "report"
 })
-public class ClusterSet {
+public class FeatureClusters {
 
     @JsonProperty("feature_clusters")
     private List<us.kbase.kbasefeaturevalues.LabeledCluster> featureClusters;
@@ -77,7 +77,7 @@ public class ClusterSet {
         this.featureClusters = featureClusters;
     }
 
-    public ClusterSet withFeatureClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> featureClusters) {
+    public FeatureClusters withFeatureClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> featureClusters) {
         this.featureClusters = featureClusters;
         return this;
     }
@@ -92,7 +92,7 @@ public class ClusterSet {
         this.conditionClusters = conditionClusters;
     }
 
-    public ClusterSet withConditionClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> conditionClusters) {
+    public FeatureClusters withConditionClusters(List<us.kbase.kbasefeaturevalues.LabeledCluster> conditionClusters) {
         this.conditionClusters = conditionClusters;
         return this;
     }
@@ -107,7 +107,7 @@ public class ClusterSet {
         this.featureDendrogram = featureDendrogram;
     }
 
-    public ClusterSet withFeatureDendrogram(String featureDendrogram) {
+    public FeatureClusters withFeatureDendrogram(String featureDendrogram) {
         this.featureDendrogram = featureDendrogram;
         return this;
     }
@@ -122,7 +122,7 @@ public class ClusterSet {
         this.conditionDendrogram = conditionDendrogram;
     }
 
-    public ClusterSet withConditionDendrogram(String conditionDendrogram) {
+    public FeatureClusters withConditionDendrogram(String conditionDendrogram) {
         this.conditionDendrogram = conditionDendrogram;
         return this;
     }
@@ -137,7 +137,7 @@ public class ClusterSet {
         this.originalData = originalData;
     }
 
-    public ClusterSet withOriginalData(String originalData) {
+    public FeatureClusters withOriginalData(String originalData) {
         this.originalData = originalData;
         return this;
     }
@@ -170,7 +170,7 @@ public class ClusterSet {
         this.report = report;
     }
 
-    public ClusterSet withReport(AnalysisReport report) {
+    public FeatureClusters withReport(AnalysisReport report) {
         this.report = report;
         return this;
     }
@@ -187,7 +187,7 @@ public class ClusterSet {
 
     @Override
     public String toString() {
-        return ((((((((((((((("ClusterSet"+" [featureClusters=")+ featureClusters)+", conditionClusters=")+ conditionClusters)+", featureDendrogram=")+ featureDendrogram)+", conditionDendrogram=")+ conditionDendrogram)+", originalData=")+ originalData)+", report=")+ report)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("FeatureClusters"+" [featureClusters=")+ featureClusters)+", conditionClusters=")+ conditionClusters)+", featureDendrogram=")+ featureDendrogram)+", conditionDendrogram=")+ conditionDendrogram)+", originalData=")+ originalData)+", report=")+ report)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -197,7 +197,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     /**
      * <p>Original spec-file function name: clusters_from_dendrogram</p>
      * <pre>
-     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * Given a FeatureClusters with a dendogram built from a hierarchical clustering
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>
@@ -216,7 +216,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     /**
      * <p>Original spec-file function name: evaluate_clusterset_quality</p>
      * <pre>
-     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * Given a FeatureClusters with a dendogram built from a hierarchical clustering
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>

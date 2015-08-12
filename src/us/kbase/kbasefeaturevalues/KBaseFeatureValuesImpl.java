@@ -163,7 +163,7 @@ public class KBaseFeatureValuesImpl {
                     params.getNStart(), params.getMaxIter(), params.getRandomSeed(),
                     params.getAlgorithm());
         }
-        ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData());
+        FeatureClusters toSave = new FeatureClusters().withOriginalData(params.getInputData());
         toSave.withFeatureClusters(clustersFromLabels(matrix, res));
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
@@ -174,7 +174,7 @@ public class KBaseFeatureValuesImpl {
                 .withMethodParams(Arrays.asList(new UObject(params))));
         getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
                 .withObjects(Arrays.asList(new ObjectSaveData()
-                .withType("KBaseFeatureValues.ClusterSet").withName(params.getOutClustersetId())
+                .withType("KBaseFeatureValues.FeatureClusters").withName(params.getOutClustersetId())
                 .withData(new UObject(toSave)).withProvenance(provenance))));
         return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }
@@ -216,7 +216,7 @@ public class KBaseFeatureValuesImpl {
         ClusterServiceLocalClient mathClient = getMathClient();
         ClusterResults res = mathClient.clusterHierarchical(matrix.getData(), params.getDistanceMetric(), 
                 params.getLinkageCriteria(), params.getFeatureHeightCutoff(), 1L, params.getAlgorithm());
-        ClusterSet toSave = new ClusterSet().withOriginalData(params.getInputData())
+        FeatureClusters toSave = new FeatureClusters().withOriginalData(params.getInputData())
                 .withFeatureClusters(clustersFromLabels(matrix, res))
                 .withFeatureDendrogram(res.getDendrogram());
         List<ProvenanceAction> provenance = Arrays.asList(
@@ -228,7 +228,7 @@ public class KBaseFeatureValuesImpl {
                 .withMethodParams(Arrays.asList(new UObject(params))));
         getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
                 .withObjects(Arrays.asList(new ObjectSaveData()
-                .withType("KBaseFeatureValues.ClusterSet").withName(params.getOutClustersetId())
+                .withType("KBaseFeatureValues.FeatureClusters").withName(params.getOutClustersetId())
                 .withData(new UObject(toSave)).withProvenance(provenance))));
         return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }
@@ -236,14 +236,14 @@ public class KBaseFeatureValuesImpl {
     public String clustersFromDendrogram(ClustersFromDendrogramParams params) throws Exception {
         ObjectData objData = getWsClient().getObjects(Arrays.asList(
                 new ObjectIdentity().withRef(params.getInputData()))).get(0);
-        ClusterSet input = objData.getData().asClassInstance(ClusterSet.class);
+        FeatureClusters input = objData.getData().asClassInstance(FeatureClusters.class);
         ObjectData objData2 = getWsClient().getObjects(Arrays.asList(
                 new ObjectIdentity().withRef(input.getOriginalData()))).get(0);
         BioMatrix matrix = objData2.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
         ClusterResults res = mathClient.clustersFromDendrogram(matrix.getData(), 
                 input.getFeatureDendrogram(), params.getFeatureHeightCutoff());
-        ClusterSet toSave = new ClusterSet().withOriginalData(input.getOriginalData())
+        FeatureClusters toSave = new FeatureClusters().withOriginalData(input.getOriginalData())
                 .withFeatureClusters(clustersFromLabels(matrix, res))
                 .withFeatureDendrogram(res.getDendrogram());
         List<ProvenanceAction> provenance = Arrays.asList(
@@ -255,7 +255,7 @@ public class KBaseFeatureValuesImpl {
                 .withMethodParams(Arrays.asList(new UObject(params))));
         getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(params.getOutWorkspace())
                 .withObjects(Arrays.asList(new ObjectSaveData()
-                .withType("KBaseFeatureValues.ClusterSet").withName(params.getOutClustersetId())
+                .withType("KBaseFeatureValues.FeatureClusters").withName(params.getOutClustersetId())
                 .withData(new UObject(toSave)).withProvenance(provenance))));
         return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }

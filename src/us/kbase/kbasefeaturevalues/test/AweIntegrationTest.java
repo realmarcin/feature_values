@@ -45,7 +45,7 @@ import us.kbase.common.utils.ProcessHelper;
 import us.kbase.kbasefeaturevalues.BuildFeatureSetParams;
 import us.kbase.kbasefeaturevalues.ClusterHierarchicalParams;
 import us.kbase.kbasefeaturevalues.ClusterKMeansParams;
-import us.kbase.kbasefeaturevalues.ClusterSet;
+import us.kbase.kbasefeaturevalues.FeatureClusters;
 import us.kbase.kbasefeaturevalues.ClustersFromDendrogramParams;
 import us.kbase.kbasefeaturevalues.CorrectMatrixParams;
 import us.kbase.kbasefeaturevalues.EstimateKParams;
@@ -59,7 +59,7 @@ import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
 import us.kbase.kbasefeaturevalues.MatrixDescriptor;
 import us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams;
 import us.kbase.kbasefeaturevalues.ServiceStatus;
-import us.kbase.kbasefeaturevalues.transform.ClusterSetDownloader;
+import us.kbase.kbasefeaturevalues.transform.FeatureClustersDownloader;
 import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 import us.kbase.workspace.CreateWorkspaceParams;
@@ -256,7 +256,7 @@ public class AweIntegrationTest {
         waitForJob(jobId2);
         ObjectData res2 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj1Name))).get(0);
-        ClusterSet clSet2 = res2.getData().asClassInstance(ClusterSet.class);
+        FeatureClusters clSet2 = res2.getData().asClassInstance(FeatureClusters.class);
         System.out.println("K-means: " + clSet2.getFeatureClusters());
         /////////////// Hierarchikal /////////////////
         String jobId3 = client.clusterHierarchical(new ClusterHierarchicalParams().withInputData(testWsName + "/" + 
@@ -264,7 +264,7 @@ public class AweIntegrationTest {
         waitForJob(jobId3);
         ObjectData res3 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj2Name))).get(0);
-        ClusterSet clSet3 = res3.getData().asClassInstance(ClusterSet.class);
+        FeatureClusters clSet3 = res3.getData().asClassInstance(FeatureClusters.class);
         System.out.println("Hierarchical: " + clSet3.getFeatureClusters());
         System.out.println("Hierarchical: " + clSet3.getFeatureDendrogram());
         /////////////// From dendrogram /////////////////
@@ -273,11 +273,11 @@ public class AweIntegrationTest {
         waitForJob(jobId4);
         ObjectData res4 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj3Name))).get(0);
-        ClusterSet clSet4 = res4.getData().asClassInstance(ClusterSet.class);
+        FeatureClusters clSet4 = res4.getData().asClassInstance(FeatureClusters.class);
         System.out.println("From dendrogram: " + clSet4.getFeatureClusters());
         /////////////// Clusters download ///////////////
         File tsvTempFile = new File(fvServiceDir, "clusters.tsv");
-        ClusterSetDownloader.generate(getWsUrl(), testWsName, clustObj1Name, 1, "TSV", token,
+        FeatureClustersDownloader.generate(getWsUrl(), testWsName, clustObj1Name, 1, "TSV", token,
                 new PrintWriter(tsvTempFile));
         List<String> lines = readFileLines(tsvTempFile);
         Assert.assertEquals(7, lines.size());
@@ -308,7 +308,7 @@ public class AweIntegrationTest {
         waitForJob(jobId);
         ObjectData res = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj1Name))).get(0);
-        ClusterSet clSet = res.getData().asClassInstance(ClusterSet.class);
+        FeatureClusters clSet = res.getData().asClassInstance(FeatureClusters.class);
         System.out.println("Python Scikit K-means: " + clSet.getFeatureClusters());
     }
     
