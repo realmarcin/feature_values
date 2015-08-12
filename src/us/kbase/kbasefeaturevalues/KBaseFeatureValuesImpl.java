@@ -654,17 +654,24 @@ public class KBaseFeatureValuesImpl {
     		
     		String function = "";
     		String name = "";
+            Hashtable<String,String> props = new Hashtable<String,String>();
     		
     		//TODO implement general approach to extract required properties. For now just function
-    		Feature feature = mgl.featureId2Feature.get(rId);
+    		if (mgl.featureId2Feature != null) {
+    		    String featureId = null;
+    		    if (mgl.matrix.getFeatureMapping() != null) 
+    		        featureId = mgl.matrix.getFeatureMapping().get(rId);
+    		    if (featureId == null)
+    		        featureId = rId;
+    		    Feature feature = mgl.featureId2Feature.get(featureId);
+
+    		    if(feature != null){
+    		        function = feature.getFunction();
+    		        props.put("function", function != null ? function : "");
+    		        name = feature.getAliases() != null? StringUtils.join(feature.getAliases(), "; ") : "";
+    		    }
+    		}    		
     		
-    		Hashtable<String,String> props = new Hashtable<String,String>();
-    		if(feature != null){
-        		function = feature.getFunction();
-	        	props.put("function", function != null ? function : "");
-	        	name = feature.getAliases() != null? StringUtils.join(feature.getAliases(), "; ") : "";
-    		}
-    		    		
     		ItemDescriptor desc = new ItemDescriptor()
     			.withDescription("")
     			.withId(rId)

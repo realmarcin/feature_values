@@ -54,9 +54,12 @@ import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 import us.kbase.kbasefeaturevalues.GetMatrixDescriptorParams;
+import us.kbase.kbasefeaturevalues.GetMatrixItemDescriptorsParams;
+import us.kbase.kbasefeaturevalues.GetMatrixStatParams;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
 import us.kbase.kbasefeaturevalues.MatrixDescriptor;
+import us.kbase.kbasefeaturevalues.MatrixStat;
 import us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams;
 import us.kbase.kbasefeaturevalues.ServiceStatus;
 import us.kbase.kbasefeaturevalues.transform.FeatureClustersDownloader;
@@ -353,6 +356,22 @@ public class AweIntegrationTest {
                 new ObjectIdentity().withWorkspace(testWsName).withName(matrixId)))
                 .get(0).getData().asClassInstance(ExpressionMatrix.class);
         Assert.assertEquals(2666, matrix.getFeatureMapping().size());
+    }
+    
+    @Test
+    public void testBuildRowDescriptors() throws Exception {
+        ExpressionMatrix data = UObject.getMapper().readValue(new File("test/data/upload7/poplar_roots_exp_matrix_5000.json"), ExpressionMatrix.class);
+        String matrixId = "row_descr_matrix.1";
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(matrixId).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        try {
+            MatrixStat stat = client.getMatrixStat(new GetMatrixStatParams().withInputData(testWsName + "/" + matrixId));
+            Assert.assertEquals(4999, stat.getRowStats().size());
+        } catch (ServerException ex) {
+            System.err.println(ex.getData());
+            throw ex;
+        }
     }
     
     private static int getNullCount(FloatMatrix2D matrix) {
