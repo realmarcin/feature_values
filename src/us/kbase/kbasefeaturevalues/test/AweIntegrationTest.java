@@ -2,6 +2,7 @@ package us.kbase.kbasefeaturevalues.test;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import junit.framework.Assert;
 
@@ -54,14 +56,15 @@ import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
 import us.kbase.kbasefeaturevalues.FloatMatrix2D;
 import us.kbase.kbasefeaturevalues.GetMatrixDescriptorParams;
-import us.kbase.kbasefeaturevalues.GetMatrixItemDescriptorsParams;
 import us.kbase.kbasefeaturevalues.GetMatrixStatParams;
+import us.kbase.kbasefeaturevalues.GetSubmatrixStatParams;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
 import us.kbase.kbasefeaturevalues.MatrixDescriptor;
 import us.kbase.kbasefeaturevalues.MatrixStat;
 import us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams;
 import us.kbase.kbasefeaturevalues.ServiceStatus;
+import us.kbase.kbasefeaturevalues.SubmatrixStat;
 import us.kbase.kbasefeaturevalues.transform.FeatureClustersDownloader;
 import us.kbase.kbasefeaturevalues.transform.ExpressionUploader;
 import us.kbase.userandjobstate.UserAndJobStateClient;
@@ -425,6 +428,42 @@ public class AweIntegrationTest {
                 .get(0).getData().asClassInstance(Map.class);
         Map<String, List<String>> elements2 = (Map<String, List<String>>)fs2.get("elements");
         Assert.assertEquals(4, elements2.size());
+    }
+    
+    @Test
+    public void testSubMatrixStat() throws Exception {
+        File dir = new File("test/data/upload8");
+        GZIPInputStream is = new GZIPInputStream(new FileInputStream(new File(dir, "Rhodobacter.contigset.json.gz")));
+        Map<String, Object> contigsetData = UObject.getMapper().readValue(is, Map.class);
+        is.close();
+        String contigsetObjName = "submatrix_contigset.1";
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(contigsetObjName).withType("KBaseGenomes.ContigSet")
+                .withData(new UObject(contigsetData)))));
+        is = new GZIPInputStream(new FileInputStream(new File(dir, "Rhodobacter.genome.json.gz")));
+        Map<String, Object> genomeData = UObject.getMapper().readValue(is, Map.class);
+        is.close();
+        String genomeObjName = "submatrix_contigset.1";
+        genomeData.put("contigset_ref", testWsName + "/" + contigsetObjName);
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(genomeObjName).withType("KBaseGenomes.Genome")
+                .withData(new UObject(genomeData)))));
+        ExpressionMatrix data = UObject.getMapper().readValue(new File(dir, "NewFakeData2.3.json"), ExpressionMatrix.class);
+        data.setGenomeRef(testWsName + "/" + genomeObjName);
+        String matrixId = "submatrix_matrix.1";
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(matrixId).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        try {
+            SubmatrixStat stat = client.getSubmatrixStat(new GetSubmatrixStatParams().withInputData(testWsName + "/" + matrixId)
+                    .withRowIds(Arrays.asList("RSP_0049", "RSP_1584", "RSP_1588")).withFlRowPairwiseCorrelation(1L)
+                    .withFlRowSetStats(1L));
+            Assert.assertEquals(3, stat.getRowPairwiseCorrelation().getComparisonValues().size());
+            Assert.assertEquals(3, stat.getRowPairwiseCorrelation().getComparisonValues().get(0).size());
+        } catch (ServerException ex) {
+            System.err.println(ex.getData());
+            throw ex;
+        }
     }
     
     private static FloatMatrix2D getSampleMatrix() {
