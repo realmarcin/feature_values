@@ -41,6 +41,19 @@ class ClusterServicePy:
         # return the results
         return [returnVal]
 
+    def estimate_k_new(self, ctx, matrix, min_k, max_k, criterion, usepam, alpha, diss, random_seed):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN estimate_k_new
+        #END estimate_k_new
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method estimate_k_new return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
     def cluster_k_means(self, ctx, matrix, k, n_start, max_iter, random_seed, algorithm):
         # ctx is the context object
         # return variables are: returnVal

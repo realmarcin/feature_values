@@ -177,6 +177,13 @@ class ClusterServicePy(object):
                           [matrix, min_k, max_k, max_iter, random_seed, neighb_size], json_rpc_context)
         return resp[0]
   
+    def estimate_k_new(self, matrix, min_k, max_k, criterion, usepam, alpha, diss, random_seed, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method estimate_k_new: argument json_rpc_context is not type dict as required.')
+        resp = self._call('ClusterServicePy.estimate_k_new',
+                          [matrix, min_k, max_k, criterion, usepam, alpha, diss, random_seed], json_rpc_context)
+        return resp[0]
+  
     def cluster_k_means(self, matrix, k, n_start, max_iter, random_seed, algorithm, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method cluster_k_means: argument json_rpc_context is not type dict as required.')

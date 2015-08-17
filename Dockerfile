@@ -56,6 +56,8 @@ RUN cp $GOPATH/bin/awe-client /kb/runtime/bin/
 ######################### Feature values module
 RUN R -e 'if(!require(clValid)) install.packages("clValid", repos="http://cran.us.r-project.org")'
 RUN R -e 'if(!require(sp)) install.packages("sp", repos="http://cran.us.r-project.org")'
+RUN R -q -e 'if(!require(flashClust)) install.packages("flashClust", repos="http://cran.us.r-project.org")'
+RUN R -q -e 'if(!require(fpc)) install.packages("fpc", dependencies=TRUE, repos="http://cran.us.r-project.org")'
 WORKDIR /kb/dev_container/modules
 RUN mkdir feature_values
 COPY . /kb/dev_container/modules/feature_values/

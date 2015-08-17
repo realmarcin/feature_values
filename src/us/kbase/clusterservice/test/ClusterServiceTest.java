@@ -91,6 +91,22 @@ public class ClusterServiceTest {
         }
     }
 
+    @Test
+    public void rEstimateKNewTest() throws Exception {
+        ClusterServiceRLocalClient cl = getRClient("r_estimate_k_new");
+        FloatMatrix2D matrix = getSampleMatrix();
+        try {
+            EstimateKResult estK = cl.estimateKNew(matrix, null, null, null, null, null, null, 123L);
+            long k = estK.getBestK();
+            System.out.println("Estimated K new: " + k);
+            System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());
+            Assert.assertEquals(3, k);
+        } catch (ServerException ex) {
+            System.out.println(ex.getData());
+            throw ex;
+        }
+    }
+
     @Ignore
     @Test
     public void rCorrTest() throws Exception {

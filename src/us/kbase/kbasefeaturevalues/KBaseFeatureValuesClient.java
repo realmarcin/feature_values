@@ -165,6 +165,25 @@ public class KBaseFeatureValuesClient {
     }
 
     /**
+     * <p>Original spec-file function name: estimate_k_new</p>
+     * <pre>
+     * Used as an analysis step before generating clusters using K-means clustering, this method
+     * provides an estimate of K by [...]
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKParamsNew EstimateKParamsNew}
+     * @return   parameter "job_id" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String estimateKNew(EstimateKParamsNew params) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBaseFeatureValues.estimate_k_new", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: cluster_k_means</p>
      * <pre>
      * Clusters features by K-means clustering.
@@ -203,7 +222,7 @@ public class KBaseFeatureValuesClient {
     /**
      * <p>Original spec-file function name: clusters_from_dendrogram</p>
      * <pre>
-     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * Given a FeatureClusters with a dendogram built from a hierarchical clustering
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>
@@ -223,7 +242,7 @@ public class KBaseFeatureValuesClient {
     /**
      * <p>Original spec-file function name: evaluate_clusterset_quality</p>
      * <pre>
-     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * Given a FeatureClusters with a dendogram built from a hierarchical clustering
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>

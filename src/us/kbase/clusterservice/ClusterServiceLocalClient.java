@@ -11,6 +11,8 @@ public interface ClusterServiceLocalClient {
     
     public EstimateKResult estimateK(FloatMatrix2D matrix, Long minK, Long maxK, Long maxIter, Long randomSeed, Long neighbSize, Long maxItems) throws IOException, JsonClientException;
 
+    public EstimateKResult estimateKNew(FloatMatrix2D matrix, Long minK, Long maxK, String criterion, Long usepam, Double alpha, Long diss, Long randomSeed) throws IOException, JsonClientException;
+
     public ClusterResults clusterKMeans(FloatMatrix2D matrix, Long k, Long nStart, Long maxIter, Long randomSeed, String algorithm) throws IOException, JsonClientException;
 
     public ClusterResults clusterHierarchical(FloatMatrix2D matrix, String distanceMetric, String linkageCriteria, Double heightCutoff, Long processRows, String algorithm) throws IOException, JsonClientException;

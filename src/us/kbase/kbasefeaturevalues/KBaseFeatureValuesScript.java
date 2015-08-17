@@ -12,6 +12,7 @@ import java.util.Map;
 
 import us.kbase.common.service.UObject;
 import us.kbase.common.utils.TextUtils;
+import us.kbase.userandjobstate.InitProgress;
 import us.kbase.userandjobstate.Results;
 import us.kbase.userandjobstate.UserAndJobStateClient;
 
@@ -53,7 +54,10 @@ public class KBaseFeatureValuesScript {
         Long time = null;  //task.getEstimatedFinishTime();
         String estComplete = time == null ? null : 
             new SimpleDateFormat("YYYY-MM-DDThh:mm:ssZ").format(new Date(time));
-        ujsClient.updateJob(jobId, token, "running", estComplete);
+        //ujsClient.updateJob(jobId, token, "running", estComplete);
+        ujsClient.startJob(jobId, token, "running", "AWE job for " + 
+                KBaseFeatureValuesServer.SERVICE_NAME + "." + methodName, 
+                new InitProgress().withPtype("none"), estComplete);
         try {
             Object ret = method.invoke(impl, methodArgs);
             Results res = null;

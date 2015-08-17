@@ -93,9 +93,10 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         }
         Map<String, Object> args = new LinkedHashMap<String, Object>();
         UserAndJobStateClient ujsClient = getUjsClient(authPart);
-        String jobId = ujsClient.createAndStartJob(authPart.toString(), "queued", 
-                "AWE job for " + SERVICE_NAME + "." + methodName, 
-                new InitProgress().withPtype("none"), null);
+        //String jobId = ujsClient.createAndStartJob(authPart.toString(), "queued", 
+        //        "AWE job for " + SERVICE_NAME + "." + methodName, 
+        //        new InitProgress().withPtype("none"), null);
+        String jobId = ujsClient.createJob();
         args.put("method", methodName);
         args.put("params", Arrays.asList(params));
         args.put("config", config);
@@ -133,6 +134,24 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
         //BEGIN estimate_k
         returnVal = runAweJob(authPart, params);
         //END estimate_k
+        return returnVal;
+    }
+
+    /**
+     * <p>Original spec-file function name: estimate_k_new</p>
+     * <pre>
+     * Used as an analysis step before generating clusters using K-means clustering, this method
+     * provides an estimate of K by [...]
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbasefeaturevalues.EstimateKParamsNew EstimateKParamsNew}
+     * @return   parameter "job_id" of String
+     */
+    @JsonServerMethod(rpc = "KBaseFeatureValues.estimate_k_new")
+    public String estimateKNew(EstimateKParamsNew params, AuthToken authPart) throws Exception {
+        String returnVal = null;
+        //BEGIN estimate_k_new
+        returnVal = runAweJob(authPart, params);
+        //END estimate_k_new
         return returnVal;
     }
 
@@ -178,7 +197,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     /**
      * <p>Original spec-file function name: clusters_from_dendrogram</p>
      * <pre>
-     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * Given a FeatureClusters with a dendogram built from a hierarchical clustering
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>
@@ -197,7 +216,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     /**
      * <p>Original spec-file function name: evaluate_clusterset_quality</p>
      * <pre>
-     * Given a ClusterSet with a dendogram built from a hierarchical clustering
+     * Given a FeatureClusters with a dendogram built from a hierarchical clustering
      * method, this function creates new clusters by cutting the dendogram at
      * a specific hieght or by some other approach.
      * </pre>

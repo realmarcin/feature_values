@@ -12,10 +12,10 @@ import org.apache.commons.math.stat.StatUtils;
 public class FloatMatrix2DUtil {
 	
 	public static PairwiseComparison geRowstPairwiseComparison(FloatMatrix2D matrix, int[] rowIndeces, int[] columnIndeces){
-		double[][] submatrix = new double[rowIndeces.length][columnIndeces.length];
+		double[][] submatrix = new double[columnIndeces.length][rowIndeces.length];
 		for(int i = 0 ; i < rowIndeces.length; i++){
 			for(int j = 0; j < columnIndeces.length; j++){
-				submatrix[i][j] = matrix.getValues().get(rowIndeces[i]).get(columnIndeces[j]);
+				submatrix[j][i] = matrix.getValues().get(rowIndeces[i]).get(columnIndeces[j]);
 			}
 		}
 		PearsonsCorrelation pc = new PearsonsCorrelation();
