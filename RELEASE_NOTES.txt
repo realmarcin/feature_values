@@ -7,6 +7,18 @@ dimention and to different sorts conditions on second dimention.
 
 
 
+VERSION: 0.6 (Released 8/18/2015)
+------------------------------------------
+NEW FEATURES:
+- none
+
+UPDATED FEATURES / MAJOR BUG FIXES:
+- Fix for bug in hierarchical clustering related to NaN values
+in cluster quality measures which prevented clustering results
+from saving in workspace.
+
+
+
 VERSION: 0.5 (Released 8/17/2015)
 ------------------------------------------
 NEW FEATURES:

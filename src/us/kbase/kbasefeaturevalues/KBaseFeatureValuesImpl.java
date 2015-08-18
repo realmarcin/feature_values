@@ -201,14 +201,18 @@ public class KBaseFeatureValuesImpl {
                 LabeledCluster cluster = labelToCluster.get(clusterLabel);
                 int clusterPos = (int)clusterLabel - minClusterLabel;
                 if (res.getMeancor() != null)
-                    cluster.withMeancor(res.getMeancor().get(clusterPos));
+                    cluster.withMeancor(noNaN(res.getMeancor().get(clusterPos)));
                 if (res.getMsecs() != null)
-                    cluster.withMsec(res.getMsecs().get(clusterPos));
+                    cluster.withMsec(noNaN(res.getMsecs().get(clusterPos)));
             }
         }
         return featureClusters;
     }
 
+    private static Double noNaN(Double value) {
+        return (value == null || Double.isNaN(value)) ? null : value;
+    }
+    
     public String clusterHierarchical(ClusterHierarchicalParams params) throws Exception {
         ObjectData objData = getWsClient().getObjects(Arrays.asList(
                 new ObjectIdentity().withRef(params.getInputData()))).get(0);

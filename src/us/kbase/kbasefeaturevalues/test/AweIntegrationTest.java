@@ -60,6 +60,7 @@ import us.kbase.kbasefeaturevalues.GetMatrixStatParams;
 import us.kbase.kbasefeaturevalues.GetSubmatrixStatParams;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesClient;
 import us.kbase.kbasefeaturevalues.KBaseFeatureValuesServer;
+import us.kbase.kbasefeaturevalues.LabeledCluster;
 import us.kbase.kbasefeaturevalues.MatrixDescriptor;
 import us.kbase.kbasefeaturevalues.MatrixStat;
 import us.kbase.kbasefeaturevalues.ReconnectMatrixToGenomeParams;
@@ -464,6 +465,31 @@ public class AweIntegrationTest {
             System.err.println(ex.getData());
             throw ex;
         }
+    }
+    
+    @Test
+    public void testHierarchicalClustering() throws Exception {
+        String matrixId = "hierarchical_matrix.1";
+        String clustObjName = "hierarchical_clusters.1";
+        File inputFile = new File("test/data/upload6/E_coli_v4_Build_6_subdata.tsv");
+        ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
+                null, true, null, null, null);
+        getWsClient().saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(matrixId).withType("KBaseFeatureValues.ExpressionMatrix")
+                .withData(new UObject(data)))));
+        String jobId1 = client.clusterHierarchical(new ClusterHierarchicalParams().withInputData(testWsName + "/" + 
+                matrixId).withFeatureHeightCutoff(0.2).withAlgorithm("flashClust")
+                .withOutWorkspace(testWsName).withOutClustersetId(clustObjName));
+        waitForJob(jobId1);
+        ObjectData res1 = getWsClient().getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
+                .withName(clustObjName))).get(0);
+        FeatureClusters clSet1 = res1.getData().asClassInstance(FeatureClusters.class);
+        int nullCount = 0;
+        for (LabeledCluster lc : clSet1.getFeatureClusters()) {
+            if (lc.getMeancor() == null || lc.getMsec() == null)
+                nullCount++;
+        }
+        Assert.assertEquals(47, nullCount);
     }
     
     private static FloatMatrix2D getSampleMatrix() {
