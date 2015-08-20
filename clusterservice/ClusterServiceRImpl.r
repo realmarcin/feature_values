@@ -179,7 +179,7 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
         distance_metric, linkage_criteria, height_cutoff,
         process_rows, algorithm) {
     if (is.null(process_rows))
-	process_rows<-min(c(500,nrow(matrix[["values"]])))
+	process_rows<-min(c(5000,nrow(matrix[["values"]])))
     values <- matrix[["values"]]
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
