@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "linkage_criteria",
     "feature_height_cutoff",
     "condition_height_cutoff",
+    "max_items",
     "input_data",
     "algorithm",
     "out_workspace",
@@ -38,6 +39,8 @@ public class ClusterHierarchicalParams {
     private Double featureHeightCutoff;
     @JsonProperty("condition_height_cutoff")
     private Double conditionHeightCutoff;
+    @JsonProperty("max_items")
+    private Long maxItems;
     @JsonProperty("input_data")
     private String inputData;
     @JsonProperty("algorithm")
@@ -105,6 +108,21 @@ public class ClusterHierarchicalParams {
 
     public ClusterHierarchicalParams withConditionHeightCutoff(Double conditionHeightCutoff) {
         this.conditionHeightCutoff = conditionHeightCutoff;
+        return this;
+    }
+
+    @JsonProperty("max_items")
+    public Long getMaxItems() {
+        return maxItems;
+    }
+
+    @JsonProperty("max_items")
+    public void setMaxItems(Long maxItems) {
+        this.maxItems = maxItems;
+    }
+
+    public ClusterHierarchicalParams withMaxItems(Long maxItems) {
+        this.maxItems = maxItems;
         return this;
     }
 
@@ -180,7 +198,7 @@ public class ClusterHierarchicalParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((((("ClusterHierarchicalParams"+" [distanceMetric=")+ distanceMetric)+", linkageCriteria=")+ linkageCriteria)+", featureHeightCutoff=")+ featureHeightCutoff)+", conditionHeightCutoff=")+ conditionHeightCutoff)+", inputData=")+ inputData)+", algorithm=")+ algorithm)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((("ClusterHierarchicalParams"+" [distanceMetric=")+ distanceMetric)+", linkageCriteria=")+ linkageCriteria)+", featureHeightCutoff=")+ featureHeightCutoff)+", conditionHeightCutoff=")+ conditionHeightCutoff)+", maxItems=")+ maxItems)+", inputData=")+ inputData)+", algorithm=")+ algorithm)+", outWorkspace=")+ outWorkspace)+", outClustersetId=")+ outClustersetId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

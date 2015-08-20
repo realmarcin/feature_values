@@ -284,6 +284,7 @@ module KBaseFeatureValues {
         string linkage_criteria;
         float feature_height_cutoff;
         float condition_height_cutoff;
+        int max_items;
         ws_matrix_id input_data;
         string algorithm;
         string out_workspace;

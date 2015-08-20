@@ -72,7 +72,7 @@ public class ClusterServiceTest {
             List<Long> clusterLabels = cr1.getClusterLabels();
             System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
-            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, 1L, null);
+            ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, null, null);
             //System.out.println(cr2);
             String dendrogram = cr2.getDendrogram();
             System.out.println(dendrogram);
@@ -115,8 +115,13 @@ public class ClusterServiceTest {
         ExpressionMatrix data = ExpressionUploader.parse(null, null, inputFile, "Simple", 
                 null, true, null, null, null);
         FloatMatrix2D matrix = data.getData();
-        ClusterResults cr = cl.clusterHierarchical(matrix, "", "", 0.5, 1L, "flashClust");
-        System.out.println(cr);
+        try {
+            ClusterResults cr = cl.clusterHierarchical(matrix, "", "", 0.5, null, "flashClust");
+            System.out.println(cr);
+        } catch (ServerException ex) {
+            System.out.println(ex.getData());
+            throw ex;
+        }
     }
     
     private ClusterServiceRLocalClient getRClient(String testType) {
@@ -147,7 +152,7 @@ public class ClusterServiceTest {
                 null, true, null, null, null);
         FloatMatrix2D matrix = data.getData();
         try {
-            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, 1L, null);
+            ClusterResults res = cl.clusterHierarchical(matrix, null, null, 0.5, null, null);
             System.out.println(res);
         } catch (ServerException ex) {
             System.out.println(ex.getData());

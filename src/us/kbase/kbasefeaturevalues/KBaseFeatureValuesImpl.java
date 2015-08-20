@@ -219,7 +219,7 @@ public class KBaseFeatureValuesImpl {
         BioMatrix matrix = objData.getData().asClassInstance(BioMatrix.class);
         ClusterServiceLocalClient mathClient = getMathClient();
         ClusterResults res = mathClient.clusterHierarchical(matrix.getData(), params.getDistanceMetric(), 
-                params.getLinkageCriteria(), params.getFeatureHeightCutoff(), 1L, params.getAlgorithm());
+                params.getLinkageCriteria(), params.getFeatureHeightCutoff(), params.getMaxItems(), params.getAlgorithm());
         FeatureClusters toSave = new FeatureClusters().withOriginalData(params.getInputData())
                 .withFeatureClusters(clustersFromLabels(matrix, res))
                 .withFeatureDendrogram(res.getDendrogram());
