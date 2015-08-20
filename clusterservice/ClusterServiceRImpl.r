@@ -172,15 +172,15 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
     values <- data.matrix(values)
-    cor_mat <- cor(t(values))
     hcout <- NA
     if (is.null(algorithm) || algorithm == "hclust") {
-        hcout <- hcluster(cor_mat, method="correlation")
+        hcout <- hcluster(values, method="correlation")
     } else {
-        dd <- as.dist(1-cor_mat) # dist(abs(cor_mat))
+        dd <- Dist(values, method="correlation")
         hcout <- flashClust::hclust(dd, method = "complete")
     }
     phylo <- as.phylo(hcout)
+    phylo$edge.length <- phylo$edge.length * 2 / max(hcout$height)
     newick <- write.tree(phylo, file = "")
     #print(is.ultrametric(tree))
     #print(is.binary.tree(tree))
