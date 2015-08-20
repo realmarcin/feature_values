@@ -20,6 +20,16 @@ naToNaN = function(x) {
     return(x)
 }
 
+rowVar <- function(x) {
+	rowSums((x - rowMeans(x))^2)/(dim(x)[2] - 1)
+}
+
+topVarGenes = function(matx,count){
+	matv<-head(order(rowVar(matx),decreasing=TRUE),count)
+	matx<-matx[matv,]
+	return(matx)
+}
+
 calc_cluster_props = function(logratios_median, cluster, ret) {
     ###mean pairwise correlation
     meancor <- c()
@@ -168,10 +178,12 @@ methods[["ClusterServiceR.cluster_k_means"]] <- function(matrix, k, n_start,
 methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix, 
         distance_metric, linkage_criteria, height_cutoff,
         process_rows, algorithm) {
+    if (is.null(process_rows))
+	process_rows<-min(c(5000,nrow(matrix[["values"]])))
     values <- matrix[["values"]]
     row_names <- c(1:length(matrix[["row_ids"]]))-1
     row.names(values) <- row_names
-    values <- data.matrix(values)
+    values <- data.matrix(topVarGenes(values,process_rows))
     cor_mat <- cor(t(values))
     hcout <- NA
     if (is.null(algorithm) || algorithm == "hclust") {
