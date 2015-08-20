@@ -489,7 +489,7 @@ public class AweIntegrationTest {
             if (lc.getMeancor() == null || lc.getMsec() == null)
                 nullCount++;
         }
-        Assert.assertEquals(47, nullCount);
+        Assert.assertEquals(48, nullCount);
     }
     
     private static FloatMatrix2D getSampleMatrix() {
