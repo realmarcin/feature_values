@@ -478,7 +478,7 @@ public class AweIntegrationTest {
                 new ObjectSaveData().withName(matrixId).withType("KBaseFeatureValues.ExpressionMatrix")
                 .withData(new UObject(data)))));
         String jobId1 = client.clusterHierarchical(new ClusterHierarchicalParams().withInputData(testWsName + "/" + 
-                matrixId).withFeatureHeightCutoff(0.2).withAlgorithm("flashClust")
+                matrixId).withFeatureHeightCutoff(0.2).withAlgorithm("flashClust").withMaxItems(1000L)
                 .withOutWorkspace(testWsName).withOutClustersetId(clustObjName));
         waitForJob(jobId1);
         ObjectData res1 = getWsClient().getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
@@ -489,7 +489,7 @@ public class AweIntegrationTest {
             if (lc.getMeancor() == null || lc.getMsec() == null)
                 nullCount++;
         }
-        Assert.assertEquals(48, nullCount);
+        Assert.assertEquals(10, nullCount);
     }
     
     private static FloatMatrix2D getSampleMatrix() {

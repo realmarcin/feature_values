@@ -164,7 +164,7 @@ public class KBaseFeatureValuesImpl {
                     params.getAlgorithm());
         }
         FeatureClusters toSave = new FeatureClusters().withOriginalData(params.getInputData());
-        toSave.withFeatureClusters(clustersFromLabels(matrix, res));
+        toSave.withFeatureClusters(clustersFromLabels(matrix.getData(), res));
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
                 .withServiceVer(KBaseFeatureValuesServer.SERVICE_VERSION)
@@ -179,12 +179,14 @@ public class KBaseFeatureValuesImpl {
         return params.getOutWorkspace() + "/" + params.getOutClustersetId();
     }
 
-    public List<LabeledCluster> clustersFromLabels(BioMatrix matrix, ClusterResults res) {
+    public static List<LabeledCluster> clustersFromLabels(FloatMatrix2D matrixData, ClusterResults res) {
         Map<Long, LabeledCluster> labelToCluster = new LinkedHashMap<Long, LabeledCluster>();
         List<LabeledCluster> featureClusters = new ArrayList<LabeledCluster>();
         int minClusterLabel = -1;
         for (int featurePos = 0; featurePos < res.getClusterLabels().size(); featurePos++) {
             long clusterLabel = res.getClusterLabels().get(featurePos);
+            if (clusterLabel < 0)
+                continue;
             if (minClusterLabel < 0 || minClusterLabel > clusterLabel)
                 minClusterLabel = (int)clusterLabel;
             LabeledCluster cluster = labelToCluster.get(clusterLabel);
@@ -193,7 +195,7 @@ public class KBaseFeatureValuesImpl {
                 labelToCluster.put(clusterLabel, cluster);
                 featureClusters.add(cluster);
             }
-            String featureLabel = matrix.getData().getRowIds().get(featurePos);
+            String featureLabel = matrixData.getRowIds().get(featurePos);
             cluster.getIdToPos().put(featureLabel, (long)featurePos);
         }
         if (res.getMeancor() != null || res.getMsecs() != null) {
@@ -221,7 +223,7 @@ public class KBaseFeatureValuesImpl {
         ClusterResults res = mathClient.clusterHierarchical(matrix.getData(), params.getDistanceMetric(), 
                 params.getLinkageCriteria(), params.getFeatureHeightCutoff(), params.getMaxItems(), params.getAlgorithm());
         FeatureClusters toSave = new FeatureClusters().withOriginalData(params.getInputData())
-                .withFeatureClusters(clustersFromLabels(matrix, res))
+                .withFeatureClusters(clustersFromLabels(matrix.getData(), res))
                 .withFeatureDendrogram(res.getDendrogram());
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)
@@ -248,7 +250,7 @@ public class KBaseFeatureValuesImpl {
         ClusterResults res = mathClient.clustersFromDendrogram(matrix.getData(), 
                 input.getFeatureDendrogram(), params.getFeatureHeightCutoff());
         FeatureClusters toSave = new FeatureClusters().withOriginalData(input.getOriginalData())
-                .withFeatureClusters(clustersFromLabels(matrix, res))
+                .withFeatureClusters(clustersFromLabels(matrix.getData(), res))
                 .withFeatureDendrogram(res.getDendrogram());
         List<ProvenanceAction> provenance = Arrays.asList(
                 new ProvenanceAction().withService(KBaseFeatureValuesServer.SERVICE_NAME)

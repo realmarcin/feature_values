@@ -75,7 +75,10 @@ clusters_from_dendrogram = function(values, dendrogram, height_cutoff) {
     #plot(hcout)
     groups <- cutree(hcout, h=height_cutoff)
     names <- names(groups)
-    cluster_labels <- numeric(length(groups))
+    cluster_labels <- numeric(nrow(values))
+    for (pos in 1:length(cluster_labels)) {
+        cluster_labels[pos] <- -1
+    }
     for (pos in 1:length(groups)) {
         name <- as.integer(names[pos])
         value <- as.integer(groups[pos])
@@ -183,6 +186,7 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
     row.names(values) <- row_names
     if (is.null(process_rows))
         process_rows<-nrow(matrix[["values"]])
+    original_values <- values
     values <- data.matrix(topVarGenes(values,process_rows))
     hcout <- NA
     if (is.null(algorithm) || algorithm == "hclust") {
@@ -197,7 +201,7 @@ methods[["ClusterServiceR.cluster_hierarchical"]] <- function(matrix,
     #print(is.ultrametric(tree))
     #print(is.binary.tree(tree))
     #print(is.rooted(tree))
-    return(clusters_from_dendrogram(values, newick, height_cutoff))
+    return(clusters_from_dendrogram(original_values, newick, height_cutoff))
 }
 
 methods[["ClusterServiceR.clusters_from_dendrogram"]] <- function(
