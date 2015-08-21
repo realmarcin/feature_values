@@ -152,7 +152,7 @@ methods[["ClusterServiceR.estimate_k_new"]] <- function(matrix, min_k, max_k,
     cluster_count_qualities <- list()
     for (pos in 1:length(ret_names)) {
         cluster_count = unbox(ret_names[pos])
-        quality <- unbox(pk$crit[pos+1])
+        quality <- unbox(pk$crit[cluster_count])
         cluster_count_qualities <- rbind(cluster_count_qualities, list(cluster_count, quality))
     }
     return(list(best_k=unbox(as.numeric(best_pos)), estimate_cluster_sizes=cluster_count_qualities))

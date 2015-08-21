@@ -97,13 +97,13 @@ public class ClusterServiceTest {
         ClusterServiceRLocalClient cl = getRClient("r_estimate_k_new");
         FloatMatrix2D matrix = getSampleMatrix();
         try {
-            EstimateKResult estK = cl.estimateKNew(matrix, null, null, null, null, null, null, 123L);
+            EstimateKResult estK = cl.estimateKNew(matrix, 3L, null, null, null, null, null, 123L);
             long k = estK.getBestK();
             Assert.assertEquals(3, k);
-            Assert.assertEquals(5, estK.getEstimateClusterSizes().size());
+            Assert.assertEquals(4, estK.getEstimateClusterSizes().size());
             for (int i = 0; i < estK.getEstimateClusterSizes().size(); i++) {
                 Tuple2 <Long, Double> item = estK.getEstimateClusterSizes().get(i);
-                Assert.assertEquals(2L + i, (long)item.getE1());
+                Assert.assertEquals(3L + i, (long)item.getE1());
                 Assert.assertTrue((double)item.getE2() > 0);
             }
         } catch (ServerException ex) {
