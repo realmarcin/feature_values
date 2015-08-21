@@ -50,7 +50,7 @@ public class KBaseFeatureValuesServer extends JsonServerServlet {
     public static final String CONFIG_PARAM_CLIENT_BIN_DIR = "client.bin.dir";
     public static final String CONFIG_PARAM_CLIENT_WORK_DIR = "client.work.dir";
     public static final String AWE_CLIENT_SCRIPT_NAME = "awe_" + SERVICE_NAME + "_run_job.sh";
-    public static final String SERVICE_VERSION = "0.6";
+    public static final String SERVICE_VERSION = "0.7";
     
     private UserAndJobStateClient getUjsClient(AuthToken auth) throws Exception {
         String ujsUrl = config.get(CONFIG_PARAM_UJS_URL);

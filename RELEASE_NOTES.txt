@@ -7,6 +7,25 @@ dimention and to different sorts conditions on second dimention.
 
 
 
+VERSION: 0.7 (Released 8/21/2015)
+------------------------------------------
+NEW FEATURES:
+- none
+
+UPDATED FEATURES / MAJOR BUG FIXES:
+- Parameter max_items was added for hierarchical clustering 
+allowing to slice top number of rows according to standard
+deviation for rows
+- Fix for misuse of correlation method in hierarchical 
+clustering
+- Fix for bug in hierarchical clustering with limited max_items
+- Additional feature_ids parameter added for build_feature_set
+method
+- Fix for bug in estimate_k_new method in case min_k parameter 
+more than 2.
+
+
+
 VERSION: 0.6 (Released 8/18/2015)
 ------------------------------------------
 NEW FEATURES:
