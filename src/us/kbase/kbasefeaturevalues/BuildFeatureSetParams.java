@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "genome",
     "feature_ids",
+    "feature_ids_custom",
     "base_feature_set",
     "description",
     "out_workspace",
@@ -35,6 +36,8 @@ public class BuildFeatureSetParams {
     private String genome;
     @JsonProperty("feature_ids")
     private String featureIds;
+    @JsonProperty("feature_ids_custom")
+    private String featureIdsCustom;
     @JsonProperty("base_feature_set")
     private String baseFeatureSet;
     @JsonProperty("description")
@@ -72,6 +75,21 @@ public class BuildFeatureSetParams {
 
     public BuildFeatureSetParams withFeatureIds(String featureIds) {
         this.featureIds = featureIds;
+        return this;
+    }
+
+    @JsonProperty("feature_ids_custom")
+    public String getFeatureIdsCustom() {
+        return featureIdsCustom;
+    }
+
+    @JsonProperty("feature_ids_custom")
+    public void setFeatureIdsCustom(String featureIdsCustom) {
+        this.featureIdsCustom = featureIdsCustom;
+    }
+
+    public BuildFeatureSetParams withFeatureIdsCustom(String featureIdsCustom) {
+        this.featureIdsCustom = featureIdsCustom;
         return this;
     }
 
@@ -147,7 +165,7 @@ public class BuildFeatureSetParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((("BuildFeatureSetParams"+" [genome=")+ genome)+", featureIds=")+ featureIds)+", baseFeatureSet=")+ baseFeatureSet)+", description=")+ description)+", outWorkspace=")+ outWorkspace)+", outputFeatureSet=")+ outputFeatureSet)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((("BuildFeatureSetParams"+" [genome=")+ genome)+", featureIds=")+ featureIds)+", featureIdsCustom=")+ featureIdsCustom)+", baseFeatureSet=")+ baseFeatureSet)+", description=")+ description)+", outWorkspace=")+ outWorkspace)+", outputFeatureSet=")+ outputFeatureSet)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

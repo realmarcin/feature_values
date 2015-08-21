@@ -17,6 +17,7 @@ import us.kbase.clusterservice.ClusterResults;
 import us.kbase.clusterservice.ClusterServicePyLocalClient;
 import us.kbase.clusterservice.ClusterServiceRLocalClient;
 import us.kbase.common.service.ServerException;
+import us.kbase.common.service.Tuple2;
 import us.kbase.common.service.UObject;
 import us.kbase.kbasefeaturevalues.EstimateKResult;
 import us.kbase.kbasefeaturevalues.ExpressionMatrix;
@@ -61,28 +62,28 @@ public class ClusterServiceTest {
         ClusterServiceRLocalClient cl = getRClient("r1");
         FloatMatrix2D matrix = getSampleMatrix();
         try {
-            EstimateKResult estK = cl.estimateK(matrix, null, null, 100L, null, null, null);
+            EstimateKResult estK = cl.estimateKNew(matrix, null, null, null, null, null, null, 123L);
             long k = estK.getBestK();
-            System.out.println("Estimated K: " + k);
-            System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());
             Assert.assertEquals(3, k);
+            Assert.assertEquals(5, estK.getEstimateClusterSizes().size());
+            for (int i = 0; i < estK.getEstimateClusterSizes().size(); i++) {
+                Tuple2 <Long, Double> item = estK.getEstimateClusterSizes().get(i);
+                Assert.assertEquals(2L + i, (long)item.getE1());
+                Assert.assertTrue((double)item.getE2() > 0);
+            }
             Long randomSeed = 403L;
             ClusterResults cr1 = cl.clusterKMeans(matrix, k, null, null, randomSeed, null);
-            System.out.println(cr1);
             List<Long> clusterLabels = cr1.getClusterLabels();
-            System.out.println(clusterLabels);
             checkClusterLabels(clusterLabels);
             ClusterResults cr2 = cl.clusterHierarchical(matrix, "", "", 0.5, null, null);
             //System.out.println(cr2);
             String dendrogram = cr2.getDendrogram();
-            System.out.println(dendrogram);
+            Assert.assertTrue(dendrogram.startsWith("("));
+            Assert.assertTrue(dendrogram.endsWith(");"));
             ClusterResults cr3 = cl.clustersFromDendrogram(matrix, dendrogram, 0.2);
-            //System.out.println(cr3);
             List<Long> clusterLabels2 = cr3.getClusterLabels();
-            System.out.println(clusterLabels2);
             checkClusterLabels(clusterLabels2);
             ClusterResults cr4 = cl.calcClusterQualities(matrix, clusterLabels);
-            //System.out.println(cr4);
             Assert.assertEquals(3, cr4.getMeancor().size());
             Assert.assertEquals(3, cr4.getMsecs().size());
         } catch (ServerException ex) {
@@ -98,9 +99,13 @@ public class ClusterServiceTest {
         try {
             EstimateKResult estK = cl.estimateKNew(matrix, null, null, null, null, null, null, 123L);
             long k = estK.getBestK();
-            System.out.println("Estimated K new: " + k);
-            System.out.println("Cluster count qualities: " + estK.getEstimateClusterSizes());
             Assert.assertEquals(3, k);
+            Assert.assertEquals(5, estK.getEstimateClusterSizes().size());
+            for (int i = 0; i < estK.getEstimateClusterSizes().size(); i++) {
+                Tuple2 <Long, Double> item = estK.getEstimateClusterSizes().get(i);
+                Assert.assertEquals(2L + i, (long)item.getE1());
+                Assert.assertTrue((double)item.getE2() > 0);
+            }
         } catch (ServerException ex) {
             System.out.println(ex.getData());
             throw ex;

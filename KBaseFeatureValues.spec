@@ -399,6 +399,7 @@ module KBaseFeatureValues {
     typedef structure {
         ws_genome_id genome;
         string feature_ids;
+        string feature_ids_custom;
         ws_featureset_id base_feature_set;
         string description;
         string out_workspace;

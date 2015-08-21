@@ -38,6 +38,7 @@ import us.kbase.auth.AuthException;
 import us.kbase.auth.AuthService;
 import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
+import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.ServerException;
 import us.kbase.common.service.Tuple2;
 import us.kbase.common.service.Tuple7;
@@ -238,16 +239,20 @@ public class AweIntegrationTest {
                 .withName(estimObjName))).get(0);
         EstimateKResult estKRes = res1.getData().asClassInstance(EstimateKResult.class);
         long k = estKRes.getBestK();
-        System.out.println("Best K: " + k);
-        System.out.println("Cluster count qualities: " + estKRes.getEstimateClusterSizes());
+        Assert.assertEquals(3, k);
+        Assert.assertEquals(5, estKRes.getEstimateClusterSizes().size());
+        for (int i = 0; i < estKRes.getEstimateClusterSizes().size(); i++) {
+            Tuple2 <Long, Double> item = estKRes.getEstimateClusterSizes().get(i);
+            Assert.assertEquals(2L + i, (long)item.getE1());
+            Assert.assertTrue((double)item.getE2() > 0);
+        }
         String jobId1new = client.estimateKNew(new EstimateKParamsNew().withInputMatrix(testWsName + "/" + 
-                exprObjName).withOutWorkspace(testWsName).withOutEstimateResult(estimNewObjName));
+                exprObjName).withRandomSeed(123L).withOutWorkspace(testWsName).withOutEstimateResult(estimNewObjName));
         waitForJob(jobId1new);
         ObjectData res1new = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(estimNewObjName))).get(0);
         EstimateKResult estKResNew = res1new.getData().asClassInstance(EstimateKResult.class);
         long kNew = estKResNew.getBestK();
-        System.out.println("Best K new: " + kNew);
         Assert.assertEquals(k, kNew);
         //System.out.println("Cluster count qualities: " + estKResNew.getEstimateClusterSizes());
         Assert.assertEquals(estKRes.getEstimateClusterSizes().size(), estKResNew.getEstimateClusterSizes().size());
@@ -264,7 +269,9 @@ public class AweIntegrationTest {
         ObjectData res2 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj1Name))).get(0);
         FeatureClusters clSet2 = res2.getData().asClassInstance(FeatureClusters.class);
-        System.out.println("K-means: " + clSet2.getFeatureClusters());
+        Assert.assertEquals(2, clSet2.getFeatureClusters().get(0).getIdToPos().size());
+        Assert.assertEquals(2, clSet2.getFeatureClusters().get(1).getIdToPos().size());
+        Assert.assertEquals(3, clSet2.getFeatureClusters().get(2).getIdToPos().size());
         /////////////// Hierarchikal /////////////////
         String jobId3 = client.clusterHierarchical(new ClusterHierarchicalParams().withInputData(testWsName + "/" + 
                 exprObjName).withFeatureHeightCutoff(0.5).withOutWorkspace(testWsName).withOutClustersetId(clustObj2Name));
@@ -272,8 +279,10 @@ public class AweIntegrationTest {
         ObjectData res3 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj2Name))).get(0);
         FeatureClusters clSet3 = res3.getData().asClassInstance(FeatureClusters.class);
-        System.out.println("Hierarchical: " + clSet3.getFeatureClusters());
-        System.out.println("Hierarchical: " + clSet3.getFeatureDendrogram());
+        Assert.assertEquals(5, clSet3.getFeatureClusters().get(0).getIdToPos().size());
+        Assert.assertEquals(2, clSet3.getFeatureClusters().get(1).getIdToPos().size());
+        Assert.assertTrue(clSet3.getFeatureDendrogram().startsWith("("));
+        Assert.assertTrue(clSet3.getFeatureDendrogram().endsWith(");"));
         /////////////// From dendrogram /////////////////
         String jobId4 = client.clustersFromDendrogram(new ClustersFromDendrogramParams().withInputData(testWsName + "/" + 
                 clustObj2Name).withFeatureHeightCutoff(0.2).withOutWorkspace(testWsName).withOutClustersetId(clustObj3Name));
@@ -281,7 +290,9 @@ public class AweIntegrationTest {
         ObjectData res4 = wscl.getObjects(Arrays.asList(new ObjectIdentity().withWorkspace(testWsName)
                 .withName(clustObj3Name))).get(0);
         FeatureClusters clSet4 = res4.getData().asClassInstance(FeatureClusters.class);
-        System.out.println("From dendrogram: " + clSet4.getFeatureClusters());
+        Assert.assertEquals(2, clSet4.getFeatureClusters().get(0).getIdToPos().size());
+        Assert.assertEquals(2, clSet4.getFeatureClusters().get(1).getIdToPos().size());
+        Assert.assertEquals(3, clSet4.getFeatureClusters().get(2).getIdToPos().size());
         /////////////// Clusters download ///////////////
         File tsvTempFile = new File(fvServiceDir, "clusters.tsv");
         FeatureClustersDownloader.generate(getWsUrl(), testWsName, clustObj1Name, 1, "TSV", token,
@@ -391,23 +402,24 @@ public class AweIntegrationTest {
     public void testDataAPI() throws Exception {
         MatrixDescriptor md1 = client.getMatrixDescriptor(new GetMatrixDescriptorParams().withInputData(
                 testWsName + "/" + commonExpressionObjectName));
-        System.out.println(md1);
+        Assert.assertEquals(2680L, (long)md1.getRowsCount());
     }
     
     @Test
     public void testBuildFeatureSet() throws Exception {
         String genomeObjName = "Desulfovibrio_vulgaris_Hildenborough.genome";
-        String featureIdsText = " DVUA0001 \nDVUA0075, DVUA0112";
         String outFeatureSetObj1 = "featureset.1";
-        String jobId1 = client.buildFeatureSet(new BuildFeatureSetParams().withDescription("Testing...")
-                .withFeatureIds(featureIdsText).withGenome(testWsName + "/" + genomeObjName)
-                .withOutWorkspace(testWsName).withOutputFeatureSet(outFeatureSetObj1));
-        waitForJob(jobId1);
-        Map<String, Object> fs1 = getWsClient().getObjects(Arrays.asList(
-                new ObjectIdentity().withWorkspace(testWsName).withName(outFeatureSetObj1)))
-                .get(0).getData().asClassInstance(Map.class);
-        Map<String, List<String>> elements1 = (Map<String, List<String>>)fs1.get("elements");
+        Map<String, List<String>> elements1 = buildFeatureSetForTesting(genomeObjName, 
+                outFeatureSetObj1, " DVUA0001 \nDVUA0075, DVUA0112", null);
         Assert.assertEquals(3, elements1.size());
+        Assert.assertEquals(3, buildFeatureSetForTesting(genomeObjName, 
+                "featureset.1b", " DVUA0001 \nDVUA0075", "DVUA0112").size());
+        Assert.assertEquals(3, buildFeatureSetForTesting(genomeObjName, 
+                "featureset.1c", " DVUA0001 \n", "DVUA0075, DVUA0112").size());
+        Assert.assertEquals(3, buildFeatureSetForTesting(genomeObjName, 
+                "featureset.1d", "", " DVUA0001 \nDVUA0075, DVUA0112").size());
+        Assert.assertEquals(3, buildFeatureSetForTesting(genomeObjName, 
+                "featureset.1e", null, " DVUA0001 \nDVUA0075, DVUA0112").size());
         String outFeatureSetObj2 = "featureset.2";
         try {
             String jobId2 = client.buildFeatureSet(new BuildFeatureSetParams().withDescription("Testing...")
@@ -429,6 +441,21 @@ public class AweIntegrationTest {
                 .get(0).getData().asClassInstance(Map.class);
         Map<String, List<String>> elements2 = (Map<String, List<String>>)fs2.get("elements");
         Assert.assertEquals(4, elements2.size());
+    }
+
+    public Map<String, List<String>> buildFeatureSetForTesting(
+            String genomeObjName, String outFeatureSetObj1, String featureIds,
+            String featureIdsCustom) throws Exception {
+        String jobId1 = client.buildFeatureSet(new BuildFeatureSetParams().withDescription("Testing...")
+                .withFeatureIds(featureIds).withFeatureIdsCustom(featureIdsCustom)
+                .withGenome(testWsName + "/" + genomeObjName)
+                .withOutWorkspace(testWsName).withOutputFeatureSet(outFeatureSetObj1));
+        waitForJob(jobId1);
+        Map<String, Object> fs1 = getWsClient().getObjects(Arrays.asList(
+                new ObjectIdentity().withWorkspace(testWsName).withName(outFeatureSetObj1)))
+                .get(0).getData().asClassInstance(Map.class);
+        Map<String, List<String>> elements1 = (Map<String, List<String>>)fs1.get("elements");
+        return elements1;
     }
     
     @Test

@@ -356,8 +356,22 @@ public class KBaseFeatureValuesImpl {
             String featureId = (String)feature.get("id");
             featureIdSet.add(featureId);
         }
+        String featureIdsText = params.getFeatureIds();
+        if (featureIdsText == null) {
+            featureIdsText = "";
+        } else {
+            featureIdsText = featureIdsText.trim();
+        }
+        if (params.getFeatureIdsCustom() != null) {
+            String featureIdsText2 = params.getFeatureIdsCustom().trim();
+            if (featureIdsText2.length() > 0) {
+                if (featureIdsText.length() > 0)
+                    featureIdsText += "\n";
+                featureIdsText += featureIdsText2;
+            }
+        }
         List<String> lostFeatureIds = new ArrayList<String>();
-        BufferedReader br = new BufferedReader(new StringReader(params.getFeatureIds()));
+        BufferedReader br = new BufferedReader(new StringReader(featureIdsText));
         while (true) {
             String l = br.readLine();
             if (l == null)
