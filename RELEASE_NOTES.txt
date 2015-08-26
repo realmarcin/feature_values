@@ -7,6 +7,17 @@ dimention and to different sorts conditions on second dimention.
 
 
 
+VERSION: 0.71 (Released 8/21/2015)
+------------------------------------------
+NEW FEATURES:
+- none
+
+UPDATED FEATURES / MAJOR BUG FIXES:
+- Fix for bug in computing averages across all data when getting
+stats for a submatrix.
+
+
+
 VERSION: 0.7 (Released 8/21/2015)
 ------------------------------------------
 NEW FEATURES:
