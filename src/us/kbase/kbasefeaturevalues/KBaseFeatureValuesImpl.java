@@ -589,7 +589,7 @@ public class KBaseFeatureValuesImpl {
 			submatrixStat.setMtxRowSetStat(FloatMatrix2DUtil.getRowsSetStat(mgl.matrix.getData(), matrixSetStatParams));				
 		}
 		if( toBoolean(params.getFlMtxColumnSetStat()) ) {
-			int[] mtxRowIndeces = buildIndeces(null, null, mgl.matrix.getData().getColIds());
+			int[] mtxRowIndeces = buildIndeces(null, null, mgl.matrix.getData().getRowIds());
 			matrixSetStatParams
 				.withItemIndecesFor( toListLong(colIndeces))
 				.withItemIndecesOn( toListLong(mtxRowIndeces));			
