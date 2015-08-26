@@ -1,6 +1,7 @@
 package us.kbase.kbasefeaturevalues.transform.test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import javax.management.ObjectName;
 
@@ -173,6 +175,33 @@ public class ExpressionUploaderTest {
         }
         if (error != null)
             throw error;
+    }    
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testMappingToAliases() throws Exception {
+        String expressionObjName = "Escherichia_coli_str_K-12_substr_MG1655.expression";
+        String contigsetObjName = "Escherichia_coli_str_K-12_substr_MG1655.contigset";
+        String genomeObjName = "Escherichia_coli_str_K-12_substr_MG1655.genome";
+        File inputDir = new File("test/data/upload6");
+        File inputFile = new File(inputDir, "E_coli_v4_Build_6_subdata.tsv");
+        Map<String, Object> contigsetData = UObject.getMapper().readValue(new GZIPInputStream(
+                new FileInputStream(new File(inputDir, "kb_g.1870.contigset.json.gz"))), Map.class);
+        WorkspaceClient wscl = getWsClient();
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(contigsetObjName).withType("KBaseGenomes.ContigSet")
+                .withData(new UObject(contigsetData)))));
+        Map<String, Object> genomeData = UObject.getMapper().readValue(new GZIPInputStream(
+                new FileInputStream(new File(inputDir, "kb_g.1870.genome.json.gz"))), Map.class);
+        genomeData.put("contigset_ref", testWsName + "/" + contigsetObjName);
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(genomeObjName).withType("KBaseGenomes.Genome")
+                .withData(new UObject(genomeData)))));
+        ExpressionMatrix data = ExpressionUploader.parse(getWsUrl(), testWsName, inputFile, "Simple", 
+                genomeObjName, true, "Unknown", "1.0", token);
+        wscl.saveObjects(new SaveObjectsParams().withWorkspace(testWsName).withObjects(Arrays.asList(
+                new ObjectSaveData().withName(expressionObjName)
+                .withType("KBaseFeatureValues.ExpressionMatrix").withData(new UObject(data)))));
     }    
 
     private static WorkspaceClient getWsClient() throws Exception {

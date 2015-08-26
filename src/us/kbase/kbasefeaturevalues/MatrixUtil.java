@@ -44,10 +44,12 @@ public class MatrixUtil {
         if (rowIdSet.size() > 0) {
             for (Map<String, Object> feature: features) {
                 String id = (String)feature.get("id");
-                for (String alias : (List<String>)feature.get("aliases")) {
-                    if (rowIdSet.contains(alias)) {
-                        featureMapping.put(alias, id);
-                        rowIdSet.remove(alias);
+                if (feature.containsKey("aliases")) {
+                    for (String alias : (List<String>)feature.get("aliases")) {
+                        if (rowIdSet.contains(alias)) {
+                            featureMapping.put(alias, id);
+                            rowIdSet.remove(alias);
+                        }
                     }
                 }
             }
