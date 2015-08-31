@@ -41,7 +41,7 @@ logratios_median <- apply(logratios_median,2,missfxn)
 date()
 
 ###validation to assess number of clusters
-valid <- clValid(logratios_median, nClust=c(2:50),maxitems=3569, clMethods=c("kmeans"),validation=c("internal"))#,metric=c("correlation"))#,method=c("complete")
+valid <- clValid(logratios_median, nClust=c(2:200),maxitems=3569, clMethods=c("kmeans"),validation=c("internal"))#,metric=c("correlation"))#,method=c("complete")
 
 save(valid, file="validR.Rdata")
 
@@ -52,7 +52,7 @@ dev.off(2)
 
 measures <- measures(valid)
 ###transform cluster number indices to array indices (since no data for K=1)
-clust_range <- c(5:50) - 1
+clust_range <- c(100:200) - 1
 ###use Silhouette Width by default
 maxclustvalid <- max(measures[3,clust_range,])
 ###force to use first cluster number
@@ -62,7 +62,7 @@ maxclust <- which(measures[3,,] == maxclustvalid)[1]
 date()
 
 
-numclusters <- 10
+numclusters <- maxclust[1]
 prefix <- paste("kmeans_",numclusters,sep="")
 
 save.image()
