@@ -50,6 +50,14 @@ plot(valid)
 dev.off(2)
 #silhouette max is X clusters val Y
 
+measures <- measures(valid)
+###transform cluster number indices to array indices (since no data for K=1)
+clust_range <- c(5,50) - 1
+###use Silhouette Width by default
+maxclustvalid <- max(measures[3,clust_range,])
+maxclust <- which(measures[3,,] == maxclustvalid)
+
+
 date()
 
 
@@ -92,7 +100,7 @@ mypalette <- rev(brewer.pal(3, "Blues"))
 mypalette <- c(mypalette, brewer.pal(9, "YlOrBr"))
 
 ###save svg ordered heatmap
-svg("data_rowkmeans_sort.svg", width=8.5, height=11)
+pdf("data_rowkmeans_sort.pdf", width=8.5, height=11)
 heatmap.2(as.matrix(sortmat), dendrogram="none",Rowv=NULL, Colv=NULL, trace="none",col=mypalette, cexRow=0.25, cexCol=0.5, rowsep=rev(rowseps),scale="none")
 dev.off(2)
 
