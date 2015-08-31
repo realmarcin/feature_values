@@ -52,10 +52,11 @@ dev.off(2)
 
 measures <- measures(valid)
 ###transform cluster number indices to array indices (since no data for K=1)
-clust_range <- c(5,50) - 1
+clust_range <- c(5:50) - 1
 ###use Silhouette Width by default
 maxclustvalid <- max(measures[3,clust_range,])
-maxclust <- which(measures[3,,] == maxclustvalid)
+###force to use first cluster number
+maxclust <- which(measures[3,,] == maxclustvalid)[1]
 
 
 date()
