@@ -89,57 +89,79 @@ maxmatch <- max(table(km$cluster[sahr_indices ]))/length(sahr_indices)
 print(maxmatch)
 
 
-###sort clusters by mean pairwise correlation
-meancor <- c()
-for(i in 1:max(km$cluster)) {
-  clust_ind <- which(km$cluster == i)
-  cors <- cor(t(logratios_median[clust_ind,]), use="pairwise.complete.obs",method="pearson")
-  print(dim(cors))
-  AbCorC <- mean(cors[lower.tri(cors, diag=FALSE)])
-  meancor <- c(meancor, AbCorC)
-}
-
-print(sort(meancor))
-
-#95/118 = 81% = top 20
-
-
-###sort clusters by mean intergenic distance
-tabdata <- read.csv("./882.tab",header=T,sep="\t")
-meandist <- c()
-for(i in 1:max(km$cluster)) {
-  
-  clust_ind <- which(km$cluster == i)
-  cur_ids <- names( km$cluster)[clust_ind]
-  
-  tabindA <- match(cur_ids, tabdata[,8])
-  tabindB <- match(cur_ids, tabdata[,1])
-  tabind <- c(tabindA, tabindB)
-  tabind <- tabind[!is.na(tabind)]
-  
-  starts <- tabdata[tabind,5]
-  
-  curdists <- c()
-  for(a in 1:length(starts)) {
-    for(b in 1:length(starts)) {   
-      if(b > a) {
-      print(paste(a,"_",b,abs(starts[a]-starts[b])))
-      curdists <- c(curdists, abs(starts[a]-starts[b]))
-      }
-    }
-  }  
-  meandist <- c(meandist, mean(curdists))
-}
-
-print(sort(meandist))
-#meandist[80]
 #which(sort(meandist) == 1429796)
 #[1] 105
 #105/118 = 89% = top 13
 
+#meandist[80]
+
+
+
+cluster.props=function(km) {
+
+###mean pairwise correlation
+meancor <- c()
+  for(i in 1:max(km$cluster)) {
+    clust_ind <- which(km$cluster == i)
+    cors <- cor(t(logratios_median[clust_ind,]), use="pairwise.complete.obs",method="pearson")
+    print(dim(cors))
+    AbCorC <- mean(cors[lower.tri(cors, diag=FALSE)])
+    meancor <- c(meancor, AbCorC)
+  }
+#print(sort(meancor))
+#95/118 = 81% = top 20
+
+
+###mean intergenic distance
+tabdata <- read.csv("./882.tab",header=T,sep="\t")
+meandist <- c()
+  for(i in 1:max(km$cluster)) {
+    
+    clust_ind <- which(km$cluster == i)
+    cur_ids <- names( km$cluster)[clust_ind]
+    
+    tabindA <- match(cur_ids, tabdata[,8])
+    tabindB <- match(cur_ids, tabdata[,1])
+    tabind <- c(tabindA, tabindB)
+    tabind <- tabind[!is.na(tabind)]
+    
+    starts <- tabdata[tabind,5]
+    
+    curdists <- c()
+    for(a in 1:length(starts)) {
+      for(b in 1:length(starts)) {   
+        if(b > a) {
+        print(paste(a,"_",b,abs(starts[a]-starts[b])))
+        curdists <- c(curdists, abs(starts[a]-starts[b]))
+        }
+      }
+    }  
+    meandist <- c(meandist, mean(curdists))
+  }
+#print(sort(meandist))
+
+
+###MSEC
+MSECs <- c()
+  for(i in 1:max(km$cluster)) {
+    clust_ind <- which(km$cluster == i)
+    curdata <- logratios_median[clust_ind,]
+    MSEall <- mean.m((curdata-mean.m(curdata))^2)
+    cmeans <- colMeans(curdata,na.rm=TRUE)
+    csds <- apply(curdata,2,sd,na.rm=TRUE)
+    MSEC <- mean.m((sweep(curdata,2,cmeans))^2/MSEall)
+    MSECs <- c(MSECs, MSEC)
+  }
+#print(sort(MSECs))
+
+
+prop_names <- c("Mean pairwise correlation","MSEC","Mean intergenic distance")
+rbind(meancor, MSECs, meandist)
+}
+
 
 ###cross-check with RegPrecise DvH regulons
-dvh_regprec_TFs <- read.csv("./DvH_RegPrecise.txt",fill=T,header=F,comment="@")
+#dvh_regprec_TFs <- read.csv("./DvH_RegPrecise.txt",fill=T,header=F,comment="@")
 
 
 
