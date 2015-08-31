@@ -52,7 +52,8 @@ dev.off(2)
 
 measures <- measures(valid)
 ###transform cluster number indices to array indices (since no data for K=1)
-clust_range <- c(100:200) - 1
+#clust_range <- c(100:200) - 1 #=183
+clust_range <- c(50:150) - 1#=118
 ###use Silhouette Width by default
 maxclustvalid <- max(measures[3,clust_range,])
 ###force to use first cluster number
@@ -69,10 +70,26 @@ save.image()
 
 date()
 ###Run clustering
-km <- kmeans(logratios_median, numclusters, iter.max = 100, nstart=100,algorithm="Lloyd")
+###we should be able to reduce the 1000 parameter settings below and still get it to work
+#km <- kmeans(logratios_median, numclusters, iter.max = 200, nstart=200,algorithm="Lloyd")
+###this is what I used to reproduce exactly the published example, it takes a while
+km <- kmeans(logratios_median, numclusters, iter.max = 1000, nstart=1000,algorithm="Lloyd")
+
 
 date()
 save.image()
+
+
+###reference example and checking 
+sahr_regulon <- c("DVU3371","DVU0997","DVU2448","DVU2449","DVU0606","DVU0607")
+
+sahr_indices <- match(sahr_regulon,names( km$cluster))
+
+maxmatch <- max(table(km$cluster[sahr_indices ]))/length(sahr_indices)
+print(maxmatch)
+
+
+
 
 ###sort dataset based on clusters
 clusts <- km$cluster
@@ -101,7 +118,7 @@ mypalette <- rev(brewer.pal(3, "Blues"))
 mypalette <- c(mypalette, brewer.pal(9, "YlOrBr"))
 
 ###save svg ordered heatmap
-pdf("data_rowkmeans_sort.pdf", width=8.5, height=11)
+pdf("data_rowkmeans_sort_k118.pdf", width=8.5, height=11)
 heatmap.2(as.matrix(sortmat), dendrogram="none",Rowv=NULL, Colv=NULL, trace="none",col=mypalette, cexRow=0.25, cexCol=0.5, rowsep=rev(rowseps),scale="none")
 dev.off(2)
 
