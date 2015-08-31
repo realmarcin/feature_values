@@ -138,6 +138,11 @@ print(sort(meandist))
 #105/118 = 89% = top 13
 
 
+###cross-check with RegPrecise DvH regulons
+dvh_regprec_TFs <- read.csv("./DvH_RegPrecise.txt",fill=T,header=F,comment="@")
+
+
+
 ###sort dataset based on clusters
 clusts <- km$cluster
 clusters <-c()
