@@ -96,6 +96,13 @@ print(maxmatch)
 #meandist[80]
 
 
+mean.m=function(vec){
+  vec[as.vector(is.nan(vec))] <- NA
+  n <- sum(!is.na(vec))
+  summ <- sum(vec,na.rm=TRUE)
+  summ/n
+}
+
 
 cluster.props=function(km) {
 
